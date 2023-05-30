@@ -22,6 +22,7 @@ void ClientWorker::ForwardRequestDone(Coordinator* coo,
                                       TxReply* output,
                                       DeferredReply* defer,
                                       TxReply& txn_reply) {
+  Log_info("inside void ClientWorker::ForwardRequestDone");
   verify(coo != nullptr);
   verify(output != nullptr);
 
@@ -52,6 +53,7 @@ void ClientWorker::ForwardRequestDone(Coordinator* coo,
 
 
 void ClientWorker::RequestDone(Coordinator* coo, TxReply& txn_reply) {
+  Log_info("inside void ClientWorker::RequestDone");
   verify(0);
   verify(coo != nullptr);
 
@@ -101,6 +103,7 @@ void ClientWorker::RequestDone(Coordinator* coo, TxReply& txn_reply) {
 }
 
 Coordinator* ClientWorker::FindOrCreateCoordinator() {
+  // Log_info("inside Coordinator* ClientWorker::FindOrCreateCoordinator");
   std::lock_guard<std::mutex> lock(coordinator_mutex);
 
   Coordinator* coo = nullptr;
@@ -113,6 +116,7 @@ Coordinator* ClientWorker::FindOrCreateCoordinator() {
       return nullptr;
     }
     verify(created_coordinators_.size() <= UINT16_MAX);
+      Log_info("inside Coordinator* ClientWorker::FindOrCreateCoordinator, calling CreateCoordinator");
     coo = CreateCoordinator(created_coordinators_.size());
   }
 
@@ -122,7 +126,7 @@ Coordinator* ClientWorker::FindOrCreateCoordinator() {
 }
 
 Coordinator* ClientWorker::CreateFailCtrlCoordinator() {
-
+  Log_info("inside Coordinator* ClientWorker::CreateFailCtrlCoordinator");
   cooid_t coo_id = cli_id_;
   uint64_t offset_id = 1000000 ; // TODO temp value
   coo_id = (coo_id << 16) + offset_id;
@@ -143,9 +147,9 @@ Coordinator* ClientWorker::CreateFailCtrlCoordinator() {
   return coo ;
 }
 
-
+  // what does this create?
 Coordinator* ClientWorker::CreateCoordinator(uint16_t offset_id) {
-
+  Log_info("inside Coordinator* ClientWorker::CreateCoordinator");
   cooid_t coo_id = cli_id_;
   coo_id = (coo_id << 16) + offset_id;
   auto coo = frame_->CreateCoordinator(coo_id,
@@ -168,6 +172,7 @@ Coordinator* ClientWorker::CreateCoordinator(uint16_t offset_id) {
 }
 
 void ClientWorker::Work() {
+  Log_info("inside void ClientWorker::Work");
   Log_debug("%s: %d", __FUNCTION__, this->cli_id_);
   txn_reg_ = std::make_shared<TxnRegistry>();
   verify(config_ != nullptr);
@@ -226,7 +231,7 @@ void ClientWorker::Work() {
       Reactor::CreateSpEvent<NeverEvent>()->Wait(RandomGenerator::rand(0, 1000000));
       auto beg_time = Time::now() ;
       auto end_time = beg_time + duration * pow(10, 6);
-      while (true) {
+      while (n_tx_issued_ < 1) {
         auto cur_time = Time::now(); // optimize: this call is not scalable.
         if (cur_time > end_time) {
           break;
@@ -252,6 +257,7 @@ void ClientWorker::Work() {
         coo->sp_ev_done_ = Reactor::CreateSpEvent<IntEvent>();
 
 				Log_debug("Dispatching request for %d", n_tx);
+        Log_info("Dispatching request for %d", n_tx);
 				this->outbound++;
 				
 				bool first = true;
@@ -269,22 +275,29 @@ void ClientWorker::Work() {
 					auto t = Reactor::CreateSpEvent<TimeoutEvent>(0.1*1000*1000);
 					t->Wait();
 				}
-        
+        Log_info("void ClientWorker::Work; calling DispatchRequest");
 				this->DispatchRequest(coo);
+        Log_info("void ClientWorker::Work; returned from DispatchRequest");
         if (config_->client_type_ == Config::Closed) {
+          Log_info("void ClientWorker::Work; checkpoint 001");
           auto ev = coo->sp_ev_commit_;
 #if 1
           char txid[20];
-          sprintf(txid, "%" PRIx64 "|", coo->ongoing_tx_id_);
+          // Log_info(txid, "%" PRIx64 "|", coo->ongoing_tx_id_);
           ev->wait_place_ = std::string(txid);
 #endif
+          Log_info("void ClientWorker::Work; checkpoint 002");
           Wait_recordplace(ev, Wait(600*1000*1000));
+          Log_info("void ClientWorker::Work; checkpoint 003");
           this->outbound--;
           verify(ev->status_ != Event::TIMEOUT);
         } else {
+          Log_info("void ClientWorker::Work; checkpoint 010");
           auto sp_event = Reactor::CreateSpEvent<NeverEvent>();
           Wait_recordplace(sp_event, Wait(pow(10, 6)));
         }
+
+        Log_info("void ClientWorker::Work; checkpoint 030");
         Coroutine::CreateRun([this, coo](){
           verify(coo->_inuse_);
           auto ev = coo->sp_ev_done_;
@@ -447,6 +460,7 @@ void ClientWorker::Work() {
 void ClientWorker::AcceptForwardedRequest(TxRequest& request,
                                           TxReply* txn_reply,
                                           rrr::DeferredReply* defer) {
+  Log_info("ClientWorker::AcceptForwardedRequest");
   const char* f = __FUNCTION__;
 
   // obtain free a coordinator first
@@ -526,7 +540,9 @@ void ClientWorker::FailoverPreprocess(Coordinator* coo) {
 }
 
 void ClientWorker::DispatchRequest(Coordinator* coo) {
+//? who is a coordinator? Is it the server?
 //  FailoverPreprocess(coo);
+  Log_info("inside void ClientWorker::DispatchRequest");
   const char* f = __FUNCTION__;
   std::function<void()> task = [=]() {
     Log_debug("%s: %d", f, cli_id_);
@@ -548,9 +564,11 @@ void ClientWorker::DispatchRequest(Coordinator* coo) {
       coo->sp_ev_done_->Set(1);
       delete req;
     };
+    Log_info("inside void ClientWorker::DispatchRequest; calling DoTxAsync");
     coo->DoTxAsync(*req);
   };
   task();
+  Log_info("returning void ClientWorker::DispatchRequest");
 //  dispatch_pool_->run_async(task); // this causes bug
 }
 
@@ -587,6 +605,7 @@ void ClientWorker::DispatchRequest(Coordinator* coo) {
 
 void ClientWorker::SearchLeader(Coordinator* coo) {
   // TODO multiple par_id yidawu
+  Log_info("void ClientWorker::SearchLeader");
   parid_t par_id = 0;
   coo->SetNewLeader(par_id, failover_server_idx_);
   cur_leader_ = *failover_server_idx_;
@@ -617,6 +636,11 @@ ClientWorker::ClientWorker(uint32_t id, Config::SiteInfo& site_info, Config* con
   success.store(0);
   num_try.store(0);
   commo_ = frame_->CreateCommo(poll_mgr_);
+
+  // ###remove later
+  n_concurrent_ = 1; // number of concurrent requests sent by a client???
+  // duration = 1; // duration for which a client sends/generate txns???
+
   commo_->loc_id_ = my_site_.locale_id;
   forward_requests_to_leader_ =
       (config->replica_proto_ == MODE_FPGA_RAFT && site_info.locale_id != 0) ? true :

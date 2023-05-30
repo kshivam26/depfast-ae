@@ -16,6 +16,7 @@ FpgaRaftCommo::FpgaRaftCommo(PollMgr* poll) : Communicator(poll) {
 shared_ptr<FpgaRaftForwardQuorumEvent> FpgaRaftCommo::SendForward(parid_t par_id, 
                                             parid_t self_id, shared_ptr<Marshallable> cmd)
 {
+    Log_info("inside shared_ptr<FpgaRaftForwardQuorumEvent> FpgaRaftCommo::SendForward");
     int n = Config::GetConfig()->GetPartitionSize(par_id);
     auto e = Reactor::CreateSpEvent<FpgaRaftForwardQuorumEvent>(1,1);
     parid_t fid = (self_id + 1 ) % n ;
@@ -38,6 +39,7 @@ shared_ptr<FpgaRaftForwardQuorumEvent> FpgaRaftCommo::SendForward(parid_t par_id
     MarshallDeputy md(cmd);
     auto f = proxy->async_Forward(md, fuattr);
     Future::safe_release(f);
+    Log_info("returning shared_ptr<FpgaRaftForwardQuorumEvent> FpgaRaftCommo::SendForward");
     return e;
 }
 
@@ -150,6 +152,7 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
                                       uint64_t prevLogTerm,
                                       uint64_t commitIndex,
                                       shared_ptr<Marshallable> cmd) {
+  Log_info("inside shared_ptr<FpgaRaftAppendQuorumEvent> FpgaRaftCommo::BroadcastAppendEntries");
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftAppendQuorumEvent>(n, n/2 + 1);
   auto proxies = rpc_par_proxies_[par_id];
@@ -182,7 +185,7 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
     if (cli_it != rpc_clients_.end()) {
       ip = cli_it->second->host();
     }
-	if (p.first == leader_site_id) {
+	  if (p.first == leader_site_id) {
         // fix the 1c1s1p bug
         // Log_info("leader_site_id %d", leader_site_id);
         e->FeedResponse(true, prevLogIndex + 1, ip);
@@ -242,9 +245,10 @@ void FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
                                            uint64_t commitIndex,
                                            shared_ptr<Marshallable> cmd,
                                            const function<void(Future*)>& cb) {
+  Log_info("FpgaRaftCommo::BroadcastAppendEntries");
   verify(0); // deprecated function
   auto proxies = rpc_par_proxies_[par_id];
-  vector<Future*> fus;
+  vector<Future*> fus;   //? Why need this here?
   for (auto& p : proxies) {
     auto proxy = (FpgaRaftProxy*) p.second;
     FutureAttr fuattr;
@@ -267,11 +271,13 @@ void FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
 //  verify(0);
 }
 
+// ### change this to decide chain
 void FpgaRaftCommo::BroadcastDecide(const parid_t par_id,
                                       const slotid_t slot_id,
 																			const i64 dep_id,
                                       const ballot_t ballot,
                                       const shared_ptr<Marshallable> cmd) {
+  Log_info("inside void FpgaRaftCommo::BroadcastDecide");
   auto proxies = rpc_par_proxies_[par_id];
   vector<Future*> fus;
   for (auto& p : proxies) {
@@ -287,19 +293,64 @@ void FpgaRaftCommo::BroadcastDecide(const parid_t par_id,
   }
 }
 
+// void FpgaRaftCommo::BroadcastDecide(const parid_t par_id,
+//                                       const slotid_t slot_id,
+// 																			const i64 dep_id,
+//                                       const ballot_t ballot,
+//                                       const shared_ptr<Marshallable> cmd) {
+//   Log_info("inside void FpgaRaftCommo::BroadcastDecide");
+//   auto proxies = rpc_par_proxies_[par_id];
+//   vector<Future*> fus;
+//   auto& p = proxies[0];
+//   proxies.erase(proxies.begin()); // delete the first proxy
+//   Log_info("current size of proxies: %d", proxies.size());
+//   // for (auto& p : proxies) {
+//   // proxy 1
+//   auto proxy = (FpgaRaftProxy*) p.second;
+//   FutureAttr fuattr;
+//   fuattr.callback = [](Future* fu) {};
+//   MarshallDeputy md(cmd);
+// 	DepId di;
+// 	di.str = "dep";
+// 	di.id = dep_id;
+//   auto f = proxy->async_DecideChain(slot_id, ballot, di, md, fuattr);
+//   // auto f = proxy->async_DecideChain(slot_id, ballot, di, md, proxies, state, fuattr);
+//   Future::safe_release(f);
+
+//   // proxy 2
+//   if (proxies.size() > 0){
+//     p = proxies[0];
+//     proxies.erase(proxies.begin()); 
+//     Log_info("void FpgaRaftCommo::BroadcastDecide; making another decideChain call");
+//     auto proxy = (FpgaRaftProxy*) p.second;
+//     FutureAttr fuattr;
+//     fuattr.callback = [](Future* fu) {};
+//     MarshallDeputy md(cmd);
+// 	  DepId di;
+// 	  di.str = "dep";
+// 	  di.id = dep_id;
+//     auto f = proxy->async_DecideChain(slot_id, ballot, di, md,fuattr);
+//     // auto f = proxy->async_DecideChain(slot_id, ballot, di, md, proxies, state, fuattr);
+//     Future::safe_release(f);
+//   }
+//   Log_info("returning from void FpgaRaftCommo::BroadcastDecide");
+//   // }
+// }
+
 void FpgaRaftCommo::BroadcastVote(parid_t par_id,
                                         slotid_t lst_log_idx,
                                         ballot_t lst_log_term,
                                         parid_t self_id,
                                         ballot_t cur_term,
                                        const function<void(Future*)>& cb) {
+  Log_info("inside void FpgaRaftCommo::BroadcastVote");
   verify(0); // deprecated function
   auto proxies = rpc_par_proxies_[par_id];
   for (auto& p : proxies) {
     auto proxy = (FpgaRaftProxy*) p.second;
     FutureAttr fuattr;
     fuattr.callback = cb;
-    Future::safe_release(proxy->async_Vote(lst_log_idx, lst_log_term, self_id,cur_term, fuattr));
+    Future::safe_release(proxy->async_VoteChain(lst_log_idx, lst_log_term, self_id,cur_term, fuattr));
   }
 }
 
@@ -309,6 +360,7 @@ FpgaRaftCommo::BroadcastVote(parid_t par_id,
                                     ballot_t lst_log_term,
                                     parid_t self_id,
                                     ballot_t cur_term ) {
+  Log_info("inside shared_ptr<FpgaRaftVoteQuorumEvent> FpgaRaftCommo::BroadcastVote");
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftVoteQuorumEvent>(n, n/2);
   auto proxies = rpc_par_proxies_[par_id];
@@ -337,6 +389,7 @@ void FpgaRaftCommo::BroadcastVote2FPGA(parid_t par_id,
                                         parid_t self_id,
                                         ballot_t cur_term,
                                        const function<void(Future*)>& cb) {
+  Log_info("inside void FpgaRaftCommo::BroadcastVote2FPGA");
   verify(0); // deprecated function
   auto proxies = rpc_par_proxies_[par_id];
   for (auto& p : proxies) {
@@ -353,6 +406,7 @@ FpgaRaftCommo::BroadcastVote2FPGA(parid_t par_id,
                                     ballot_t lst_log_term,
                                     parid_t self_id,
                                     ballot_t cur_term ) {
+  Log_info("inside shared_ptr<FpgaRaftVote2FPGAQuorumEvent> FpgaRaftCommo::BroadcastVote2FPGA");
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftVote2FPGAQuorumEvent>(n, n/2);
   auto proxies = rpc_par_proxies_[par_id];

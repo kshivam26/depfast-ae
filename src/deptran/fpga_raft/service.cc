@@ -15,7 +15,7 @@ void FpgaRaftServiceImpl::Heartbeat(const uint64_t& leaderPrevLogIndex,
 																		const DepId& dep_id,
 																		uint64_t* followerPrevLogIndex,
 																		rrr::DeferredReply* defer) {
-	//Log_info("received heartbeat");
+	Log_info("received heartbeat");
 	*followerPrevLogIndex = sched_->lastLogIndex;
 	defer->reply();
 }
@@ -23,6 +23,7 @@ void FpgaRaftServiceImpl::Heartbeat(const uint64_t& leaderPrevLogIndex,
 void FpgaRaftServiceImpl::Forward(const MarshallDeputy& cmd,
                                     uint64_t* cmt_idx, 
                                     rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::Forward");
    verify(sched_ != nullptr);
    sched_->OnForward(const_cast<MarshallDeputy&>(cmd).sp_data_, cmt_idx,
                       std::bind(&rrr::DeferredReply::reply, defer));
@@ -36,6 +37,21 @@ void FpgaRaftServiceImpl::Vote(const uint64_t& lst_log_idx,
                                     ballot_t* reply_term,
                                     bool_t *vote_granted,
                                     rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::Vote");
+  verify(sched_ != nullptr);
+  sched_->OnVote(lst_log_idx,lst_log_term, can_id, can_term,
+                    reply_term, vote_granted,
+                    std::bind(&rrr::DeferredReply::reply, defer));
+}
+
+void FpgaRaftServiceImpl::VoteChain(const uint64_t& lst_log_idx,
+                                    const ballot_t& lst_log_term,
+                                    const parid_t& can_id,
+                                    const ballot_t& can_term,
+                                    ballot_t* reply_term,
+                                    bool_t *vote_granted,
+                                    rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::VoteChain");
   verify(sched_ != nullptr);
   sched_->OnVote(lst_log_idx,lst_log_term, can_id, can_term,
                     reply_term, vote_granted,
@@ -49,6 +65,7 @@ void FpgaRaftServiceImpl::Vote2FPGA(const uint64_t& lst_log_idx,
                                     ballot_t* reply_term,
                                     bool_t *vote_granted,
                                     rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::Vote2FPGA");
   verify(sched_ != nullptr);
   sched_->OnVote2FPGA(lst_log_idx,lst_log_term, can_id, can_term,
                     reply_term, vote_granted,
@@ -67,6 +84,7 @@ void FpgaRaftServiceImpl::AppendEntries2(const uint64_t& slot,
                                         uint64_t *followerCurrentTerm,
                                         uint64_t *followerLastLogIndex,
                                         rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::AppendEntries2");
 	verify(sched_ != nullptr);
 	*followerAppendOK = 1;
 	defer->reply();
@@ -85,6 +103,7 @@ void FpgaRaftServiceImpl::AppendEntries(const uint64_t& slot,
                                         uint64_t *followerCurrentTerm,
                                         uint64_t *followerLastLogIndex,
                                         rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::AppendEntries");
   verify(sched_ != nullptr);
 	//Log_info("CreateRunning2");
 
@@ -126,6 +145,23 @@ void FpgaRaftServiceImpl::Decide(const uint64_t& slot,
 																	 const DepId& dep_id,
                                    const MarshallDeputy& md_cmd,
                                    rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::Decide");
+  verify(sched_ != nullptr);
+	//Log_info("Deciding with string: %s and id: %d", dep_id.str.c_str(), dep_id.id);
+  Coroutine::CreateRun([&] () {
+    sched_->OnCommit(slot,
+                     ballot,
+                     const_cast<MarshallDeputy&>(md_cmd).sp_data_);
+    defer->reply();
+  });
+}
+
+void FpgaRaftServiceImpl::DecideChain(const uint64_t& slot,
+                                   const ballot_t& ballot,
+																	 const DepId& dep_id,
+                                   const MarshallDeputy& md_cmd,
+                                   rrr::DeferredReply* defer) {
+  Log_info("inside void FpgaRaftServiceImpl::DecideChain");
   verify(sched_ != nullptr);
 	//Log_info("Deciding with string: %s and id: %d", dep_id.str.c_str(), dep_id.id);
   Coroutine::CreateRun([&] () {

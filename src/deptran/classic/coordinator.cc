@@ -38,6 +38,7 @@ Communicator* CoordinatorClassic::commo() {
 }
 
 void CoordinatorClassic::ForwardTxnRequest(TxRequest& req) {
+  Log_info("inside void CoordinatorClassic::ForwardTxnRequest");
   auto comm = commo();
   comm->SendForwardTxnRequest(
       req,
@@ -57,6 +58,7 @@ void CoordinatorClassic::ForwardTxRequestAck(const TxReply& txn_reply) {
 }
 
 void CoordinatorClassic::DoTxAsync(TxRequest& req) {
+  Log_info("inside void CoordinatorClassic::DoTxAsync");
   std::lock_guard<std::recursive_mutex> lock(this->mtx_);
   TxData* cmd = frame_->CreateTxnCommand(req, txn_reg_);
   verify(txn_reg_ != nullptr);
@@ -70,6 +72,7 @@ void CoordinatorClassic::DoTxAsync(TxRequest& req) {
   Reset(); // In case of reuse.
 
   Log_debug("do one request txn_id: %d", cmd_->id_);
+  Log_info("do one request txn_id: %d", cmd_->id_);
   auto config = Config::GetConfig();
   bool not_forwarding = forward_status_ != PROCESS_FORWARD_REQUEST;
 
@@ -84,13 +87,16 @@ void CoordinatorClassic::DoTxAsync(TxRequest& req) {
     ForwardTxnRequest(req);
   } else {
     Log_debug("start txn!!! : %d", forward_status_);
+    Log_info("start txn!!! : %d", forward_status_);
     Coroutine::CreateRun([this]() { GotoNextPhase(); }, __FILE__, __LINE__);
   }
+  Log_info("returning from void CoordinatorClassic::DoTxAsync");
 }
 
 
 void CoordinatorClassic::GotoNextPhase() {
   //Log_info("We're moving along: %d", phase_ % 4);
+  Log_info("inside void CoordinatorClassic::GotoNextPhase");
   int n_phase = 4;
   int current_phase = phase_ % n_phase;
   phase_++;
@@ -99,6 +105,7 @@ void CoordinatorClassic::GotoNextPhase() {
   //Log_info("aborted and committed: %d, %d", aborted_, committed_);
   switch (current_phase) {
     case Phase::INIT_END:
+      Log_info("inside void CoordinatorClassic::GotoNextPhase -> INIT_END");
 			if (n_retry_ > 0) Log_info("dispatching after restart");
       //Log_info("Dispatching for some reason: %x, %d", this, phase_);
       verify(phase_ % n_phase == Phase::DISPATCH);
@@ -121,6 +128,7 @@ void CoordinatorClassic::GotoNextPhase() {
       break;
       //break;
     case Phase::DISPATCH:
+      Log_info("inside void CoordinatorClassic::GotoNextPhase-> DISPATCH");
       //Log_info("Preparing for some reason: %x, %d", this, phase_);
       verify(phase_ % n_phase == Phase::PREPARE);
       verify(!committed_);
@@ -135,12 +143,14 @@ void CoordinatorClassic::GotoNextPhase() {
       }
       //break;
     case Phase::PREPARE:
+      Log_info("inside void CoordinatorClassic::GotoNextPhase-> Prepare");
       //Log_info("Committing for some reason: %x, %d", this, phase_);
       verify(phase_ % n_phase == Phase::COMMIT);
       phase_++;
       Commit();
       //break;
     case Phase::COMMIT:
+      Log_info("inside void CoordinatorClassic::GotoNextPhase-> COMMIT");
       verify(phase_ % n_phase == Phase::INIT_END);
       verify(committed_ != aborted_);
       if (committed_){
@@ -158,10 +168,12 @@ void CoordinatorClassic::GotoNextPhase() {
     default:
       verify(0);
   }
+  Log_info("returning void CoordinatorClassic::GotoNextPhase");
 }
 
 void CoordinatorClassic::Reset() {
-  Coordinator::Reset();
+  Log_info("inside void CoordinatorClassic::Reset");
+  Coordinator::Reset(); //? Why use this when already resetting?
   for (int i = 0; i < site_prepare_.size(); i++) {
     site_prepare_[i] = 0;
   }
@@ -175,6 +187,7 @@ void CoordinatorClassic::Reset() {
   committed_ = false;
   aborted_ = false;
 	repeat_ = false;
+  Log_info("returning void CoordinatorClassic::Reset");
 }
 
 void CoordinatorClassic::Restart() {

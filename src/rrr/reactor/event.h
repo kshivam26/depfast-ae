@@ -19,7 +19,9 @@
 #define REJECT (-10)
 #define Wait_recordplace(sp_ev, wait_func) do { \
   auto ref_ev = sp_ev; \
+  Log_info("Event::Wait_recordplace; checkpoint 001");\
   ref_ev->RecordPlace(__FILE__, __LINE__); \
+  Log_info("Event::Wait_recordplace; checkpoint 002");\
   ref_ev->wait_func; \
 } while(0)
 

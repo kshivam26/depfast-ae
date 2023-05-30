@@ -9,6 +9,7 @@
 namespace janus {
 
 void ServerWorker::SetupHeartbeat() {
+  Log_info("inside void ServerWorker::SetupHeartbeat");
   bool hb = Config::GetConfig()->do_heart_beat();
   if (!hb) return;
   auto timeout = Config::GetConfig()->get_ctrl_timeout();
@@ -34,6 +35,7 @@ void ServerWorker::SetupHeartbeat() {
 }
 
 void ServerWorker::SetupBase() {
+  Log_info("inside void ServerWorker::SetupBase");
   auto config = Config::GetConfig();
   tx_frame_ = Frame::GetFrame(config->tx_proto_);
   tx_frame_->site_info_ = site_info_;
@@ -71,9 +73,11 @@ void ServerWorker::SetupBase() {
                                            tx_sched_,
                                            std::placeholders::_1));
   }
+  Log_info("returning from void ServerWorker::SetupBase");
 }
 
 void ServerWorker::PopTable() {
+  Log_info("inside void ServerWorker::PopTable");
   // populate table
   int ret = 0;
   // get all tables
@@ -112,6 +116,7 @@ void ServerWorker::PopTable() {
 }
 
 void ServerWorker::RegisterWorkload() {
+  Log_info("inside void ServerWorker::RegisterWorkload");
   Workload* workload = Workload::CreateWorkload(Config::GetConfig());
   verify(tx_reg_ != nullptr);
   verify(sharding_ != nullptr);
@@ -121,6 +126,7 @@ void ServerWorker::RegisterWorkload() {
 }
 
 void ServerWorker::SetupService() {
+  Log_info("inside void ServerWorker::SetupService");
   Log_info("enter %s for %s @ %s", __FUNCTION__,
            this->site_info_->name.c_str(),
            site_info_->GetBindAddress().c_str());
@@ -139,6 +145,7 @@ void ServerWorker::SetupService() {
   // init service implementation
 
   if (tx_frame_ != nullptr) {
+    Log_info("inside void ServerWorker::SetupService; calling tx_frame_->CreateRpcServices");
     services_ = tx_frame_->CreateRpcServices(site_info_->id,
                                              tx_sched_,
                                              svr_poll_mgr_,
@@ -146,6 +153,7 @@ void ServerWorker::SetupService() {
   }
 
   if (rep_frame_ != nullptr) {
+    Log_info("inside void ServerWorker::SetupService; calling rep_frame_->CreateRpcServices");
     auto s2 = rep_frame_->CreateRpcServices(site_info_->id,
                                             rep_sched_,
                                             svr_poll_mgr_,
@@ -182,6 +190,7 @@ void ServerWorker::SetupService() {
 }
 
 void ServerWorker::WaitForShutdown() {
+  Log_info("inside void ServerWorker::SetupService");
   Log_debug("%s", __FUNCTION__);
   if (hb_rpc_server_ != nullptr) {
     scsi_->wait_for_shutdown();
@@ -209,6 +218,7 @@ void ServerWorker::WaitForShutdown() {
 }
 
 void ServerWorker::SetupCommo() {
+  Log_info("inside void ServerWorker::SetupCommo");
   verify(svr_poll_mgr_ != nullptr);
   if (tx_frame_) {
     tx_commo_ = tx_frame_->CreateCommo(svr_poll_mgr_);

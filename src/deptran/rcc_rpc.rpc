@@ -74,6 +74,11 @@ abstract service FpgaRaft {
                ballot_t ballot,
 							 DepId dep_id,
                MarshallDeputy cmd);
+
+  defer DecideChain(uint64_t slot,
+               ballot_t ballot,
+							 DepId dep_id,
+               MarshallDeputy cmd);
 }
 
 

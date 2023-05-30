@@ -146,6 +146,7 @@ bool SchedulerClassic::OnPrepare(cmdid_t tx_id,
                                  const std::vector<i32>& sids,
                                  struct DepId dep_id,
 																 bool& null_cmd) {
+  Log_info("inside bool SchedulerClassic::OnPrepare");
   auto sp_tx = dynamic_pointer_cast<TxClassic>(GetOrCreateTx(tx_id));
   verify(sp_tx);
 	/*if(sp_tx->cmd_ == NULL){
@@ -172,6 +173,7 @@ bool SchedulerClassic::OnPrepare(cmdid_t tx_id,
 		/*clock_gettime(CLOCK_MONOTONIC, &end);
 		Log_info("time of prepare on server: %d", end.tv_nsec-begin.tv_nsec);*/
     //Log_info("The locale id: %d", coo->loc_id_);
+    Log_info("inside bool SchedulerClassic::OnPrepare; calling coo->Submit");
     coo->Submit(sp_m);
     sp_tx->prepare_result->Wait();
 		slow_ = coo->slow_;

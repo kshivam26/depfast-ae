@@ -131,6 +131,7 @@ void ClassicServiceImpl::FailOverTrig(
 
 void ClassicServiceImpl::SimpleCmd(
     const SimpleCommand& cmd, rrr::i32* res, rrr::DeferredReply* defer) {
+  Log_info("inside void ClassicServiceImpl::SimpleCmd");
   Coroutine::CreateRun([res, defer, this]() {
     auto empty_cmd = std::make_shared<TpcEmptyCommand>();
     verify(empty_cmd->kind_ == MarshallDeputy::CMD_TPC_EMPTY);

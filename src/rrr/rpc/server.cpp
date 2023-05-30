@@ -12,7 +12,7 @@
 #include "reactor/coroutine.h"
 #include "server.hpp"
 #include "utils.hpp"
-
+#include <ctime>
 using namespace std;
 
 namespace rrr {
@@ -107,6 +107,10 @@ int ServerConnection::run_async(const std::function<void()>& f) {
 }
 
 void ServerConnection::begin_reply(Request* req, i32 error_code /* =... */) {
+  time_t ttime;
+  ttime = time(0);
+  // std::cout << "The current local date and time is: " << ctime(&ttime) << std::endl; 
+  // printf("inside serverConnection::begin_reply\n");
   verify (status_ == CONNECTED);
     out_l_.lock();
     v32 v_error_code = error_code;
@@ -116,9 +120,16 @@ void ServerConnection::begin_reply(Request* req, i32 error_code /* =... */) {
 
     *this << v_reply_xid;
     *this << v_error_code;
+  ttime = time(0);
+  // std::cout << "The current local date and time is: " << ctime(&ttime) << std::endl; 
+  // printf("returning serverConnection::begin_reply\n");
 }
 
 void ServerConnection::end_reply() {
+  time_t ttime;
+  ttime = time(0);
+  // std::cout << "The current local date and time is: " << ctime(&ttime) << std::endl; 
+  // printf("inside serverConnection::end_reply\n");
   verify (status_ == CONNECTED);
 
     // set reply size in packet
@@ -134,6 +145,10 @@ void ServerConnection::end_reply() {
     server_->pollmgr_->update_mode(shared_from_this(), Pollable::READ | Pollable::WRITE);
 
     out_l_.unlock();
+  
+  ttime = time(0);
+  // std::cout << "The current local date and time is: " << ctime(&ttime) << std::endl; 
+  // printf("returning serverConnection::end_reply\n");
 }
 
 
@@ -571,6 +586,7 @@ ServerListener::ServerListener(Server* server, string addr) {
 }
 
 int Server::start(const char* bind_addr) {
+  Log_info("inside int Server::start");
   string addr(bind_addr);
   Log_info("bind address is: %s", bind_addr);
   addr_ = addr;
@@ -657,6 +673,7 @@ int Server::start(const char* bind_addr) {
 
     Pthread_create(&loop_th_, nullptr, Server::start_server_loop, start_server_loop_args);
 
+    Log_info("return int Server::start");
     return 0;
 }
 

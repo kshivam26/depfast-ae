@@ -358,6 +358,7 @@ Executor* Frame::CreateExecutor(cmdid_t cmd_id, TxLogServer* sched) {
 }
 
 TxLogServer* Frame::CreateScheduler() {
+  Log_info("inside TxLogServer* Frame::CreateScheduler");
   auto mode = Config::GetConfig()->tx_proto_;
   TxLogServer *sch = nullptr;
   switch(mode) {
@@ -388,6 +389,7 @@ TxLogServer* Frame::CreateScheduler() {
   }
   verify(sch);
   sch->frame_ = this;
+  Log_info("returning TxLogServer* Frame::CreateScheduler");
   return sch;
 }
 
