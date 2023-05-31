@@ -3,23 +3,36 @@
 #include "../src/rrr/rpc/client.hpp"
 #include "../src/rrr/reactor/reactor.h"
 #include<vector>
+std::vector<demo::DemoProxy *> proxies;
+std::vector<std::string> serverAddr;
+
+void PopulateServerAddresses(){
+	serverAddr.push_back("127.0.0.1:8090");
+	serverAddr.push_back("127.0.0.1:8091");
+	serverAddr.push_back("127.0.0.1:8092");
+}
+
 
 int main(){
 	rrr::PollMgr *pm = new rrr::PollMgr();
-	std::shared_ptr<rrr::Client> client = std::make_shared<rrr::Client>(pm);
-	while(client->connect(std::string("127.0.0.1:8090").c_str())!=0){
-		usleep(100*100);
+	
+	// get the server addresses
+	PopulateServerAddresses();
+	for (int i=0; i<serverAddr.size(); i++){
+		std::shared_ptr<rrr::Client> client = std::make_shared<rrr::Client>(pm);
+		auto connect_result = client->connect(serverAddr[i].c_str(), false);	
+		if(connect_result != 0){
+			printf("connection unsuccessful\n");
+			return -1;
+		}
+		else{
+			printf("connection successful\n");
+		}
+		printf("checkpoint-0\n");
+		proxies.push_back(new demo::DemoProxy(client.get()));
 	}
-
-	printf("checkpoint-0\n");
-	// auto e = rrr::Reactor::CreateSpEvent<ExampleQuorumEvent>(1,1);
-	std::vector<demo::DemoProxy *> proxies;
-	auto client_proxy = new demo::DemoProxy(client.get());
-	// proxies.push_back(new demo::DemoProxy(client.get()));
-	// proxies.push_back(new demo::DemoProxy(client.get()));
-
-	std::string hi = "Hello Server1";
-	std::string reply;
+	
+	
 
 	printf("checkpoint-1\n");
 	// auto e = make_shared<ExampleQuorumEvent>(2, 2);
@@ -39,11 +52,13 @@ int main(){
 	// 	printf("got a quorum\n");
 	// }
 
+	for (int i=0; i<3; i++){
+	std::string hi("Hello Server" + std::to_string(i));
+	std::string reply;
 	
-
-	client_proxy->hello(hi, &reply);
+	proxies[i]->hello(hi, &reply);
 	std::cout<<reply.c_str() << "\n";
-
+	}
 	// rrr::i32 a = 1, b = 2, c = 3;
 	// rrr::i32 result;
 

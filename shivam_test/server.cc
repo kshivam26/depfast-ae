@@ -8,6 +8,8 @@ int main(){
 	rrr::Server *server = new rrr::Server(pm, tp);
 	server->reg(&impl);
 	server->start(std::string("127.0.0.1:8090").c_str());
+	server->start(std::string("127.0.0.1:8091").c_str());
+	server->start(std::string("127.0.0.1:8092").c_str());
 
 	while(1){
 		sleep(1);
