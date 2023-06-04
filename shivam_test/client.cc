@@ -3,13 +3,13 @@
 #include "../src/rrr/rpc/client.hpp"
 #include "../src/rrr/reactor/reactor.h"
 #include<vector>
-std::vector<demo::DemoProxy *> proxies;
+std::vector<janus::DemoProxy *> proxies;
 std::vector<std::string> serverAddr;
 
 void PopulateServerAddresses(){
-	serverAddr.push_back("127.0.0.1:8090");
 	serverAddr.push_back("127.0.0.1:8091");
 	serverAddr.push_back("127.0.0.1:8092");
+	serverAddr.push_back("127.0.0.1:8093");
 }
 
 
@@ -29,36 +29,30 @@ int main(){
 			printf("connection successful\n");
 		}
 		printf("checkpoint-0\n");
-		proxies.push_back(new demo::DemoProxy(client.get()));
+		proxies.push_back(new janus::DemoProxy(client.get()));
 	}
 	
 	
 
 	printf("checkpoint-1\n");
-	// auto e = make_shared<ExampleQuorumEvent>(2, 2);
-	// auto proxies = rpc_par_proxies_[par_id];
-	// for (auto& p : proxies) {
-	//   rrr::FutureAttr fuattr;
-	//   fuattr.callback = [e](rrr::Future* fu) {
-	//     e->FeedResponse(true);
-	//   };
-	// 	printf("checkpoint-2");
-	// 	rrr::Future::safe_release(p->async_hello(hi, fuattr));
-	// }
-	// printf("waiting for the event\n");
-	// e->Wait();
-	// printf("checkpoint-3");
-	// if (e->IsReady()){
-	// 	printf("got a quorum\n");
+
+
+	// broadcast request to all servers
+	// for (int i = 0; i < 3; i++)
+	// {
+	// 	std::string hi("Hello Server" + std::to_string(i));
+	// 	std::string reply;
+
+	// 	proxies[i]->hello(hi, &reply);
+	// 	std::cout << reply.c_str() << "\n";
 	// }
 
-	for (int i=0; i<3; i++){
-	std::string hi("Hello Server" + std::to_string(i));
+	// just send request to one proxy to check if chain may happen
+	std::string hi("Hello Server" + std::to_string(0));
 	std::string reply;
-	
-	proxies[i]->hello(hi, &reply);
-	std::cout<<reply.c_str() << "\n";
-	}
+	proxies[0]->hello(hi, &reply);
+	std::cout << reply.c_str() << "\n";
+
 	// rrr::i32 a = 1, b = 2, c = 3;
 	// rrr::i32 result;
 

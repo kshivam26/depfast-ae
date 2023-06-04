@@ -66,6 +66,7 @@ Marshal& MarshallDeputy::CreateActualObjectFrom(Marshal& m) {
       verify(0);
       break;
     default:
+      Log_info("inside MarshallDeputy::CreateActualObjectFrom; current type is: %d", kind_);
       auto func = GetInitializer(kind_);
       verify(func);
       sp_data_.reset(func());

@@ -1,17 +1,18 @@
 #pragma once
 
 #include "rrr.hpp"
-
+#include "../src/deptran/marshallable.h"
 #include <errno.h>
 
 
-namespace demo {
+namespace janus {
 
 class DemoService: public rrr::Service {
 public:
     enum {
-        HELLO = 0x65a7b916,
-        SUM = 0x5ea7f912,
+        HELLO = 0x6ec04d2c,
+        SUM = 0x1a640db9,
+        CRPC = 0x55422553,
     };
     int __reg_to__(rrr::Server* svr) {
         int ret = 0;
@@ -21,19 +22,23 @@ public:
         if ((ret = svr->reg(SUM, this, &DemoService::__sum__wrapper__)) != 0) {
             goto err;
         }
+        if ((ret = svr->reg(CRPC, this, &DemoService::__cRPC__wrapper__)) != 0) {
+            goto err;
+        }
         return 0;
     err:
         svr->unreg(HELLO);
         svr->unreg(SUM);
+        svr->unreg(CRPC);
         return ret;
     }
     // these RPC handler functions need to be implemented by user
     // for 'raw' handlers, remember to reply req, delete req, and sconn->release(); use sconn->run_async for heavy job
     virtual void hello(const std::string& hi, std::string* reply, rrr::DeferredReply* defer) = 0;
     virtual void sum(const rrr::i32& a, const rrr::i32& b, const rrr::i32& c, rrr::i32* result, rrr::DeferredReply* defer) = 0;
+    virtual void cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain, rrr::DeferredReply* defer) = 0;
 private:
     void __hello__wrapper__(rrr::Request* req, rrr::ServerConnection* sconn) {
-        printf("inside __hello__wrapper__\n");
         std::string* in_0 = new std::string;
         req->m >> *in_0;
         std::string* out_0 = new std::string;
@@ -45,9 +50,7 @@ private:
             delete out_0;
         };
         rrr::DeferredReply* __defer__ = new rrr::DeferredReply(req, sconn, __marshal_reply__, __cleanup__);
-        printf("calling this->hello\n");
         this->hello(*in_0, out_0, __defer__);
-        printf("returning from __hello__wrapper__\n");
     }
     void __sum__wrapper__(rrr::Request* req, rrr::ServerConnection* sconn) {
         rrr::i32* in_0 = new rrr::i32;
@@ -69,6 +72,25 @@ private:
         rrr::DeferredReply* __defer__ = new rrr::DeferredReply(req, sconn, __marshal_reply__, __cleanup__);
         this->sum(*in_0, *in_1, *in_2, out_0, __defer__);
     }
+    void __cRPC__wrapper__(rrr::Request* req, rrr::ServerConnection* sconn) {
+        Log_info("inside __cRPC__wrapper__");
+        MarshallDeputy* in_0 = new MarshallDeputy;
+        req->m >> *in_0;
+        Log_info("inside __cRPC__wrapper__; checkpoint 0");
+        std::vector<std::string>* in_1 = new std::vector<std::string>;
+        req->m >> *in_1;
+        Log_info("inside __cRPC__wrapper__; checkpoint 1");
+        auto __marshal_reply__ = [=] {
+        };
+        Log_info("inside __cRPC__wrapper__; checkpoint 2");
+        auto __cleanup__ = [=] {
+            delete in_0;
+            delete in_1;
+        };
+        Log_info("inside __cRPC__wrapper__; checkpoint 3");
+        rrr::DeferredReply* __defer__ = new rrr::DeferredReply(req, sconn, __marshal_reply__, __cleanup__);
+        this->cRPC(*in_0, *in_1, __defer__);
+    }
 };
 
 class DemoProxy {
@@ -77,24 +99,15 @@ protected:
 public:
     DemoProxy(rrr::Client* cl): __cl__(cl) { }
     rrr::Future* async_hello(const std::string& hi, const rrr::FutureAttr& __fu_attr__ = rrr::FutureAttr()) {
-        // sort of like setting up a connection
-        printf("sending begin_request to demoService\n");
-        rrr::Future* __fu__ = __cl__->begin_request(DemoService::HELLO, __fu_attr__); 
-        // adding the 'hi' argument to the client? 
-        // sets the value in 'out' field of marshal?
+        rrr::Future* __fu__ = __cl__->begin_request(DemoService::HELLO, __fu_attr__);
         if (__fu__ != nullptr) {
             *__cl__ << hi;
         }
-        // end request and get the answer?
-        printf("sending end_request to demoService\n");
         __cl__->end_request();
-        printf("returning from async_hello\n");
         return __fu__;
     }
     rrr::i32 hello(const std::string& hi, std::string* reply) {
-        printf("calling this->async_hello\n");
         rrr::Future* __fu__ = this->async_hello(hi);
-        printf("returned from this->async_hello\n");
         if (__fu__ == nullptr) {
             return ENOTCONN;
         }
@@ -103,7 +116,6 @@ public:
             __fu__->get_reply() >> *reply;
         }
         __fu__->release();
-        printf("returning result from hello\n");
         return __ret__;
     }
     rrr::Future* async_sum(const rrr::i32& a, const rrr::i32& b, const rrr::i32& c, const rrr::FutureAttr& __fu_attr__ = rrr::FutureAttr()) {
@@ -128,9 +140,33 @@ public:
         __fu__->release();
         return __ret__;
     }
+    rrr::Future* async_cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain, const rrr::FutureAttr& __fu_attr__ = rrr::FutureAttr()) {
+        Log_info("inside proxy async_cRPC");
+        rrr::Future* __fu__ = __cl__->begin_request(DemoService::CRPC, __fu_attr__);
+        Log_info("inside proxy async_cRPC; checkpoint 0");
+        if (__fu__ != nullptr) {
+            Log_info("inside proxy async_cRPC; checkpoint 1");
+            *__cl__ << cmd;
+            *__cl__ << addrChain;
+            Log_info("inside proxy async_cRPC; checkpoint 2");
+        }
+        Log_info("inside proxy async_cRPC; checkpoint 3");
+        __cl__->end_request();
+        return __fu__;
+    }
+    rrr::i32 cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain) {
+        Log_info("inside proxy cRPC");
+        rrr::Future* __fu__ = this->async_cRPC(cmd, addrChain);
+        if (__fu__ == nullptr) {
+            return ENOTCONN;
+        }
+        rrr::i32 __ret__ = __fu__->get_error_code();
+        __fu__->release();
+        return __ret__;
+    }
 };
 
-} // namespace demo
+} // namespace janus
 
 
 
