@@ -10,9 +10,9 @@ namespace janus {
 class DemoService: public rrr::Service {
 public:
     enum {
-        HELLO = 0x6ec04d2c,
-        SUM = 0x1a640db9,
-        CRPC = 0x55422553,
+        HELLO = 0x35eb203b,
+        SUM = 0x59ab2e83,
+        CRPC = 0x12f60c02,
     };
     int __reg_to__(rrr::Server* svr) {
         int ret = 0;
@@ -36,7 +36,7 @@ public:
     // for 'raw' handlers, remember to reply req, delete req, and sconn->release(); use sconn->run_async for heavy job
     virtual void hello(const std::string& hi, std::string* reply, rrr::DeferredReply* defer) = 0;
     virtual void sum(const rrr::i32& a, const rrr::i32& b, const rrr::i32& c, rrr::i32* result, rrr::DeferredReply* defer) = 0;
-    virtual void cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain, rrr::DeferredReply* defer) = 0;
+    virtual void cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain, const MarshallDeputy& state, rrr::DeferredReply* defer) = 0;
 private:
     void __hello__wrapper__(rrr::Request* req, rrr::ServerConnection* sconn) {
         std::string* in_0 = new std::string;
@@ -73,23 +73,21 @@ private:
         this->sum(*in_0, *in_1, *in_2, out_0, __defer__);
     }
     void __cRPC__wrapper__(rrr::Request* req, rrr::ServerConnection* sconn) {
-        Log_info("inside __cRPC__wrapper__");
         MarshallDeputy* in_0 = new MarshallDeputy;
         req->m >> *in_0;
-        Log_info("inside __cRPC__wrapper__; checkpoint 0");
         std::vector<std::string>* in_1 = new std::vector<std::string>;
         req->m >> *in_1;
-        Log_info("inside __cRPC__wrapper__; checkpoint 1");
+        MarshallDeputy* in_2 = new MarshallDeputy;
+        req->m >> *in_2;
         auto __marshal_reply__ = [=] {
         };
-        Log_info("inside __cRPC__wrapper__; checkpoint 2");
         auto __cleanup__ = [=] {
             delete in_0;
             delete in_1;
+            delete in_2;
         };
-        Log_info("inside __cRPC__wrapper__; checkpoint 3");
         rrr::DeferredReply* __defer__ = new rrr::DeferredReply(req, sconn, __marshal_reply__, __cleanup__);
-        this->cRPC(*in_0, *in_1, __defer__);
+        this->cRPC(*in_0, *in_1, *in_2, __defer__);
     }
 };
 
@@ -140,27 +138,32 @@ public:
         __fu__->release();
         return __ret__;
     }
-    rrr::Future* async_cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain, const rrr::FutureAttr& __fu_attr__ = rrr::FutureAttr()) {
-        Log_info("inside proxy async_cRPC");
+    rrr::Future* async_cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain, const MarshallDeputy& state, const rrr::FutureAttr& __fu_attr__ = rrr::FutureAttr()) {
+        Log_info("inside rrr::i32 async_cRPC; checkpoint 1");
         rrr::Future* __fu__ = __cl__->begin_request(DemoService::CRPC, __fu_attr__);
-        Log_info("inside proxy async_cRPC; checkpoint 0");
+        Log_info("inside rrr::i32 async_cRPC; checkpoint 2");
         if (__fu__ != nullptr) {
-            Log_info("inside proxy async_cRPC; checkpoint 1");
+            Log_info("inside rrr::i32 async_cRPC; checkpoint 3");
             *__cl__ << cmd;
             *__cl__ << addrChain;
-            Log_info("inside proxy async_cRPC; checkpoint 2");
+            *__cl__ << state;
         }
-        Log_info("inside proxy async_cRPC; checkpoint 3");
+        Log_info("inside rrr::i32 async_cRPC; checkpoint 4");
         __cl__->end_request();
+        Log_info("inside rrr::i32 async_cRPC; checkpoint 5");
         return __fu__;
     }
-    rrr::i32 cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain) {
-        Log_info("inside proxy cRPC");
-        rrr::Future* __fu__ = this->async_cRPC(cmd, addrChain);
+    rrr::i32 cRPC(const MarshallDeputy& cmd, const std::vector<std::string>& addrChain, const MarshallDeputy& state) {
+        Log_info("inside rrr::i32 cRPC; checkpoint 1");
+        rrr::Future* __fu__ = this->async_cRPC(cmd, addrChain, state);
+        Log_info("inside rrr::i32 cRPC; checkpoint 2");
         if (__fu__ == nullptr) {
+            Log_info("inside rrr::i32 cRPC; checkpoint 3");
             return ENOTCONN;
         }
+        Log_info("inside rrr::i32 cRPC; checkpoint 4");
         rrr::i32 __ret__ = __fu__->get_error_code();
+        Log_info("inside rrr::i32 cRPC; checkpoint 5");
         __fu__->release();
         return __ret__;
     }
