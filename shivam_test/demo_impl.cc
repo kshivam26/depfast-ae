@@ -62,10 +62,15 @@ namespace janus{
 		auto it = std::find(serverAddr_.begin(), serverAddr_.end(), server_->addr_);
 		if(it != serverAddr_.end()){
 			int index = it - serverAddr_.begin();
+			// int index = -1;
 			if (index < serverAddr_.size()-1){
+				FutureAttr fuattr;
+				fuattr.callback = [] (Future* fu) {
+            		Log_info("received a response back, in Hello");
+        		};
 				std::vector<std::string> testserverAddr_ = serverAddr_;
+				testserverAddr_.erase(testserverAddr_.begin());
 				testserverAddr_.push_back(server_->addr_.c_str());
-				std::string testString("hello_from_first");
 				rrr::i32 result;
 				auto cmd = std::make_shared<TestCommand>();
 				cmd->a = 1;
@@ -80,7 +85,7 @@ namespace janus{
 				// auto state_sp_m = dynamic_pointer_cast<Marshallable>(std::make_shared<TestCommandState>());
 				MarshallDeputy state_md(dynamic_pointer_cast<Marshallable>(std::make_shared<TestCommandState>()));
 				Log_info("**** inside demoserviceimpl::hello; in %s, calling cRPC", server_->addr_.c_str());
-				proxies_[serverAddr_[index+1]]->cRPC(md, testserverAddr_, state_md);
+				proxies_[serverAddr_[1]]->async_cRPC(md, testserverAddr_, state_md, fuattr);
 				Log_info("**** inside demoserviceimpl::hello; in %s, returned from calling cRPC", server_->addr_.c_str());
 			}
 		}
@@ -185,10 +190,15 @@ namespace janus{
 				// Log_info("**** inside demoserviceimpl::cRPC; in %s, result is: %d", server_->addr_.c_str(), result);
 				// auto sp_m = dynamic_pointer_cast<Marshallable>(cmd);
 				// MarshallDeputy md(sp_m);
+				FutureAttr fuattr;
+				fuattr.callback = [] (Future* fu) {
+            		Log_info("received a response back, in cRPC");
+        		};
+
 				if (index < addrChain.size() - 1)
 				{
 					Log_info("**** inside demoserviceimpl::cRPC, in %s, calling cRPC on server: %s", server_->addr_.c_str(), addrChain[index + 1].c_str());
-					proxies_[addrChain[index + 1]]->cRPC(cmd, addrChain, state);
+					proxies_[addrChain[index + 1]]->async_cRPC(cmd, addrChain, state, fuattr);
 					Log_info("**** inside demoserviceimpl::cRPC, in %s, returning after calling cRPC", server_->addr_.c_str());
 				}
 			}

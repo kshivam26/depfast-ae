@@ -350,7 +350,7 @@ void FpgaRaftCommo::BroadcastVote(parid_t par_id,
     auto proxy = (FpgaRaftProxy*) p.second;
     FutureAttr fuattr;
     fuattr.callback = cb;
-    Future::safe_release(proxy->async_VoteChain(lst_log_idx, lst_log_term, self_id,cur_term, fuattr));
+    Future::safe_release(proxy->async_Vote(lst_log_idx, lst_log_term, self_id,cur_term, fuattr));
   }
 }
 

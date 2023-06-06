@@ -44,19 +44,19 @@ void FpgaRaftServiceImpl::Vote(const uint64_t& lst_log_idx,
                     std::bind(&rrr::DeferredReply::reply, defer));
 }
 
-void FpgaRaftServiceImpl::VoteChain(const uint64_t& lst_log_idx,
-                                    const ballot_t& lst_log_term,
-                                    const parid_t& can_id,
-                                    const ballot_t& can_term,
-                                    ballot_t* reply_term,
-                                    bool_t *vote_granted,
-                                    rrr::DeferredReply* defer) {
-  Log_info("inside void FpgaRaftServiceImpl::VoteChain");
-  verify(sched_ != nullptr);
-  sched_->OnVote(lst_log_idx,lst_log_term, can_id, can_term,
-                    reply_term, vote_granted,
-                    std::bind(&rrr::DeferredReply::reply, defer));
-}
+// void FpgaRaftServiceImpl::VoteChain(const uint64_t& lst_log_idx,
+//                                     const ballot_t& lst_log_term,
+//                                     const parid_t& can_id,
+//                                     const ballot_t& can_term,
+//                                     ballot_t* reply_term,
+//                                     bool_t *vote_granted,
+//                                     rrr::DeferredReply* defer) {
+//   Log_info("inside void FpgaRaftServiceImpl::VoteChain");
+//   verify(sched_ != nullptr);
+//   sched_->OnVote(lst_log_idx,lst_log_term, can_id, can_term,
+//                     reply_term, vote_granted,
+//                     std::bind(&rrr::DeferredReply::reply, defer));
+// }
 
 void FpgaRaftServiceImpl::Vote2FPGA(const uint64_t& lst_log_idx,
                                     const ballot_t& lst_log_term,
