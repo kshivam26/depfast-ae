@@ -74,6 +74,12 @@ class FpgaRaftServiceImpl : public FpgaRaftService {
               const MarshallDeputy& cmd,
               rrr::DeferredReply* defer) override;
 
+  void DecideChain(const uint64_t& slot,
+              const ballot_t& ballot,
+							const DepId& dep_id,
+              const MarshallDeputy& cmd,
+              rrr::DeferredReply* defer) override;
+
 };
 
 } // namespace janus

@@ -135,6 +135,10 @@ def build(bld):
     _depend("src/deptran/example.h src/deptran/example.py",
             "src/deptran/example.rpc",
             "bin/rpcgen --python --cpp src/deptran/example.rpc")
+    
+    # _depend("shivam_test/demo.h",
+    #         "shivam_test/demo.rrr",
+    #         "bin/rpcgen --cpp shivam_test/demo.rrr")
     _gen_srpc_headers()
 
 #     _depend("old-test/benchmark_service.h", "old-test/benchmark_service.rpc",
@@ -209,6 +213,28 @@ def build(bld):
                 includes="src src/rrr src/deptran ",
                 uselib="YAML-CPP BOOST",
                 use="externc rrr memdb deptran_objects PTHREAD PROFILER RT")
+
+    bld.objects(source=bld.path.ant_glob("shivam_test/*.cc ",
+                                        excl=['shivam_test/client.cc', 'shivam_test/server.cc']),
+              target="demo",
+              includes="src src/rrr src/deptran ",
+              uselib="YAML-CPP BOOST",
+              use="externc rrr memdb deptran_objects PTHREAD PROFILER RT")
+        
+    bld.program(source=bld.path.ant_glob("shivam_test/client.cc "
+                                        "src/deptran/paxos_main_helper.cc"),
+              target="shivam_client",
+              includes="src src/rrr src/deptran ",
+              uselib="YAML-CPP BOOST",
+              use="externc rrr memdb deptran_objects demo PTHREAD PROFILER RT")
+    
+    bld.program(source=bld.path.ant_glob("shivam_test/server.cc "
+                                        "src/deptran/paxos_main_helper.cc"),
+              target="shivam_server",
+              includes="src src/rrr src/deptran ",
+              uselib="YAML-CPP BOOST",
+              use="externc rrr memdb demo PTHREAD PROFILER RT")
+    
 
     bld.add_post_fun(post)
 

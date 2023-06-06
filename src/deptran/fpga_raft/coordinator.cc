@@ -27,6 +27,7 @@ void CoordinatorFpgaRaft::Forward(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
                                    const function<void()>& exe_callback) {
     //for(int i = 0; i < 100; i++) Log_info("inside forward");
+    Log_info("inside void CoordinatorFpgaRaft::Forward");
 		verify(0) ; // TODO delete it
     auto e = commo()->SendForward(par_id_, loc_id_, cmd);
     e->Wait();
@@ -35,13 +36,16 @@ void CoordinatorFpgaRaft::Forward(shared_ptr<Marshallable>& cmd,
     Coroutine::CreateRun([&] () {
       this->sch_->SpCommit(cmt_idx) ;
     }) ;
+    Log_info("returning void CoordinatorFpgaRaft::Forward");
 }
 
 
 void CoordinatorFpgaRaft::Submit(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
                                    const function<void()>& exe_callback) {
+  Log_info("void CoordinatorFpgaRaft::Submit");
   if (!IsLeader()) {
+     Log_info("void CoordinatorFpgaRaft::Submit; I am not the leader, forwarding");
     //Log_fatal("i am not the leader; site %d; locale %d",
     //          frame_->site_info_->id, loc_id_);
     Forward(cmd, func, exe_callback) ;
@@ -56,10 +60,13 @@ void CoordinatorFpgaRaft::Submit(shared_ptr<Marshallable>& cmd,
   cmd_ = cmd;
   verify(cmd_->kind_ != MarshallDeputy::UNKNOWN);
   commit_callback_ = func;
+  Log_info("void CoordinatorFpgaRaft::Submit; GotoNextPhase");
   GotoNextPhase();
+  Log_info("returning void CoordinatorFpgaRaft::Submit; GotoNextPhase");
 }
 
 void CoordinatorFpgaRaft::AppendEntries() {
+  Log_info("void CoordinatorFpgaRaft::AppendEntries");
     std::lock_guard<std::recursive_mutex> lock(mtx_);
     verify(!in_append_entries);
     // verify(this->sch_->IsLeader()); TODO del it yidawu
@@ -163,16 +170,20 @@ void CoordinatorFpgaRaft::AppendEntries() {
 }
 
 void CoordinatorFpgaRaft::Commit() {
+  Log_info("void CoordinatorFpgaRaft::Commit");
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   commit_callback_();
   Log_debug("fpga-raft broadcast commit for partition: %d, slot %d",
             (int) par_id_, (int) slot_id_);
+  Log_info("inside CoordinatorFpgaRaft::Commit; calling BroadcastDecide");
   commo()->BroadcastDecide(par_id_, slot_id_, dep_id_, curr_ballot_, cmd_);
   verify(phase_ == Phase::COMMIT);
+  Log_info("inside CoordinatorFpgaRaft::Commit; calling GotoNextPhase");
   GotoNextPhase();
 }
 
 void CoordinatorFpgaRaft::LeaderLearn() {
+    Log_info("inside void CoordinatorFpgaRaft::LeaderLearn");
     std::lock_guard<std::recursive_mutex> lock(mtx_);
     commit_callback_();
     uint64_t prevCommitIndex = this->sch_->commitIndex;
@@ -186,20 +197,26 @@ void CoordinatorFpgaRaft::LeaderLearn() {
     /*     this->sch_->app_next_(*instance->log_); */
     /* } */
 
+    Log_info("inside CoordinatorFpgaRaft::LeaderLearn; calling BroadcastDecide");
     commo()->BroadcastDecide(par_id_, slot_id_, dep_id_, curr_ballot_, cmd_);
     verify(phase_ == Phase::COMMIT);
+    Log_info("inside CoordinatorFpgaRaft::LeaderLearn; calling GotoNextPhase");
     GotoNextPhase();
 }
 
 void CoordinatorFpgaRaft::GotoNextPhase() {
+  Log_info("void CoordinatorFpgaRaft::GotoNextPhase");
   int n_phase = 4;
   int current_phase = phase_ % n_phase;
   phase_++;
   switch (current_phase) {
     case Phase::INIT_END:
+      Log_info("in CoordinatorFpgaRaft::GotoNextPhase; INIT_END");
       if (IsLeader()) {
+        Log_info("in CoordinatorFpgaRaft::GotoNextPhase; I am leader, skipping Prepare phase");
         phase_++; // skip prepare phase for "leader"
         verify(phase_ % n_phase == Phase::ACCEPT);
+        Log_info("in CoordinatorFpgaRaft::GotoNextPhase; I am leader, calling AppendEntries");
         AppendEntries();
         phase_++;
         verify(phase_ % n_phase == Phase::COMMIT);
@@ -210,6 +227,7 @@ void CoordinatorFpgaRaft::GotoNextPhase() {
         phase_ = Phase::COMMIT;
       }
     case Phase::ACCEPT:
+      Log_info("in CoordinatorFpgaRaft::GotoNextPhase; ACCEPT");
       verify(phase_ % n_phase == Phase::COMMIT);
       if (committed_) {
         LeaderLearn();
@@ -220,10 +238,12 @@ void CoordinatorFpgaRaft::GotoNextPhase() {
       }
       break;
     case Phase::PREPARE:
+      Log_info("in CoordinatorFpgaRaft::GotoNextPhase; PREPARE");
       verify(phase_ % n_phase == Phase::ACCEPT);
       AppendEntries();
       break;
     case Phase::COMMIT:
+      Log_info("in CoordinatorFpgaRaft::GotoNextPhase; COMMIT");
       // do nothing.
       break;
     default:

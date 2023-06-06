@@ -42,7 +42,9 @@ class MarshallDeputy {
     CMD_TPC_PREPARE_CAROUSEL = 8,
 		CMD_BLK_PXS = 9,
     CMD_NOOP = 10,
-    CMD_TPC_BATCH = 11
+    CMD_TPC_BATCH = 11,
+    CMD_TEST = 12, // [cRPC test, to be deleted]
+    CMD_TEST_STATE = 13 // [cRPC test, to be deleted]
   };
   /**
    * This should be called by the rpc layer.
@@ -67,16 +69,22 @@ class MarshallDeputy {
 };
 
 inline Marshal& operator>>(Marshal& m, MarshallDeputy& rhs) {
+  Log_info("inside Marshal& operator>>; checkpoint 0");
   m >> rhs.kind_;
+  Log_info("inside Marshal& operator>>; checkpoint 1");
   rhs.CreateActualObjectFrom(m);
+  Log_info("inside Marshal& operator>>; checkpoint 2");
   return m;
 }
 
 inline Marshal& operator<<(Marshal& m, const MarshallDeputy& rhs) {
   verify(rhs.kind_ != MarshallDeputy::UNKNOWN);
+  Log_info("inside Marshal& operator<<; checkpoint 0");
   m << rhs.kind_;
   verify(rhs.sp_data_); // must be non-empty
+  Log_info("inside Marshal& operator<<; checkpoint 1");
   rhs.sp_data_->ToMarshal(m);
+  Log_info("inside Marshal& operator<<; checkpoint 2");
   return m;
 }
 

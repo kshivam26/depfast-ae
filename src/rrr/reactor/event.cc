@@ -92,9 +92,12 @@ void Event::Wait(uint64_t timeout) {
 }
 
 void Event::RecordPlace(const char* file, int line) {
+  Log_info("Event::RecordPlace; checkpoint 001");
   char buff[200];
   sprintf(buff, "%s:%d", file, line);
+  Log_info("Event::RecordPlace; checkpoint 002");
   wait_place_ += std::string(buff);
+  Log_info("Event::RecordPlace; checkpoint 003");
   rcd_wait_ = true;
 }
 
@@ -186,8 +189,8 @@ int DiskEvent::Write_Spec() {
 			written = fwrite(buffer, size_, count_, f);
 			fclose(f);
 		} else {
-			Log_info("file: %s", file.c_str());
-			Log_info("error is: %s", strerror(errno)); 
+			// Log_info("file: %s", file.c_str());
+			// Log_info("error is: %s", strerror(errno)); 
 		}
 		return written;
 	}

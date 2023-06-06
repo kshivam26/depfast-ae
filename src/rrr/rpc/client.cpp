@@ -13,6 +13,8 @@
 #include "client.hpp"
 #include "utils.hpp"
 
+#include <ctime>
+
 using namespace std;
 
 namespace rrr {
@@ -485,9 +487,13 @@ int Client::poll_mode() {
   return mode;
 }
 
+// begins a request by setting up connection to the server?
 Future* Client::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) {
   //auto start = chrono::steady_clock::now();
-	
+  time_t ttime;
+  ttime = time(0);
+  // std::cout << "The current local date and time is: " << ctime(&ttime) << std::endl; 
+	// printf("inside client::begin_request\n");
   out_l_.lock();
 	
   if (status_ != CONNECTED) {
@@ -529,6 +535,9 @@ Future* Client::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) {
   //Log_info("The Time for begin_request is: %d", duration);
   //Log_info("EXITING begin_request");
   // one ref is already in pending_fu_
+  ttime = time(0);
+  // std::cout << "The current local date and time is: " << ctime(&ttime) << std::endl;
+  // printf("returning from client::begin_request\n");
   return (Future*) fu->ref_copy();
 }
 

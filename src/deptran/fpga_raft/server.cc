@@ -28,6 +28,7 @@ FpgaRaftServer::FpgaRaftServer(Frame * frame) {
 void FpgaRaftServer::Setup() {
 	if (heartbeat_ && !FpgaRaftServer::looping && IsLeader()) {
 		Log_info("starting loop at server");
+    // printf("starting loop at server");
 		FpgaRaftServer::looping = true;
 		memset(&loop_th_, 0, sizeof(loop_th_));
 		hb_loop_args_type* hb_loop_args = new hb_loop_args_type();
@@ -40,7 +41,7 @@ void FpgaRaftServer::Setup() {
 
 void* FpgaRaftServer::HeartbeatLoop(void* args) {
 	hb_loop_args_type* hb_loop_args = (hb_loop_args_type*) args;
-
+  Log_info("FpgaRaftServer::HeartbeatLoop called");
 	FpgaRaftServer::looping = true;
 	while(FpgaRaftServer::looping) {
 		usleep(100*1000);
@@ -106,8 +107,9 @@ void FpgaRaftServer::RequestVote2FPGA() {
   }
 
   Log_debug("fpga raft server %d in request vote to fpga", loc_id );
+  Log_info("fpga raft server %d in request vote to fpga", loc_id );
 
-  uint32_t lstoff = 0  ;
+  uint32_t lstoff = 0  ; 
   slotid_t lst_idx = 0 ;
   ballot_t lst_term = 0 ;
 
@@ -123,6 +125,7 @@ void FpgaRaftServer::RequestVote2FPGA() {
   }
   
   auto sp_quorum = ((FpgaRaftCommo *)(this->commo_))->BroadcastVote2FPGA(par_id,lst_idx,lst_term,loc_id, currentTerm );
+  // printf("waiting for sp_quorum");
   sp_quorum->Wait();
   std::lock_guard<std::recursive_mutex> lock1(mtx_);
   if (sp_quorum->Yes()) {
@@ -200,6 +203,7 @@ void FpgaRaftServer::OnVote2FPGA(const slotid_t& lst_log_idx,
 
 
 bool FpgaRaftServer::RequestVote() {
+Log_info("void FpgaRaftServer::RequestVote");
   for(int i = 0; i < 1000; i++) Log_info("not calling the wrong method");
 
   // currently don't request vote if no log
@@ -286,7 +290,7 @@ void FpgaRaftServer::OnVote(const slotid_t& lst_log_idx,
                             ballot_t *reply_term,
                             bool_t *vote_granted,
                             const function<void()> &cb) {
-
+  Log_info("void FpgaRaftServer::OnVote");
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   Log_debug("fpga raft receives vote from candidate: %llx", can_id);
 
@@ -385,7 +389,7 @@ void FpgaRaftServer::StartTimer()
                                      uint64_t *followerCurrentTerm,
                                      uint64_t *followerLastLogIndex,
                                      const function<void()> &cb) {
-
+        Log_info("inside void FpgaRaftServer::OnAppendEntries");
         std::lock_guard<std::recursive_mutex> lock(mtx_);
         //StartTimer() ;
         
@@ -466,13 +470,16 @@ void FpgaRaftServer::StartTimer()
 					usleep(25*1000);
 				}*/
         cb();
+        Log_info("returning void FpgaRaftServer::OnAppendEntries");
     }
 
     void FpgaRaftServer::OnForward(shared_ptr<Marshallable> &cmd, 
                                           uint64_t *cmt_idx,
                                           const function<void()> &cb) {
+      Log_info("void FpgaRaftServer::OnForward");
         this->rep_frame_ = this->frame_ ;
         auto co = ((TxLogServer *)(this))->CreateRepCoord(0);
+        Log_info("void FpgaRaftServer::OnForward; calling coordinatorFpgaRaft submit");
         ((CoordinatorFpgaRaft*)co)->Submit(cmd);
         
         std::lock_guard<std::recursive_mutex> lock(mtx_);
@@ -490,6 +497,7 @@ void FpgaRaftServer::StartTimer()
   void FpgaRaftServer::OnCommit(const slotid_t slot_id,
                               const ballot_t ballot,
                               shared_ptr<Marshallable> &cmd) {
+    Log_info("void FpgaRaftServer::OnCommit");
     std::lock_guard<std::recursive_mutex> lock(mtx_);
 		struct timespec begin, end;
 		//clock_gettime(CLOCK_MONOTONIC, &begin);
@@ -518,10 +526,14 @@ void FpgaRaftServer::StartTimer()
     }
     min_active_slot_ = i;
 
+
+    Log_info("returning from void FpgaRaftServer::OnCommit");
+
 		/*clock_gettime(CLOCK_MONOTONIC, &end);
 		Log_info("time of decide on server: %d", (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);*/
   }
   void FpgaRaftServer::SpCommit(const uint64_t cmt_idx) {
+    Log_info("void FpgaRaftServer::SpCommit");
       verify(0) ; // TODO delete it
       std::lock_guard<std::recursive_mutex> lock(mtx_);
       Log_debug("fpga raft spcommit for index: %lx for server %d", cmt_idx, loc_id_);

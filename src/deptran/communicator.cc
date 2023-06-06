@@ -536,6 +536,7 @@ void Communicator::___LogSent(parid_t pid, txnid_t tid) {
 shared_ptr<AndEvent>
 Communicator::SendCommit(Coordinator* coo,
                               txnid_t tid) {
+Log_info("inside shared_ptr<AndEvent> Communicator::SendCommit");
 #ifdef LOG_LEVEL_AS_DEBUG
 //  ___LogSent(pid, tid);
 #endif

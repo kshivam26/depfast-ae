@@ -93,8 +93,10 @@ void server_launch_worker(vector<Config::SiteInfo>& server_sites) {
       worker.DbChecksum();
 #endif
       // start server service
+      Log_info("inside void server_launch_worker; calling worker.SetupService");
       worker.SetupService();
       Log_info("start communication for site %d", (int)worker.site_info_->id);
+      Log_info("inside void server_launch_worker; calling worker.SetupCommo");
       worker.SetupCommo();
       Log_info("site %d launched!", (int)site_info.id);
       worker.launched_ = true;
@@ -284,6 +286,7 @@ int main(int argc, char *argv[]) {
   Log_info("starting process %ld", getpid());
   setup_ulimit();
 
+  Log_info("trying to read/create configuration");
   // read configuration
   int ret = Config::CreateConfig(argc, argv);
   if (ret == SUCCESS) {
@@ -293,6 +296,7 @@ int main(int argc, char *argv[]) {
     return ret;
   }
 
+  Log_info("getting client info from config");
   auto client_infos = Config::GetConfig()->GetMyClients();
   if (client_infos.size() > 0) {
     client_setup_heartbeat(client_infos.size());
@@ -306,6 +310,7 @@ int main(int argc, char *argv[]) {
   Log_info("started to profile cpu");
 #endif // ifdef CPU_PROFILE
 
+  Log_info("getting server info from config");
   auto server_infos = Config::GetConfig()->GetMyServers();
   if (!server_infos.empty()) {
     server_launch_worker(server_infos);
@@ -316,8 +321,11 @@ int main(int argc, char *argv[]) {
 
   if (!client_infos.empty()) {
     //client_setup_heartbeat(client_infos.size());
+    Log_info("calling client_launch_workers");
     client_launch_workers(client_infos);
+    Log_info("sleeping for provided duration in Config::GetConfig()");
     sleep(Config::GetConfig()->duration_);
+    Log_info("calling wait_for_clients");
     wait_for_clients();
     failover_server_quit = true;
     Log_info("all clients have shut down.");

@@ -198,6 +198,7 @@ TxLogServer::TxLogServer() : mtx_() {
 }
 
 Coordinator *TxLogServer::CreateRepCoord(const i64& dep_id) {
+  Log_info("inside Coordinator *TxLogServer::CreateRepCoord");
   Coordinator *coord;
   static cooid_t cid = 0;
   int32_t benchmark = 0;
