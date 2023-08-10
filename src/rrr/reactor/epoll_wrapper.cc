@@ -3,6 +3,7 @@
 namespace rrr {
 
 std::vector<struct timespec> Epoll::Wait_One(int& num_ev, bool& slow) {
+	// // Log_info("*** std::vector<struct timespec> Epoll::Wait_One; checkpoint 1; tid is %d", gettid());
 	const int max_nev = 100;
 		bool found = false;
 		std::vector<struct timespec> result{};
@@ -52,7 +53,8 @@ std::vector<struct timespec> Epoll::Wait_One(int& num_ev, bool& slow) {
 		Pollable* poll = (Pollable *) evlist[i].data.ptr;
 		verify(poll != nullptr);
 		if (evlist[i].events & EPOLLIN) {
-					bool push = poll->handle_read_one();
+			// Log_info("*** std::vector<struct timespec> Epoll::Wait_One; checkpoint 2; tid is %d", gettid());
+			bool push = poll->handle_read_one();
 			if(push) pending.push_back(poll);
 		}
 		if (evlist[i].events & EPOLLOUT) {
@@ -178,6 +180,7 @@ void Epoll::Wait() {
 		verify(poll != nullptr);
 
 		if (evlist[i].events & EPOLLIN) {
+			// Log_info("$$$ some data received in Epoll::Wait()");
 			poll->handle_read();
 		}
 		if (evlist[i].events & EPOLLOUT) {

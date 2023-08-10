@@ -52,7 +52,8 @@ int Config::CreateConfig(int argc, char **argv) {
 //  std::string filename = "./config/sample.yml";
   vector<string> config_paths;
   std::string proc_name = "localhost"; // default as "localhost"
-  std::string logging_path = "./disk_log/";
+  std::string logging_path = "./disk_log/"; // uncomment this for logging
+  // std::string logging_path;
   char *end_ptr    = NULL;
 
   char *hostspath               = NULL;
@@ -67,18 +68,19 @@ int Config::CreateConfig(int argc, char **argv) {
   int server_or_client          = -1;
   int32_t tot_req_num           = 10000;
   int16_t n_concurrent          = 1;
+  uint32_t cRPC_version = 0;
 
   int c;
   optind = 1;
   string filename;
-  while ((c = getopt(argc, argv, "bc:d:f:h:i:k:p:P:r:s:S:t:H:T:n:")) != -1) {
+  while ((c = getopt(argc, argv, "bc:d:f:h:i:k:p:P:r:s:S:t:H:T:n:v:")) != -1) {
     switch (c) {
       case 'b': // heartbeat to controller
         heart_beat = true;
         break;
       case 'd': // duration
         duration = strtoul(optarg, &end_ptr, 10);
-
+        // Log_info("==== duration is: %d", duration);
         if ((end_ptr == NULL) || (*end_ptr != '\0'))
           return -4;
         break;
@@ -164,6 +166,12 @@ int Config::CreateConfig(int argc, char **argv) {
         if ((end_ptr == NULL) || (*end_ptr != '\0'))
           return -4;
         break;
+      case 'v':  // for crpc version; 0 for no_crpc, 1 for chained rpc
+        cRPC_version = strtoul(optarg, &end_ptr, 10);
+        Log_info("the cRPC version is: %d", cRPC_version);
+        if ((end_ptr == NULL) || (*end_ptr != '\0'))
+          return -4;
+        break;
       case 'n':
         n_concurrent = strtoul(optarg, &end_ptr, 10);
         if ((end_ptr == NULL) || (*end_ptr != '\0'))
@@ -208,6 +216,7 @@ int Config::CreateConfig(int argc, char **argv) {
   config_s->proc_name_ = proc_name;
   config_s->config_paths_ = config_paths;
   config_s->Load();
+  config_s->cRPC_version_ = cRPC_version;
   return SUCCESS;
 }
 
@@ -286,6 +295,7 @@ void Config::LoadYML(std::string &filename) {
   YAML::Node config = YAML::LoadFile(filename);
 
   if (config["process"]) {
+    // Log_info()
     BuildSiteProcMap(config["process"]);
   }
   if (config["site"]) {
@@ -316,7 +326,7 @@ void Config::LoadYML(std::string &filename) {
     LoadFailoverYML(config["failover"]);
   }
   if (config["n_concurrent"]) {
-    n_concurrent_ = config["n_concurrent"].as<uint16_t>();
+    n_concurrent_ = config["n_concurrent"].as<uint32_t>();
     Log_info("# of concurrent requests: %d", n_concurrent_);
   }
   if (config["n_parallel_dispatch"]) {
@@ -404,7 +414,8 @@ void Config::BuildSiteProcMap(YAML::Node process) {
   for (auto it = process.begin(); it != process.end(); it++) {
     auto site_name = it->first.as<string>();
     auto proc_name = it->second.as<string>();
-
+    // Log_info("BuildSiteProcMap site name %s", site_name.c_str());
+    // Log_info("BuildSiteProcMap proc name %s", proc_name.c_str());
     site_proc_map_[site_name] = proc_name;
   }
 }
@@ -416,7 +427,11 @@ void Config::LoadProcYML(YAML::Node config) {
     auto info = SiteByName(site_name);
 //    verify(info != nullptr);
     if (info != nullptr && proc_name != "") {
+      // Log_info("loading proc name %s", proc_name.c_str());
       info->proc_name = proc_name;
+    }
+    else{
+      Log_info("problem loading proc name");
     }
   }
 }
@@ -666,6 +681,7 @@ void Config::LoadShardingYML(YAML::Node config) {
 }
 
 void Config::LoadClientYML(YAML::Node client) {
+  
   std::string type = client["type"].as<std::string>();
   std::transform(type.begin(), type.end(), type.begin(), ::tolower);
   if (type == "open") {
@@ -900,15 +916,20 @@ Config::SitesByProcessName(string proc_name, Config::SiteInfoType type) {
   } else {
     searching = &par_clients_;
   }
-
+  // Log_info("proc name is: %s", proc_name.c_str());
+  // Log_info("the size of the searching vector is:%d ", searching->size());
   std::for_each(searching->begin(), searching->end(),
                 [proc_name, &result](SiteInfo& site) mutable {
+                  // Log_info("current site.proc_name is: %s", site.proc_name.c_str());
                   if (site.proc_name == "") {
+                    Log_info("site proc name is empty");
                     Log_fatal("cannot find proc name for site %s", site.name.c_str());
                   }
                   if (site.proc_name==proc_name) {
+                    // Log_info("one result pushed to result in SitesByProcessName");
                     result.push_back(site);
                   }
+                  // result.push_back(site);
                 });
   return result;
 }
@@ -1004,8 +1025,9 @@ bool Config::do_early_return() {
   return early_return_;
 }
 
-bool Config::do_logging() {
-  return logging_path_.empty();
+bool Config::do_logging() { 
+  // Log_info("*** in Config::do_logging(); value: %d", !logging_path_.empty());
+  return logging_path_.empty(); // uncomment/change sign for logging
 }
 
 bool Config::IsReplicated() {
@@ -1024,6 +1046,10 @@ bool Config::retry_wait() {
 
 int32_t Config::get_tot_req() {
   return tot_req_num_;
+}
+
+uint32_t Config::get_cRPC_version() {
+  return cRPC_version_;
 }
 
 }

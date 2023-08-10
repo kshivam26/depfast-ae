@@ -32,7 +32,7 @@ ClassicServiceImpl::ClassicServiceImpl(TxLogServer* sched,
 #endif
 
   if (Config::GetConfig()->do_logging()) {
-    verify(0); // TODO disable logging for now.
+    verify(0); // TODO disable logging for now. // uncomment this for logging
     auto path = Config::GetConfig()->log_path();
 //    recorder_ = new Recorder(path);
 //    poll_mgr->add(recorder_);
@@ -66,15 +66,24 @@ void ClassicServiceImpl::Dispatch(const i64& cmd_id,
       piece_count_[piece_count_key]++;
   piece_count_tid_.insert(header.tid);
 #endif
+  // Log_info("*** inside ClassicServiceImpl::Dispatch(); tid: %d", gettid());
   shared_ptr<Marshallable> sp = md.sp_data_;
 	//Log_info("CreateRunning2");
   // Coroutine::CreateRun([cmd_id, sp, output, res, coro_id, this, defer]() {
+    // Log_info("*** new request dispatched; tid: %d", gettid());
+
+    struct timespec curr_;
+    clock_gettime(CLOCK_MONOTONIC, &curr_);
+    
+    long long currentTimeMs = curr_.tv_sec * 1000LL + curr_.tv_nsec / 1000000LL;
+    Log_info("**** Current time in milliseconds since the epoch: %lld with tid:%d",currentTimeMs, gettid());
     *res = SUCCESS;
     if (!dtxn_sched()->Dispatch(cmd_id, sp, *output)) {
       *res = REJECT;
     }
     *coro_id = Coroutine::CurrentCoroutine()->id;
     defer->reply();
+    // Log_info("*** reply sent ClassicServiceImpl::Dispatch(); tid: %d", gettid());
   // }, __FILE__, cmd_id);
   // auto func = [cmd_id, sp, output, dep_id, res, coro_id, this, defer]() {
   //   *res = SUCCESS;
@@ -105,6 +114,7 @@ void ClassicServiceImpl::FailOverTrig(
     clt_cnt_.store(clt_set.size());
   }
 
+  // Log_info("***** inside ClassicServiceImpl::FailOverTrig");
   Coroutine::CreateRun([&]() {
     if (pause) {
       // TODO: yidawu need to test with multi clients in diff machines
@@ -131,11 +141,13 @@ void ClassicServiceImpl::FailOverTrig(
 
 void ClassicServiceImpl::SimpleCmd(
     const SimpleCommand& cmd, rrr::i32* res, rrr::DeferredReply* defer) {
+  // Log_info("**** creating a coroutine for new simplecmd received");
   Coroutine::CreateRun([res, defer, this]() {
     auto empty_cmd = std::make_shared<TpcEmptyCommand>();
     verify(empty_cmd->kind_ == MarshallDeputy::CMD_TPC_EMPTY);
     auto sp_m = dynamic_pointer_cast<Marshallable>(empty_cmd);
     auto sched = (SchedulerClassic*)dtxn_sched_;
+    // Log_info("ClassicServiceImpl::SimpleCmd; cp1");
     sched->CreateRepCoord(0)->Submit(sp_m);
     empty_cmd->Wait();
     *res = SUCCESS;
@@ -206,6 +218,7 @@ void ClassicServiceImpl::Commit(const rrr::i64& tid,
                                 uint64_t* coro_id,
 																Profiling* profile,
                                 rrr::DeferredReply* defer) {
+  // Log_info("**** inside ClassicServiceImpl::Commit; tid: %d", gettid());
   //std::lock_guard<std::mutex> guard(mtx_);
   const auto& func = [tid, res, slow, coro_id, dep_id, profile, defer, this]() {
     auto sched = (SchedulerClassic*) dtxn_sched_;
@@ -231,7 +244,7 @@ void ClassicServiceImpl::Abort(const rrr::i64& tid,
                                uint64_t* coro_id,
 															 Profiling* profile,
                                rrr::DeferredReply* defer) {
-
+  // Log_info("**** inside ClassicServiceImpl::Abort; tid: %d", gettid());
   Log_debug("get abort_txn: tid: %ld", tid);
   //std::lock_guard<std::mutex> guard(mtx_);
   const auto& func = [tid, res, slow, coro_id, dep_id, profile, defer, this]() {
@@ -452,6 +465,7 @@ void ClassicServiceImpl::JanusCommit(const cmdid_t& cmd_id,
                                      int32_t* res,
                                      TxnOutput* output,
                                      DeferredReply* defer) {
+  // Log_info("*** inside ClassicServiceImpl::JanusCommit; tid: %d", gettid());
 //  std::lock_guard<std::mutex> guard(mtx_);
   verify(0);
   auto sp_graph = dynamic_pointer_cast<RccGraph>(graph.sp_data_);
@@ -467,6 +481,7 @@ void ClassicServiceImpl::RccCommit(const cmdid_t& cmd_id,
                                    int32_t* res,
                                    TxnOutput* output,
                                    DeferredReply* defer) {
+   // Log_info("*** inside ClassicServiceImpl::JanusCommit; tid: %d", gettid());
 //  std::lock_guard<std::mutex> guard(mtx_);
   auto p_sched = (RccServer*) dtxn_sched_;
   *res = p_sched->OnCommit(cmd_id, rank, need_validation, parents, output);
@@ -479,6 +494,7 @@ void ClassicServiceImpl::JanusCommitWoGraph(const cmdid_t& cmd_id,
                                             int32_t* res,
                                             TxnOutput* output,
                                             DeferredReply* defer) {
+   // Log_info("*** inside ClassicServiceImpl::JanusCommitWoGraph; tid: %d", gettid());
 //  std::lock_guard<std::mutex> guard(mtx_);
   verify(0);
   auto sched = (SchedulerJanus*) dtxn_sched_;
@@ -593,6 +609,7 @@ void ClassicServiceImpl::CommitFebruus(const txid_t& tx_id,
                                        const uint64_t& timestamp,
                                        int32_t* res,
                                        DeferredReply* defer) {
+   // Log_info("*** inside ClassicServiceImpl::CommitFebruus; tid: %d", gettid());
   SchedulerFebruus* sched = (SchedulerFebruus*) dtxn_sched_;
   *res = sched->OnCommit(tx_id, timestamp);
   defer->reply();

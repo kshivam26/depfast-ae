@@ -1,0 +1,90 @@
+I [../src/deptran/s_main.cc:136] 2023-07-11 23:59:33.409 | PWD : 
+I [../src/deptran/s_main.cc:284] 2023-07-11 23:59:33.410 | starting process 2927904
+I [../src/deptran/s_main.cc:279] 2023-07-11 23:59:33.410 | ulimit -n is 1024
+I [../src/deptran/config.cc:285] 2023-07-11 23:59:33.411 | LoadYML: config/none_fpga_raft.yml
+I [../src/deptran/config.cc:285] 2023-07-11 23:59:33.412 | LoadYML: config/1c1s2r.yml
+I [../src/deptran/config.cc:404] 2023-07-11 23:59:33.413 | BuildSiteProcMap
+I [../src/deptran/config.cc:408] 2023-07-11 23:59:33.413 | BuildSiteProcMap site name s101
+I [../src/deptran/config.cc:409] 2023-07-11 23:59:33.413 | BuildSiteProcMap proc name localhost
+I [../src/deptran/config.cc:408] 2023-07-11 23:59:33.413 | BuildSiteProcMap site name s201
+I [../src/deptran/config.cc:409] 2023-07-11 23:59:33.413 | BuildSiteProcMap proc name localhost
+I [../src/deptran/config.cc:408] 2023-07-11 23:59:33.413 | BuildSiteProcMap site name c101
+I [../src/deptran/config.cc:409] 2023-07-11 23:59:33.413 | BuildSiteProcMap proc name localhost
+I [../src/deptran/config.cc:421] 2023-07-11 23:59:33.413 | loading proc name localhost
+I [../src/deptran/config.cc:421] 2023-07-11 23:59:33.413 | loading proc name localhost
+I [../src/deptran/config.cc:421] 2023-07-11 23:59:33.413 | loading proc name localhost
+I [../src/deptran/config.cc:285] 2023-07-11 23:59:33.413 | LoadYML: config/rw.yml
+I [../src/deptran/config.cc:661] 2023-07-11 23:59:33.417 | group size: 1
+I [../src/deptran/config.cc:285] 2023-07-11 23:59:33.418 | LoadYML: config/concurrent_20.yml
+I [../src/deptran/config.cc:321] 2023-07-11 23:59:33.419 | # of concurrent requests: 20
+I [../src/deptran/s_main.cc:290] 2023-07-11 23:59:33.419 | Read config finish
+I [../src/deptran/config.cc:909] 2023-07-11 23:59:33.419 | proc name is: localhost
+I [../src/deptran/config.cc:910] 2023-07-11 23:59:33.419 | the size of the searching vector is:1 
+I [../src/deptran/config.cc:913] 2023-07-11 23:59:33.419 | current site.proc_name is: localhost
+I [../src/deptran/config.cc:919] 2023-07-11 23:59:33.419 | one result pushed to result in SitesByProcessName
+I [../src/deptran/s_main.cc:30] 2023-07-11 23:59:33.419 | client_setup_heartbeat
+I [../src/deptran/config.cc:909] 2023-07-11 23:59:33.419 | proc name is: localhost
+I [../src/deptran/config.cc:910] 2023-07-11 23:59:33.419 | the size of the searching vector is:2 
+I [../src/deptran/config.cc:913] 2023-07-11 23:59:33.419 | current site.proc_name is: localhost
+I [../src/deptran/config.cc:919] 2023-07-11 23:59:33.419 | one result pushed to result in SitesByProcessName
+I [../src/deptran/config.cc:913] 2023-07-11 23:59:33.419 | current site.proc_name is: localhost
+I [../src/deptran/config.cc:919] 2023-07-11 23:59:33.419 | one result pushed to result in SitesByProcessName
+I [../src/deptran/s_main.cc:75] 2023-07-11 23:59:33.419 | server enabled, number of sites: 2
+I [../src/deptran/s_main.cc:81] 2023-07-11 23:59:33.420 | launching site: 0, bind address 0.0.0.0:8000
+I [../src/deptran/s_main.cc:81] 2023-07-11 23:59:33.420 | launching site: 1, bind address 0.0.0.0:8001
+I [../src/deptran/server_worker.cc:55] 2023-07-11 23:59:33.422 | Is it replicated: 1
+I [../src/deptran/server_worker.cc:55] 2023-07-11 23:59:33.422 | Is it replicated: 1
+I [../src/deptran/server_worker.cc:82] 2023-07-11 23:59:33.425 | start data population for site 1
+I [../src/deptran/server_worker.cc:82] 2023-07-11 23:59:33.425 | start data population for site 0
+I [../src/deptran/server_worker.cc:109] 2023-07-11 23:59:34.938 | data populated for site: 1, partition: 0
+I [../src/deptran/s_main.cc:91] 2023-07-11 23:59:34.938 | table popped for site 1
+I [../src/deptran/server_worker.cc:124] 2023-07-11 23:59:34.938 | enter SetupService for s201 @ 0.0.0.0:8001
+I [../src/rrr/rpc/server.cpp:575] 2023-07-11 23:59:34.939 | bind address is: 0.0.0.0:8001
+I [../src/rrr/reactor/reactor.cc:385] 2023-07-11 23:59:34.939 | starting disk thread
+I [../src/rrr/rpc/server.cpp:570] 2023-07-11 23:59:34.939 | rrr::Server: started on 0.0.0.0:8001
+I [../src/deptran/server_worker.cc:178] 2023-07-11 23:59:34.940 | Server s201 ready at 0.0.0.0:8001
+I [../src/deptran/s_main.cc:97] 2023-07-11 23:59:34.940 | start communication for site 1
+I [../src/rrr/reactor/reactor.cc:389] 2023-07-11 23:59:34.940 | starting poll thread
+I [../src/deptran/communicator.cc:25] 2023-07-11 23:59:34.940 | size of partitions: 1
+I [../src/deptran/server_worker.cc:109] 2023-07-11 23:59:34.988 | data populated for site: 0, partition: 0
+I [../src/deptran/s_main.cc:91] 2023-07-11 23:59:34.988 | table popped for site 0
+I [../src/deptran/server_worker.cc:124] 2023-07-11 23:59:34.988 | enter SetupService for s101 @ 0.0.0.0:8000
+I [../src/rrr/rpc/server.cpp:575] 2023-07-11 23:59:34.988 | bind address is: 0.0.0.0:8000
+I [../src/rrr/rpc/server.cpp:570] 2023-07-11 23:59:34.988 | rrr::Server: started on 0.0.0.0:8000
+I [../src/deptran/server_worker.cc:178] 2023-07-11 23:59:34.988 | Server s101 ready at 0.0.0.0:8000
+I [../src/deptran/s_main.cc:97] 2023-07-11 23:59:34.989 | start communication for site 0
+I [../src/deptran/communicator.cc:25] 2023-07-11 23:59:34.989 | size of partitions: 1
+I [../src/rrr/reactor/reactor.cc:385] 2023-07-11 23:59:34.988 | starting disk thread
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:34.989 | ==== connect to site: 127.0.0.1:8000 success!
+I [../src/rrr/reactor/reactor.cc:389] 2023-07-11 23:59:34.989 | starting poll thread
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:34.990 | ==== connect to site: 127.0.0.1:8001 success!
+I [../src/deptran/communicator.cc:25] 2023-07-11 23:59:34.990 | size of partitions: 1
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:34.990 | ==== connect to site: 127.0.0.1:8000 success!
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:34.990 | ==== connect to site: 127.0.0.1:8001 success!
+I [../src/deptran/s_main.cc:99] 2023-07-11 23:59:34.990 | site 0 launched!
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:35.940 | ==== connect to site: 127.0.0.1:8000 success!
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:35.941 | ==== connect to site: 127.0.0.1:8001 success!
+I [../src/deptran/communicator.cc:25] 2023-07-11 23:59:35.941 | size of partitions: 1
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:35.942 | ==== connect to site: 127.0.0.1:8000 success!
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:35.942 | ==== connect to site: 127.0.0.1:8001 success!
+I [../src/deptran/s_main.cc:99] 2023-07-11 23:59:35.943 | site 1 launched!
+I [../src/deptran/s_main.cc:110] 2023-07-11 23:59:36.420 | waiting for server setup threads.
+I [../src/deptran/s_main.cc:114] 2023-07-11 23:59:36.420 | done waiting for server setup threads.
+I [../src/deptran/s_main.cc:121] 2023-07-11 23:59:36.420 | server workers' communicators setup
+I [../src/deptran/s_main.cc:54] 2023-07-11 23:59:36.420 | client enabled, number of sites: 1
+I [../src/deptran/communicator.cc:25] 2023-07-11 23:59:36.421 | size of partitions: 1
+I [../src/rrr/reactor/reactor.cc:389] 2023-07-11 23:59:36.421 | starting poll thread
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:36.422 | ==== connect to site: 127.0.0.1:8000 success!
+I [../src/deptran/communicator.cc:194] 2023-07-11 23:59:36.422 | ==== connect to site: 127.0.0.1:8001 success!
+I [../src/deptran/communicator.cc:74] 2023-07-11 23:59:36.423 | Done waiting to connect to client leaders.
+I [../src/deptran/client_worker.cc:184] 2023-07-11 23:59:36.424 | 1) the pid for client is: 2927904
+I [../src/deptran/client_worker.cc:185] 2023-07-11 23:59:36.424 | 2) the thread id for client is: 2927952
+I [../src/deptran/client_worker.cc:362] 2023-07-11 23:59:36.424 | wait for finish... n_ceased_cleints: 0,  n_issued: 0, n_done: 0, n_created_coordinator: 0
+I [../src/deptran/client_worker.cc:348] 2023-07-11 23:59:36.425 | wait for all virtual clients to stop issuing new requests.
+I [../src/deptran/fpga_raft/commo.cc:289] 2023-07-11 23:59:36.447 | tid of leader is 2927939
+I [../src/deptran/client_worker.cc:351] 2023-07-11 23:59:37.420 | wait for all outstanding requests to finish.
+I [../src/deptran/s_main.cc:140] 2023-07-11 23:59:38.423 | wait_for_clients: wait for client threads to exit.
+I [../src/deptran/client_worker.cc:375] 2023-07-11 23:59:41.425 | Finish:
+Total: 1, Commit: 1, Attempts: 0, Running for 2, Throughput: 0.50
+
+I [../src/deptran/s_main.cc:323] 2023-07-11 23:59:41.425 | all clients have shut down.

@@ -1,8 +1,11 @@
 
 #include "service.h"
 #include "server.h"
+#include <thread>
+# include <gperftools/profiler.h>
 
 namespace janus {
+thread_local bool hasPrinted = false;
 
 FpgaRaftServiceImpl::FpgaRaftServiceImpl(TxLogServer *sched)
     : sched_((FpgaRaftServer*)sched) {
@@ -23,9 +26,11 @@ void FpgaRaftServiceImpl::Heartbeat(const uint64_t& leaderPrevLogIndex,
 void FpgaRaftServiceImpl::Forward(const MarshallDeputy& cmd,
                                     uint64_t* cmt_idx, 
                                     rrr::DeferredReply* defer) {
+    Log_info("inside void FpgaRaftServiceImpl::Forward");
    verify(sched_ != nullptr);
    sched_->OnForward(const_cast<MarshallDeputy&>(cmd).sp_data_, cmt_idx,
                       std::bind(&rrr::DeferredReply::reply, defer));
+    Log_info("returning from void FpgaRaftServiceImpl::Forward");
 
 }
 
@@ -86,7 +91,12 @@ void FpgaRaftServiceImpl::AppendEntries(const uint64_t& slot,
                                         uint64_t *followerLastLogIndex,
                                         rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
+  if (!hasPrinted) {
+      Log_info("tid of non-leader is %d", gettid());
+      hasPrinted = true;  // Update the static variable
+  }
 	//Log_info("CreateRunning2");
+  // Log_info("==== inside FpgaRaftServiceImpl::AppendEntries");
 
 
 	/*if (ballot == 1000000000 || leaderPrevLogIndex + 1 < sched_->lastLogIndex) {
@@ -115,9 +125,11 @@ void FpgaRaftServiceImpl::AppendEntries(const uint64_t& slot,
                             followerAppendOK,
                             followerCurrentTerm,
                             followerLastLogIndex,
-                            std::bind(&rrr::DeferredReply::reply, defer));
+                            std::bind(&rrr::DeferredReply::reply, defer));  // #profile - 3.42%
 
   });
+
+  // Log_info("==== returning from FpgaRaftServiceImpl::AppendEntries");
 	
 }
 
@@ -126,6 +138,7 @@ void FpgaRaftServiceImpl::Decide(const uint64_t& slot,
 																	 const DepId& dep_id,
                                    const MarshallDeputy& md_cmd,
                                    rrr::DeferredReply* defer) {
+  // Log_info("**** inside FpgaRaftServiceImpl::Decide; tid: %d", gettid());
   verify(sched_ != nullptr);
 	//Log_info("Deciding with string: %s and id: %d", dep_id.str.c_str(), dep_id.id);
   Coroutine::CreateRun([&] () {
@@ -136,5 +149,131 @@ void FpgaRaftServiceImpl::Decide(const uint64_t& slot,
   });
 }
 
+void FpgaRaftServiceImpl::CrpcAppendEntries(const uint64_t& id, 
+                        const uint64_t& slot, 
+                        const ballot_t& ballot, 
+                        const uint64_t& leaderCurrentTerm, 
+                        const uint64_t& leaderPrevLogIndex, 
+                        const uint64_t& leaderPrevLogTerm, 
+                        const uint64_t& leaderCommitIndex, 
+                        const DepId& dep_id, 
+                        const MarshallDeputy& cmd, 
+                        const std::vector<uint16_t>& addrChain, 
+                        const std::vector<AppendEntriesResult>& state, 
+                        rrr::DeferredReply* defer){
+// just create a appendEntriesCommand. no casting required
+// TODO: make Result as a base class and let AppendEntriesResult inherit it
+  // Log_info("inside CrpcAppendEntries; checkpoint 0 @ %d", gettid());
+  // const AppendEntriesCommand ae_cmd = AppendEntriesCommand (slot, 
+  //                                     ballot, 
+  //                                     leaderCurrentTerm, 
+  //                                     leaderPrevLogIndex, 
+  //                                     leaderPrevLogTerm, 
+  //                                     leaderCommitIndex, 
+  //                                     dep_id, 
+  //                                     cmd);
+
+  verify(sched_ != nullptr);
+  // Log_info("*** inside FpgaRaftServiceImpl::CrpcAppendEntries; tid: %d", gettid());
+  if (!hasPrinted) {
+      Log_info("tid of non-leader is %d", gettid());
+      hasPrinted = true;  // Update the static variable
+  }
+
+  // Coroutine::CreateRun([&] () {
+  //     sched_->OnCRPC2(id,
+  //                   ae_cmd,
+  //                   addrChain,
+  //                   state); // #profile (crpc2) - 4.96%
+  //     defer->reply();
+  // });
+
+  // Log_info("*** inside FpgaRaftServiceImpl::CrpcAppendEntries; cp 2 tid: %d", gettid());
+  Coroutine::CreateRun([&] () {
+      sched_->OnCRPC3(id,
+                    slot, 
+                    ballot, 
+                    leaderCurrentTerm, 
+                    leaderPrevLogIndex, 
+                    leaderPrevLogTerm, 
+                    leaderCommitIndex, 
+                    dep_id, 
+                    cmd,
+                    addrChain,
+                    state);
+      // Log_info("*** inside FpgaRaftServiceImpl::CrpcAppendEntries; cp 3 tid: %d", gettid());
+      defer->reply();
+      // Log_info("*** inside FpgaRaftServiceImpl::CrpcAppendEntries; cp 4 tid: %d", gettid());
+  });
+
+  // Log_info("*** returning from FpgaRaftServiceImpl::CrpcAppendEntries; tid: %d", gettid());
+}
+
+void FpgaRaftServiceImpl::CrpcAppendEntries3(const uint64_t& id, 
+                          const uint64_t& slot, 
+                          const ballot_t& ballot, 
+                          const uint64_t& leaderCurrentTerm, 
+                          const uint64_t& leaderPrevLogIndex, 
+                          const uint64_t& leaderPrevLogTerm, 
+                          const uint64_t& leaderCommitIndex, 
+                          const DepId& dep_id, 
+                          const MarshallDeputy& cmd, 
+                          const std::vector<uint16_t>& addrChain, 
+                          std::vector<AppendEntriesResult>* state, 
+                          rrr::DeferredReply* defer) {
+  // Log_info("$$$ inside FpgaRaftServiceImpl::CrpcAppendEntries3, calling sched_->OnCRPC_no_chain; tid is %d", gettid());
+  verify(sched_ != nullptr);
+  if (!hasPrinted) {
+      Log_info("tid of non-leader is %d", gettid());
+      hasPrinted = true;  // Update the static variable
+  }
+
+  Coroutine::CreateRun([&] () {
+      sched_->OnCRPC_no_chain(id,
+                    slot, 
+                    ballot, 
+                    leaderCurrentTerm, 
+                    leaderPrevLogIndex, 
+                    leaderPrevLogTerm, 
+                    leaderCommitIndex, 
+                    dep_id, 
+                    cmd,
+                    addrChain,
+                    state, std::bind(&rrr::DeferredReply::reply, defer));
+      // Log_info("$$$ inside FpgaRaftServiceImpl::CrpcAppendEntries3, returned from calling sched_->OnCRPC_no_chain; tid is %d", gettid());
+      // defer->reply();
+  });
+
+}
+
+void FpgaRaftServiceImpl::cRPC(const uint64_t& id,
+                              const MarshallDeputy& cmd, 
+                              const std::vector<uint16_t>& addrChain, 
+                              const MarshallDeputy& state, 
+                              rrr::DeferredReply* defer) {
+  Log_info("==== inside void FpgaRaftServiceImpl::cRPC");
+
+  verify(sched_ != nullptr);  // #profile - 0.9%
+
+  // static bool hasPrinted = false;  // Static variable to track if it has printed
+
+  if (!hasPrinted) {
+      Log_info("tid of non-leader is %d", gettid());
+      hasPrinted = true;  // Update the static variable
+  }
+  // ProfilerStart("P1.prof");
+  Coroutine::CreateRun([&] () {
+      // defer->reply();
+      // Log_info("==== calling first onCRPC");
+        
+      sched_->OnCRPC(id,
+                    cmd,
+                    addrChain,
+                    state); // #profile - 4.28%; decide has like 7%
+      // Log_info("==== now will do a defer->reply");
+      defer->reply();
+      });  // #profile - 1.17%
+  // ProfilerStop();
+}
 
 } // namespace janus;

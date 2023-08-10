@@ -4,6 +4,7 @@
 #include "../constants.h"
 #include "../scheduler.h"
 #include "../classic/tpc_command.h"
+#include "append_entries_command.h"
 
 namespace janus {
 class Command;
@@ -53,7 +54,7 @@ class FpgaRaftServer : public TxLogServer {
   bool in_applying_logs_ = false ;
   bool failover_{false} ;
   atomic<int64_t> counter_{0};
-  const char *filename = "/db/data.txt";
+  const char *filename = "/dev/shm/db/data.txt";
 
 	static bool looping;
 	bool heartbeat_ = false;
@@ -193,7 +194,7 @@ class FpgaRaftServer : public TxLogServer {
 			struct KeyValue key_values[kv_vector.size()];
 			std::copy(kv_vector.begin(), kv_vector.end(), key_values);
 
-			auto de = IO::write(filename, key_values, sizeof(struct KeyValue), kv_vector.size());
+			auto de = IO::write(filename, key_values, sizeof(struct KeyValue), kv_vector.size()); // ***uncomment, testing no IO
 			
 			struct timespec begin, end;
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
@@ -203,10 +204,10 @@ class FpgaRaftServer : public TxLogServer {
     } else {
 			int value = -1;
 			int value_;
-			// auto de = IO::write(filename, &value, sizeof(int), 1);
+			auto de = IO::write(filename, &value, sizeof(int), 1); // ***uncomment
 			struct timespec begin, end;
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
-      // de->Wait();
+      de->Wait();
 			//clock_gettime(CLOCK_MONOTONIC, &end);
 			//Log_info("Time of Write: %d", end.tv_nsec - begin.tv_nsec);
     }
@@ -279,6 +280,42 @@ class FpgaRaftServer : public TxLogServer {
   void OnForward(shared_ptr<Marshallable> &cmd, 
                           uint64_t *cmt_idx,
                           const function<void()> &cb) ;
+
+  void OnCRPC(const uint64_t& id,
+              const MarshallDeputy& cmd, 
+              const std::vector<uint16_t>& addrChain, 
+              const MarshallDeputy& state);
+
+  // template <typename T>
+  void OnCRPC2(const uint64_t& id,
+              const AppendEntriesCommand& cmd, 
+              const std::vector<uint16_t>& addrChain, 
+              const std::vector<AppendEntriesResult>& state);
+
+  void OnCRPC3(const uint64_t& id,
+              const slotid_t slot_id,
+              const ballot_t ballot,
+              const uint64_t leaderCurrentTerm,
+              const uint64_t leaderPrevLogIndex,
+              const uint64_t leaderPrevLogTerm,
+              const uint64_t leaderCommitIndex,
+							const struct DepId dep_id,
+              const MarshallDeputy& cmd,
+              const std::vector<uint16_t>& addrChain, 
+              const std::vector<AppendEntriesResult>& state);
+
+  void OnCRPC_no_chain(const uint64_t& id,
+              const slotid_t slot_id,
+              const ballot_t ballot,
+              const uint64_t leaderCurrentTerm,
+              const uint64_t leaderPrevLogIndex,
+              const uint64_t leaderPrevLogTerm,
+              const uint64_t leaderCommitIndex,
+							const struct DepId dep_id,
+              const MarshallDeputy& cmd,
+              const std::vector<uint16_t>& addrChain, 
+              std::vector<AppendEntriesResult>* state,
+              const function<void()> &cb);
 
   void SpCommit(const uint64_t cmt_idx) ;
 

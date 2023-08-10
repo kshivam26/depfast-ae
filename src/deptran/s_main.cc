@@ -56,6 +56,7 @@ void client_launch_workers(vector<Config::SiteInfo> &client_sites) {
 
   failover_triggers = new bool[client_sites.size()]() ;
   for (uint32_t client_id = 0; client_id < client_sites.size(); client_id++) {
+    // Log_info("***inside client_workers spawning; current iteration: %d", client_id);
     ClientWorker* worker = new ClientWorker(client_id,
                                             client_sites[client_id],
                                             Config::GetConfig(),
@@ -64,8 +65,10 @@ void client_launch_workers(vector<Config::SiteInfo> &client_sites) {
                                             &failover_server_quit,
                                             &failover_server_idx);
     workers.push_back(worker);
+    // Log_info("***current workers size: %d", workers.size());
     client_threads_g.push_back(std::thread(&ClientWorker::Work, worker));
     client_workers_g.push_back(std::unique_ptr<ClientWorker>(worker));
+    // Log_info("***current client_workers_g size: %d", client_workers_g.size());
   }
 
 }
@@ -101,8 +104,10 @@ void server_launch_worker(vector<Config::SiteInfo>& server_sites) {
     }));
   }
 
+  // Log_info("***** server_launch_worker; cp 1");
   for (auto& worker : svr_workers_g) {
     while (!worker.launched_) {
+      // Log_info("***** server_launch_worker; cp 2");
       sleep(1);
     }
   }
@@ -318,6 +323,7 @@ int main(int argc, char *argv[]) {
     //client_setup_heartbeat(client_infos.size());
     client_launch_workers(client_infos);
     sleep(Config::GetConfig()->duration_);
+    // Log_info("***main checkpoint 2");
     wait_for_clients();
     failover_server_quit = true;
     Log_info("all clients have shut down.");

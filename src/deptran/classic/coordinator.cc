@@ -49,6 +49,7 @@ void CoordinatorClassic::ForwardTxnRequest(TxRequest& req) {
 }
 
 void CoordinatorClassic::ForwardTxRequestAck(const TxReply& txn_reply) {
+  // Log_info("***** inside CoordinatorClassic::ForwardTxRequestAck tid:%d", gettid());
   Log_info("%s: %d", __FUNCTION__, txn_reply.res_);
   committed_ = (txn_reply.res_ == REJECT) ? false : true;
   aborted_ = !committed_;
@@ -57,6 +58,7 @@ void CoordinatorClassic::ForwardTxRequestAck(const TxReply& txn_reply) {
 }
 
 void CoordinatorClassic::DoTxAsync(TxRequest& req) {
+  // Log_info("***** inside CoordinatorClassic::DoTxAsync tid:%d", gettid());
   std::lock_guard<std::recursive_mutex> lock(this->mtx_);
   TxData* cmd = frame_->CreateTxnCommand(req, txn_reg_);
   verify(txn_reg_ != nullptr);
@@ -74,6 +76,7 @@ void CoordinatorClassic::DoTxAsync(TxRequest& req) {
   bool not_forwarding = forward_status_ != PROCESS_FORWARD_REQUEST;
 
   if (ccsi_ && not_forwarding) {
+    // Log_info("*** inside CoordinatorClassic::DoTxAsync->ccsi_");
     ccsi_->txn_start_one(thread_id_, cmd->type_);
   }
   if (config->forwarding_enabled_ && forward_status_ == FORWARD_TO_LEADER) {
@@ -84,13 +87,15 @@ void CoordinatorClassic::DoTxAsync(TxRequest& req) {
     ForwardTxnRequest(req);
   } else {
     Log_debug("start txn!!! : %d", forward_status_);
+    // Log_info("*** start txn!!! : %d", forward_status_);
     Coroutine::CreateRun([this]() { GotoNextPhase(); }, __FILE__, __LINE__);
   }
 }
 
 
 void CoordinatorClassic::GotoNextPhase() {
-  //Log_info("We're moving along: %d", phase_ % 4);
+  // Log_info("*** inside CoordinatorClassic::GotoNextPhase");
+  // // Log_info("*** We're moving along: %d", phase_ % 4);
   int n_phase = 4;
   int current_phase = phase_ % n_phase;
   phase_++;
@@ -99,6 +104,7 @@ void CoordinatorClassic::GotoNextPhase() {
   //Log_info("aborted and committed: %d, %d", aborted_, committed_);
   switch (current_phase) {
     case Phase::INIT_END:
+      // Log_info("*** inside CoordinatorClassic::GotoNextPhase->INIT_END");
 			if (n_retry_ > 0) Log_info("dispatching after restart");
       //Log_info("Dispatching for some reason: %x, %d", this, phase_);
       verify(phase_ % n_phase == Phase::DISPATCH);
@@ -121,7 +127,7 @@ void CoordinatorClassic::GotoNextPhase() {
       break;
       //break;
     case Phase::DISPATCH:
-      //Log_info("Preparing for some reason: %x, %d", this, phase_);
+      Log_info("Preparing for some reason: %x, %d", this, phase_);
       verify(phase_ % n_phase == Phase::PREPARE);
       verify(!committed_);
       if (!aborted_) {
@@ -135,7 +141,7 @@ void CoordinatorClassic::GotoNextPhase() {
       }
       //break;
     case Phase::PREPARE:
-      //Log_info("Committing for some reason: %x, %d", this, phase_);
+      Log_info("Committing for some reason: %x, %d", this, phase_);
       verify(phase_ % n_phase == Phase::COMMIT);
       phase_++;
       Commit();
@@ -213,7 +219,9 @@ void CoordinatorClassic::DispatchAsync() {
   n_pd = 100;
   auto cmds_by_par = txn->GetReadyPiecesData(n_pd); // TODO setting n_pd larger than 1 will cause 2pl to wait forever
   Log_debug("Dispatch for tx_id: %" PRIx64, txn->root_id_);
+  // Log_info("*** CoordinatorClassic::DispatchAsync(), checkpoint 0");
   for (auto& pair: cmds_by_par) {
+    // Log_info("*** CoordinatorClassic::DispatchAsync(), checkpoint 1");
     const parid_t& par_id = pair.first;
     auto& cmds = pair.second;
     n_dispatch_ += cmds.size();

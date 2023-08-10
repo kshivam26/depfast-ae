@@ -4,6 +4,7 @@ import random
 import re
 sys.path += os.path.abspath(os.path.join(os.path.split(__file__)[0], "../../pylib")),
 from simplerpcgen.lang_cpp import emit_rpc_source_cpp
+from simplerpcgen.lang_cpp import emit_crpc_commands
 from simplerpcgen.lang_python import emit_rpc_source_python
 
 def error(msg, ctx):
@@ -285,6 +286,7 @@ def generate_rpc_table(rpc_source):
     return rpc_table
 
 def rpcgen(rpc_fpath, languages):
+    print("*** inside rpcgen, languages are: ", languages)
     with open(rpc_fpath) as f:
         rpc_src = f.read()
 
@@ -305,6 +307,7 @@ def rpcgen(rpc_fpath, languages):
         src = '\n'.join(rpc_src_lines[:first])
         cpp_footer = '\n'.join(rpc_src_lines[first + 1:])
     else:
+        print("*** rpcgen, checkpoint 0")
         src = '\n'.join(rpc_src_lines)
 
     rpc_source = parse("rpc_source", src)
@@ -313,6 +316,7 @@ def rpcgen(rpc_fpath, languages):
     if "cpp" in languages:
         fpath = os.path.splitext(rpc_fpath)[0] + ".h"
         emit_rpc_source_cpp(rpc_source, rpc_table, fpath, cpp_header, cpp_footer)
+        # emit_crpc_commands(rpc_source, "src/deptran/") ## uncomment to generate cRPC commands for onboarding functions
 
     if "python" in languages:
         fpath = os.path.splitext(rpc_fpath)[0] + ".py"

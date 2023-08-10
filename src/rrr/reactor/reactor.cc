@@ -238,6 +238,7 @@ void Reactor::DiskLoop(){
 	for (int i = 0; i < pending_disk_events_.size(); i++) {
 		total_written += pending_disk_events_[i]->Handle();
 		if (pending_disk_events_[i]->sync) {
+      // Log_info("*** inside Reactor::diskLoop; file: %s", pending_disk_events_[i]->file.c_str());
 			auto it = sync_set.find(pending_disk_events_[i]->file);
 			if (it == sync_set.end()) {
 				sync_set.insert(pending_disk_events_[i]->file);
@@ -365,6 +366,7 @@ class PollMgr::PollThread {
   bool stop_flag_;
   bool pause_flag_;
   bool need_disk_ = false;
+  bool printed = false;
 
   static void* start_poll_loop(void* arg) {
     PollThread* thiz = (PollThread*) arg;
@@ -383,10 +385,12 @@ class PollMgr::PollThread {
     pthread_t finalize_th;
     if (thiz->need_disk_) {
       Log_info("starting disk thread");
+      // Log_info("***starting disk thread; tid: %d", gettid());
       Pthread_create(&disk_th, nullptr, PollMgr::PollThread::start_disk_loop, args);
     }
     
 		Log_info("starting poll thread");
+    // Log_info("From the function, the thread id = %d", gettid());
     thiz->poll_loop();
     delete args;
 		delete args2;
@@ -409,6 +413,7 @@ class PollMgr::PollThread {
   }
 
   static void* start_disk_loop(void* arg){
+    // Log_info("starting disk loop; tid:%d", gettid());
     struct thread_params* args = (struct thread_params*) arg;
 
     PollThread* thiz =  args->thread;
@@ -426,6 +431,10 @@ class PollMgr::PollThread {
 
   void start(PollMgr* poll_mgr) {
     Pthread_create(&th_, nullptr, PollMgr::PollThread::start_poll_loop, this);
+    // if (!printed){
+    //   Log_info("In PollMgr:start; tid of thread is %d", gettid());
+    //   printed = true;  // Update the static variable
+    // }
   }
 
   void TriggerJob() {
@@ -478,6 +487,7 @@ class PollMgr::PollThread {
 
 PollMgr::PollMgr(int n_threads /* =... */, bool need_disk)
     : n_threads_(n_threads), need_disk_(need_disk), poll_threads_() {
+  // Log_info("*** value of disk_logging is: %d", need_disk);
   verify(n_threads_ > 0);
   poll_threads_ = new PollThread[n_threads_];
   for (int i = 0; i < n_threads_; i++) {
@@ -514,7 +524,7 @@ void PollMgr::PollThread::poll_loop() {
     Reactor::GetReactor()->Loop(false, true);
 
     if (!need_disk_) {
-		poll_.Wait();
+		  poll_.Wait();
     } else {
 		begins = poll_.Wait_One(num_events, slow);
 		

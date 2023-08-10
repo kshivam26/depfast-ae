@@ -57,7 +57,7 @@ class CoordinatorFpgaRaft : public Coordinator {
     return n_replica() / 2 + 1;
   }
 
-  void DoTxAsync(TxRequest &req) override {}
+  void DoTxAsync(TxRequest &req) override {Log_info("inside CoordinatorFpgaRaft::DoTxAsync in header file");}
   void Forward(shared_ptr<Marshallable> &cmd,
               const std::function<void()> &func = []() {},
               const std::function<void()> &exe_callback = []() {}) ;

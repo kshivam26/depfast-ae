@@ -12,6 +12,8 @@ void SpinLock::lock() {
     if (!locked_ && !__sync_lock_test_and_set(&locked_, true)) {
         return;
     }
+    // num_times_locked++;
+    // std::cout<<"num_times_locked: " <<  num_times_locked << endl;
     int wait = 1000;
     while ((wait-- > 0) && locked_) {
         // spin for a short while

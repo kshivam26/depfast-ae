@@ -37,6 +37,7 @@ public:
 
 class SpinLock: public Lockable {
 public:
+    int64_t num_times_locked = 0;
     SpinLock(): locked_(false) { }
     void lock();
     void unlock() {

@@ -8,10 +8,11 @@ namespace janus {
 /** thread safe */
 
 void CoordinatorNone::GotoNextPhase() {
-
+  // Log_info("***** inside CoordinatorNone::GotoNextPhase(); tid:%d", gettid());
   int n_phase = 2;
   switch (phase_++ % n_phase) {
     case Phase::INIT_END:
+      // Log_info("*** inside CoordinatorNone::GotoNextPhase(); DispatchAsync()");
       DispatchAsync();
       verify(phase_ % n_phase == Phase::DISPATCH);
       break;

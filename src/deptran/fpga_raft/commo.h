@@ -7,6 +7,8 @@
 namespace janus {
 
 class TxData;
+class AppendEntriesCommand;
+class AppendEntriesResult;
 
 class FpgaRaftForwardQuorumEvent: public QuorumEvent {
  public:
@@ -104,18 +106,26 @@ class FpgaRaftAppendQuorumEvent: public QuorumEvent {
     uint64_t minIndex;
     using QuorumEvent::QuorumEvent;
     void FeedResponse(bool appendOK, uint64_t index, std::string ip_addr = "") {
+        // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedResponse");
         if (appendOK) {
-            if ((n_voted_yes_ == 0) && (n_voted_no_ == 0))
+          // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 0");
+            if ((n_voted_yes_ == 0) && (n_voted_no_ == 0)){
+                // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 00");
                 minIndex = index;
-            else
+            }
+            else{
+                // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 01");
                 minIndex = std::min(minIndex, index);
+            }
             VoteYes();
         } else {
+            Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 1");
             VoteNo();
         }
         /*Log_debug("fpga-raft comm accept event, "
                   "yes vote: %d, no vote: %d, min index: %d",
                   n_voted_yes_, n_voted_no_, minIndex);*/
+        // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint final");
     }
 };
 
@@ -126,6 +136,7 @@ class FpgaRaftCommo : public Communicator {
 friend class FpgaRaftProxy;
  public:
 	std::unordered_map<siteid_t, uint64_t> matchedIndex {};
+  std::unordered_map<uint64_t, shared_ptr<FpgaRaftAppendQuorumEvent>> cRPCEvents {};
 	int index;
 	
   FpgaRaftCommo() = delete;
@@ -190,6 +201,7 @@ friend class FpgaRaftProxy;
                        ballot_t ballot,
                        shared_ptr<Marshallable> cmd,
                        const function<void(Future*)> &callback);
+
   shared_ptr<FpgaRaftAppendQuorumEvent>
   BroadcastAppendEntries(parid_t par_id,
                          siteid_t leader_site_id,
@@ -212,11 +224,79 @@ friend class FpgaRaftProxy;
                               uint64_t commitIndex,
                               shared_ptr<Marshallable> cmd,
                               const function<void(Future*)> &callback);
+
+  // crpc ring version of BroadcastAppendEntries
+  shared_ptr<FpgaRaftAppendQuorumEvent>
+  crpc_ring_BroadcastAppendEntries(parid_t par_id,
+                         siteid_t leader_site_id,
+                         slotid_t slot_id,
+                         i64 dep_id,
+                         ballot_t ballot,
+                         bool isLeader,
+                         uint64_t currentTerm,
+                         uint64_t prevLogIndex,
+                         uint64_t prevLogTerm,
+                         uint64_t commitIndex,
+                         shared_ptr<Marshallable> cmd);
+
+  // crpc no_chain version of BroadcastAppendEntries
+  shared_ptr<FpgaRaftAppendQuorumEvent>
+  crpc_BroadcastAppendEntries(parid_t par_id,
+                         siteid_t leader_site_id,
+                         slotid_t slot_id,
+                         i64 dep_id,
+                         ballot_t ballot,
+                         bool isLeader,
+                         uint64_t currentTerm,
+                         uint64_t prevLogIndex,
+                         uint64_t prevLogTerm,
+                         uint64_t commitIndex,
+                         shared_ptr<Marshallable> cmd);
+
   void BroadcastDecide(const parid_t par_id,
                        const slotid_t slot_id,
 											 const i64 dep_id,
                        const ballot_t ballot,
                        const shared_ptr<Marshallable> cmd);
+
+  void cRPC(const parid_t par_id,
+              const uint64_t& id,
+              const MarshallDeputy& cmd, 
+              const std::vector<uint16_t>& addrChain, 
+              const MarshallDeputy& state);
+
+  void CrpcAppendEntries(const parid_t par_id,
+              const uint64_t& id,
+              const AppendEntriesCommand& cmd, 
+              const std::vector<uint16_t>& addrChain, 
+              const std::vector<AppendEntriesResult>& state);
+
+  void CrpcAppendEntries3(const parid_t par_id,
+              const uint64_t& id,
+              const slotid_t slot_id,
+              const ballot_t ballot,
+              const uint64_t leaderCurrentTerm,
+              const uint64_t leaderPrevLogIndex,
+              const uint64_t leaderPrevLogTerm,
+              const uint64_t leaderCommitIndex,
+							const struct DepId dep_id,
+              const MarshallDeputy& cmd, 
+              const std::vector<uint16_t>& addrChain, 
+              const std::vector<AppendEntriesResult>& state);
+
+  void CrpcAppendEntries_no_chain(const parid_t par_id,
+              const uint64_t& id,
+              const slotid_t slot_id,
+              const ballot_t ballot,
+              const uint64_t leaderCurrentTerm,
+              const uint64_t leaderPrevLogIndex,
+              const uint64_t leaderPrevLogTerm,
+              const uint64_t leaderCommitIndex,
+							const struct DepId dep_id,
+              const MarshallDeputy& cmd, 
+              const std::vector<uint16_t>& addrChain, 
+              std::vector<AppendEntriesResult>* state,
+              const function<void()> &cb);
 };
 
 } // namespace janus

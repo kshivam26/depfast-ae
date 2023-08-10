@@ -52,7 +52,6 @@ void ServerWorker::SetupBase() {
 //  Log_info("initialize site id: %d", (int) site_info_->id);
   sharding_->tx_sched_ = tx_sched_;
 
-	Log_info("Is it replicated: %d", config->IsReplicated());
   if (config->IsReplicated() &&
       config->replica_proto_ != config->tx_proto_) {
     rep_frame_ = Frame::GetFrame(config->replica_proto_);
@@ -132,7 +131,9 @@ void ServerWorker::SetupService() {
 
   // init rrr::PollMgr 1 threads
   int n_io_threads = 1;
-  svr_poll_mgr_ = new rrr::PollMgr(n_io_threads, config->replica_proto_ == MODE_FPGA_RAFT);  // Raft needs a disk thread
+  // Log_info("*** inside ServerWorker::SetupService; value of config->replica_proto_ == MODE_FPGA_RAFT: %d", config->replica_proto_ == MODE_FPGA_RAFT);
+  svr_poll_mgr_ = new rrr::PollMgr(n_io_threads, config->replica_proto_ == MODE_FPGA_RAFT);  // Raft needs a disk thread // ***uncomment for logging
+  // svr_poll_mgr_ = new rrr::PollMgr(n_io_threads);  
   Reactor::GetReactor()->server_id_ = site_info_->id;
 //  svr_thread_pool_ = new rrr::ThreadPool(1);
 
@@ -210,19 +211,24 @@ void ServerWorker::WaitForShutdown() {
 
 void ServerWorker::SetupCommo() {
   verify(svr_poll_mgr_ != nullptr);
+  // Log_info("*** inside ServerWorker::SetupCommo(); cp 1; tid: %d", gettid());
   if (tx_frame_) {
+    // Log_info("*** inside ServerWorker::SetupCommo(); cp 2; tid: %d", gettid());
     tx_commo_ = tx_frame_->CreateCommo(svr_poll_mgr_);
     if (tx_commo_) {
       tx_commo_->loc_id_ = site_info_->locale_id;
     }
-    tx_sched_->commo_ = tx_commo_;
+    tx_sched_->commo_ = tx_commo_;   // ***uncomment/comment later
+    // tx_sched_->commo_  = nullptr;
   }
   if (rep_frame_) {
+    // Log_info("*** inside ServerWorker::SetupCommo(); cp 3; tid: %d", gettid());
     rep_commo_ = rep_frame_->CreateCommo(svr_poll_mgr_);
     if (rep_commo_) {
       rep_commo_->loc_id_ = site_info_->locale_id;
     }
     rep_sched_->commo_ = rep_commo_;
+    // rep_sched_->commo_ = nullptr;
 		rep_sched_->Setup();
 
     rep_commo_->rep_sched_ = rep_sched_;

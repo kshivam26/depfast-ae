@@ -104,7 +104,7 @@ Coordinator* ClientWorker::FindOrCreateCoordinator() {
   std::lock_guard<std::mutex> lock(coordinator_mutex);
 
   Coordinator* coo = nullptr;
-
+  // Log_info("*** number of free_coordinators: %d", free_coordinators_.size());
   if (!free_coordinators_.empty()) {
     coo = dynamic_cast<Coordinator*>(free_coordinators_.back());
     free_coordinators_.pop_back();
@@ -116,6 +116,7 @@ Coordinator* ClientWorker::FindOrCreateCoordinator() {
     coo = CreateCoordinator(created_coordinators_.size());
   }
 
+  // Log_info("*** number of free_coordinators: %d", free_coordinators_.size());
   verify(!coo->_inuse_);
   coo->_inuse_ = true;
   return coo;
@@ -145,7 +146,7 @@ Coordinator* ClientWorker::CreateFailCtrlCoordinator() {
 
 
 Coordinator* ClientWorker::CreateCoordinator(uint16_t offset_id) {
-
+  // Log_info("==== inside Coordinator* ClientWorker::CreateCoordinator");
   cooid_t coo_id = cli_id_;
   coo_id = (coo_id << 16) + offset_id;
   auto coo = frame_->CreateCoordinator(coo_id,
@@ -180,6 +181,9 @@ void ClientWorker::Work() {
     ccsi->wait_for_start(id);
   }
   Log_debug("after wait for start");
+
+  Log_info("1) the pid for client is: %d", ::getpid());
+  Log_info("2) the thread id for client is: %d", gettid());
 
   bool failover = Config::GetConfig()->get_failover();
   if (failover) {
@@ -220,15 +224,33 @@ void ClientWorker::Work() {
     shared_ptr<Job> sp_job(p_job);
     poll_mgr_->add(sp_job);
   }
+
+  // auto beg_time1 = Time::now();
+  // auto cur_time1 = Time::now();
+  Log_info("current n_concurrent is: %d", n_concurrent_);
+  // Log_info("current n_concurrent is: %d", n_concurrent);
   for (uint32_t n_tx = 0; n_tx < n_concurrent_; n_tx++) {
+    // Log_info("1) the client proc id is: %d", ::getpid());
+    // Log_info("2) the client proc thread id is: %d", gettid());
     auto sp_job = std::make_shared<OneTimeJob>([this, n_tx] () {
+      
       // this wait tries to avoid launching clients all at once, especially for open-loop clients.
       Reactor::CreateSpEvent<NeverEvent>()->Wait(RandomGenerator::rand(0, 1000000));
       auto beg_time = Time::now() ;
+      // beg_time1 = beg_time;
+      // Log_info("##### setting beg_time1");
       auto end_time = beg_time + duration * pow(10, 6);
+      // Log_info("the value of client_max_undone_ is: %d", config_->client_max_undone_);
+      // auto cur_time = Time::now();
+      // Log_info("==== value of duration * pow(10, 7): %ld", duration * pow(10, 7));
+      struct timespec start_;
+      start_.tv_sec = 0;
       while (true) {
+      // while (n_tx_issued_ < 2) {
+        // Log_info("==== inside while loop of work");
         auto cur_time = Time::now(); // optimize: this call is not scalable.
         if (cur_time > end_time) {
+          // cur_time1 = cur_time;
           break;
         }
         n_tx_issued_++;
@@ -236,13 +258,21 @@ void ClientWorker::Work() {
           auto n_undone_tx = n_tx_issued_ - sp_n_tx_done_.value_;
           if (n_undone_tx % 1000 == 0) {
             Log_debug("unfinished tx %d", n_undone_tx);
+            // Log_info("unfinished tx %d", n_undone_tx);
           }
           if (config_->client_max_undone_ > 0
               && n_undone_tx > config_->client_max_undone_) {
+            // Log_info("@@@@@@ test checkpoint1");
             Reactor::CreateSpEvent<NeverEvent>()->Wait(pow(10, 4));
           } else {
             break;
           }
+          // if (n_undone_tx != 0) {
+          //   Log_info("@@@@@@ test checkpoint1");
+          //   Reactor::CreateSpEvent<NeverEvent>()->Wait(pow(10, 4));
+          // } else {
+          //   break;
+          // }
         }
         num_txn++;
         auto coo = FindOrCreateCoordinator();
@@ -270,25 +300,47 @@ void ClientWorker::Work() {
 					t->Wait();
 				}
         
-				this->DispatchRequest(coo);
+        // Log_info("==== going to call this->DispatchRequest");
+        struct timespec end_;
+		    clock_gettime(CLOCK_MONOTONIC, &end_);
+        if (start_.tv_sec != 0){
+          Log_info("&&&& tid: %d; latency: %ld", gettid(), (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+        }
+        start_ = end_;
+        // Log_info("current start_.tv_sec: %ld", start_.tv_sec);
+
+        // Log_info("&&&&& inside createRun cp1");
+				this->DispatchRequest(coo);         // #con: dispatch a request
+        // Log_info("==== returned from call this->DispatchRequest");
         if (config_->client_type_ == Config::Closed) {
+          // Log_info("==== checkpoint 000; if (config_->client_type_ == Config::Closed)");
           auto ev = coo->sp_ev_commit_;
+          // Log_info("==== checkpoint 010");
 #if 1
           char txid[20];
+          // Log_info("==== checkpoint 011");
           sprintf(txid, "%" PRIx64 "|", coo->ongoing_tx_id_);
           ev->wait_place_ = std::string(txid);
 #endif
+
+          // Log_info("==== checkpoint 012");
           Wait_recordplace(ev, Wait(600*1000*1000));
           this->outbound--;
           verify(ev->status_ != Event::TIMEOUT);
+          // Log_info("==== checkpoint 013");
         } else {
+          // Log_info("==== checkpoint 001");
           auto sp_event = Reactor::CreateSpEvent<NeverEvent>();
           Wait_recordplace(sp_event, Wait(pow(10, 6)));
         }
-        Coroutine::CreateRun([this, coo](){
+        Coroutine::CreateRun([this, coo](){ // #con: coroutine to check if the above issued trasaction was done
+          // Log_info("==== inside createRun, checkpoint 0");
+          struct timespec end_;
           verify(coo->_inuse_);
           auto ev = coo->sp_ev_done_;
           Wait_recordplace(ev, Wait());
+          // clock_gettime(CLOCK_MONOTONIC, &end_);
+          // Log_info("&&&&& inside createRun cp2");
           verify(coo->coo_id_ > 0);
 //          ev->Wait(400*1000*1000);
           verify(coo->_inuse_);
@@ -305,7 +357,9 @@ void ClientWorker::Work() {
           coo->_inuse_ = false;
           n_pause_concurrent_[coo->coo_id_] = true;
         }, __FILE__, __LINE__);
-      }
+        // Log_info("==== inside Work, while loop ends");
+      } // end of while true loop
+
       n_ceased_client_.Set(n_ceased_client_.value_+1);
     });
     poll_mgr_->add(dynamic_pointer_cast<Job>(sp_job));
@@ -323,6 +377,7 @@ void ClientWorker::Work() {
     all_done_ = 1;
   })));
 
+  
   while (all_done_ == 0) {
     Log_info("wait for finish... n_ceased_cleints: %d,  "
               "n_issued: %d, n_done: %d, n_created_coordinator: %d",
@@ -335,12 +390,22 @@ void ClientWorker::Work() {
     *failover_server_quit_ = true;
   }
 
+  // verify((int) sp_n_tx_done_.value_ == (int) n_tx_issued_);
+
   Log_info("Finish:\nTotal: %u, Commit: %u, Attempts: %u, Running for %u, Throughput: %.2f\n",
            num_txn.load(),
            success.load(),
            num_try.load(),
            Config::GetConfig()->get_duration(),
            static_cast<float>(num_txn.load()) / Config::GetConfig()->get_duration());
+
+  // Log_info("Finish:\nTotal: %u, Commit: %u, Attempts: %u, Running for %u, Throughput: %.2f\n",
+  //          num_txn.load(),
+  //          success.load(),
+  //          num_try.load(),
+  //          Config::GetConfig()->get_duration(),
+  //          static_cast<float>(num_txn.load()) / (cur_time1 - beg_time1));
+
   fflush(stderr);
   fflush(stdout);
 
@@ -526,6 +591,7 @@ void ClientWorker::FailoverPreprocess(Coordinator* coo) {
 }
 
 void ClientWorker::DispatchRequest(Coordinator* coo) {
+  // Log_info("*** inside void ClientWorker::DispatchRequest");
 //  FailoverPreprocess(coo);
   const char* f = __FUNCTION__;
   std::function<void()> task = [=]() {
@@ -551,6 +617,7 @@ void ClientWorker::DispatchRequest(Coordinator* coo) {
     coo->DoTxAsync(*req);
   };
   task();
+  // Log_info("==== returning from void ClientWorker::DispatchRequest");
 //  dispatch_pool_->run_async(task); // this causes bug
 }
 
@@ -609,18 +676,25 @@ ClientWorker::ClientWorker(uint32_t id, Config::SiteInfo& site_info, Config* con
     failover_trigger_(failover_trigger),
     failover_server_quit_(failover_server_quit),
     failover_server_idx_(failover_server_idx) {
+  Log_info("inside client worker, tid is: %d", gettid());
   poll_mgr_ = poll_mgr == nullptr ? new PollMgr(1) : poll_mgr;
+  // Log_info("***ClientWorker constructor; checkpoint 1");
   frame_ = Frame::GetFrame(config->tx_proto_);
+  // Log_info("***ClientWorker constructor; checkpoint 2");
   tx_generator_ = frame_->CreateTxGenerator();
+  // Log_info("***ClientWorker constructor; checkpoint 3");
   config->get_all_site_addr(servers_);
+  // Log_info("***ClientWorker constructor; checkpoint 4");
   num_txn.store(0);
   success.store(0);
   num_try.store(0);
   commo_ = frame_->CreateCommo(poll_mgr_);
+  // Log_info("***ClientWorker constructor; checkpoint 5");
   commo_->loc_id_ = my_site_.locale_id;
   forward_requests_to_leader_ =
       (config->replica_proto_ == MODE_FPGA_RAFT && site_info.locale_id != 0) ? true :
                                                                                false;
+  // Log_info("***ClientWorker constructor; checkpoint 6");
   Log_debug("client %d created; forward %d",
             cli_id_,
             forward_requests_to_leader_);

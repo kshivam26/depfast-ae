@@ -72,7 +72,8 @@ Marshal& MarshallDeputy::CreateActualObjectFrom(Marshal& m) {
       break;
   }
   verify(sp_data_);
-  sp_data_->FromMarshal(m);
+  // Log_debug("==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ %d", gettid());
+  sp_data_->FromMarshal(m);  // #profile (crpc2) - 8.47%
   verify(sp_data_->kind_);
   verify(kind_);
   verify(sp_data_->kind_ == kind_);

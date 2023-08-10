@@ -148,6 +148,7 @@ mdb::Txn *TxLogServer::GetOrCreateMTxn(const i64 tid) {
 void TxLogServer::get_prepare_log(i64 txn_id,
                                   const std::vector<i32> &sids,
                                   std::string *str) {
+  // Log_info("*** inside TxLogServer::get_prepare_log");
   auto it = mdb_txns_.find(txn_id);
   verify(it != mdb_txns_.end() && it->second != NULL);
 
@@ -191,6 +192,7 @@ void TxLogServer::get_prepare_log(i64 txn_id,
 TxLogServer::TxLogServer() : mtx_() {
   mdb_txn_mgr_ = make_shared<mdb::TxnMgrUnsafe>();
   if (Config::GetConfig()->do_logging()) {
+    // Log_info("*** inside TxLogServer::TxLogServer(); logging seems enabled");
     auto path = Config::GetConfig()->log_path();
     // TODO free this
 //    recorder_ = new Recorder(path);

@@ -57,6 +57,7 @@ void Future::timed_wait(double sec) {
 }
 
 void Future::notify_ready() {
+  // Log_debug("called Future::notify_ready; checkpoint 0 @ %d", gettid());
   Pthread_mutex_lock(&ready_m_);
   if (!timed_out_) {
     ready_ = true;
@@ -109,12 +110,15 @@ void Client::close() {
 
 int Client::connect(const char* addr, bool client) {
   verify(status_ != CONNECTED);
+  // Log_info("***inside  Client::connect; checkpoint 1");
   string addr_str(addr);
   size_t idx = addr_str.find(":");
   if (idx == string::npos) {
+     // Log_info("***inside  Client::connect; checkpoint 2");
     Log_error("rrr::Client: bad connect address: %s", addr);
     return EINVAL;
   }
+  // Log_info("***inside  Client::connect; checkpoint 3");
   string host = addr_str.substr(0, idx);
   host_ = host;
 	client_ = client;
@@ -143,13 +147,16 @@ int Client::connect(const char* addr, bool client) {
 
   int r = getaddrinfo(host.c_str(), port.c_str(), &hints, &result);
   if (r != 0) {
+    // Log_info("***inside  Client::connect; checkpoint 4");
     Log_error("rrr::Client: getaddrinfo(): %s", gai_strerror(r));
     return EINVAL;
   }
 
   for (rp = result; rp != nullptr; rp = rp->ai_next) {
+    // Log_info("***inside  Client::connect; checkpoint 4.1; %d --- %d --- %d", rp->ai_family, rp->ai_socktype, rp->ai_protocol);
     sock_ = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
     if (sock_ == -1) {
+      // Log_info("***inside  Client::connect; checkpoint 4.2; %s", strerror(errno));
       continue;
     }
     //Log_info("host port host port: %s:%s and socket: %d", host, port, sock_);
@@ -162,16 +169,20 @@ int Client::connect(const char* addr, bool client) {
     setsockopt(sock_, SOL_SOCKET, SO_SNDBUF, &buf_len, sizeof(buf_len));
 
     if (::connect(sock_, rp->ai_addr, rp->ai_addrlen) == 0) {
+      // Log_info("***inside  Client::connect; checkpoint 5");
+      // count++;
+      // Log_info("***inside  Client::connect; checkpoint 5; current count:%d; tid: %d", count, gettid());
       break;
     }
     ::close(sock_);
     sock_ = -1;
   }
-
+  // Log_info("***inside  Client::connect; checkpoint 6");
   freeaddrinfo(result);
 
   if (rp == nullptr) {
     // failed to connect
+    Log_info("rrr::Client: connect(%s): %s", addr, strerror(errno));
     // Log_error("rrr::Client: connect(%s): %s", addr, strerror(errno));
     return ENOTCONN;
   }
@@ -219,9 +230,11 @@ size_t Client::content_size() {
 }
 
 bool Client::handle_read(){
+  // Log_info("*** inside Client::handle_read(); checkpoint 1; tid is %d", gettid());
 	struct timespec begin2, begin2_cpu, end2, end2_cpu;
   /*clock_gettime(CLOCK_MONOTONIC, &begin2);		
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &begin2_cpu);*/
+  // Log_info("$$$ some data received in Client::handle_read()");
   if (status_ != CONNECTED) {
     return false;
   }
@@ -279,7 +292,8 @@ bool Client::handle_read(){
 }
 
 bool Client::handle_read_one() {
-  // if (strcmp(host_.c_str(), "10.0.0.15") == 0) {
+  // Log_info("*** inside Client::handle_read_one(); checkpoint 1; tid is %d", gettid());
+  // if (strcmp(xid_counter_.next(),"10.0.0.15") == 0) {
   //     count_++;
   //   Log_info("called %d", count_);
   // }
@@ -299,6 +313,7 @@ bool Client::handle_read_one() {
 }
 
 bool Client::handle_read_two() {
+  // Log_info("*** inside Client::handle_read_two(); checkpoint 1; tid is %d", gettid());
   if (status_ != CONNECTED) {
     return false;
   }
@@ -487,9 +502,14 @@ int Client::poll_mode() {
 
 Future* Client::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) {
   //auto start = chrono::steady_clock::now();
-	
+  // Log_info("number of times locked: %ld", out_l_.num_times_locked);
+  // Log_info("*** socket in client::begin_request is: %d", fd());
+  // Log_info("*** Client::begin_request; before lock; rpcid: %d; xid: %ld; tid is %d", rpc_id, xid_counter_.peek_next()+1,gettid());
   out_l_.lock();
-	
+  // Log_info("*** Client::begin_request; after lock; rpcid: %d; xid: %ld; tid is %d", rpc_id, xid_counter_.peek_next()+1,gettid());
+	// static uint64_t count = 0;
+  // count++;
+  // Log_info("==== inside Client::begin_request; count: %ld; tid is: %d", count, gettid());
   if (status_ != CONNECTED) {
     //Log_info("NOT CONNECTED");
     return nullptr;
@@ -535,12 +555,17 @@ Future* Client::begin_request(i32 rpc_id, const FutureAttr& attr /* =... */) {
 void Client::end_request() {
   //auto start = chrono::steady_clock::now();
   // set reply size in packet
+  // Log_info("==== inside Client::end_request()");
+  // Log_info("*** inside Client::end_request(); checkpoint 1; rpcid: %d; xid: %ld; tid is %d", rpc_id_, xid_counter_.peek_next(),gettid());
   if (bmark_ != nullptr) {
+    // Log_info("*** inside Client::end_request(); checkpoint 2; rpcid: %d; xid: %ld; tid is %d", rpc_id_, xid_counter_.peek_next(),gettid());
     i32 request_size = out_.get_and_reset_write_cnt();
     out_.write_bookmark(bmark_, &request_size);
     delete bmark_;
     bmark_ = nullptr;
   }
+
+  // // Log_info("$$$ inside Client::end_request(); checkpoint 3; tid is %d", gettid());
 
 	out_.found_dep = false;
 	out_.valid_id = false;
@@ -549,8 +574,11 @@ void Client::end_request() {
   // will be some data to send
   pollmgr_->update_mode(shared_from_this(), Pollable::READ | Pollable::WRITE);
 
+  // Log_info("*** before unlock; rpcid: %d; xid: %ld; tid is %d", rpc_id_, xid_counter_.peek_next(),gettid());
   out_l_.unlock();
-			
+	// Log_info("*** after unlock; rpcid: %d; xid: %ld; tid is %d", rpc_id_, xid_counter_.peek_next(),gettid());
+
+  // Log_info("==== returning from Client::end_request()");
 
   //auto end = chrono::steady_clock::now();
   //auto duration = chrono::duration_cast<chrono::microseconds>(end-start).count();

@@ -342,6 +342,7 @@ int CoordinatorJanus::FastQuorumGraphCheck(parid_t par_id) {
 }
 
 void CoordinatorJanus::GotoNextPhase() {
+  // Log_info("==== inside CoordinatorJanus::GotoNextPhase");
   int n_phase = 6;
   int current_phase = phase_ % n_phase; // for debug
   switch (phase_++ % n_phase) {

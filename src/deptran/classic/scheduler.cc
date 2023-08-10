@@ -85,6 +85,7 @@ bool SchedulerClassic::Dispatch(cmdid_t cmd_id,
                                 struct DepId dep_id,
                                 shared_ptr<Marshallable> cmd,
                                 TxnOutput& ret_output) {
+  // Log_info("*** inside SchedulerClassic::Dispatch; checkpoint 0");
   auto sp_vec_piece =
       dynamic_pointer_cast<VecPieceData>(cmd)->sp_vec_piece_data_;
   verify(sp_vec_piece);
@@ -146,6 +147,7 @@ bool SchedulerClassic::OnPrepare(cmdid_t tx_id,
                                  const std::vector<i32>& sids,
                                  struct DepId dep_id,
 																 bool& null_cmd) {
+  // Log_info("*** inside SchedulerClassic::OnPrepare");
   auto sp_tx = dynamic_pointer_cast<TxClassic>(GetOrCreateTx(tx_id));
   verify(sp_tx);
 	/*if(sp_tx->cmd_ == NULL){
@@ -215,6 +217,9 @@ int SchedulerClassic::OnEarlyAbort(txnid_t tx_id) {
 int SchedulerClassic::OnCommit(txnid_t tx_id,
 															 struct DepId dep_id,
 															 int commit_or_abort) {
+  static int64_t count = 0;
+  count++;
+  // Log_info("*** inside SchedulerClassic::OnCommit(); count: %ld", count);
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   Log_debug("%s: at site %d, tx: %" PRIx64,
             __FUNCTION__, this->site_id_, tx_id);
@@ -232,6 +237,7 @@ int SchedulerClassic::OnCommit(txnid_t tx_id,
     sp_tx->is_leader_hint_ = true;
     auto sp_m = dynamic_pointer_cast<Marshallable>(cmd);
     shared_ptr<Coordinator> coo(CreateRepCoord(dep_id.id));
+    // Log_info("***** inside SchedulerClassic::OnCommit; cp1; tid: %d", gettid());
     coo->Submit(sp_m);
     sp_tx->commit_result->Wait();
 		slow_ = coo->slow_;
@@ -245,6 +251,7 @@ int SchedulerClassic::OnCommit(txnid_t tx_id,
       verify(0);
     }
   }
+  // Log_info("*** returning SchedulerClassic::OnCommit(); count: %ld", count);
   return 0;
 }
 
