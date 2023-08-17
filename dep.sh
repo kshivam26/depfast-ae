@@ -19,10 +19,16 @@ sudo apt-get --assume-yes install -y \
     python3-setuptools \
     libjpeg-dev \
     zlib1g-dev \
-    libgoogle-perftools-dev
+    libgoogle-perftools-dev \
+    python3-testresources \
+    cmake \
+    cmake-curses-gui \
+    ninja-build \
+    libsnappy-dev
 
 sudo wget https://github.com/mikefarah/yq/releases/download/v4.24.2/yq_linux_amd64 \
     -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
+pip3 install --upgrade pip wheel setuptools testresources
 pip3 install -r requirements.txt
 pip3 install Pillow matplotlib pyyaml

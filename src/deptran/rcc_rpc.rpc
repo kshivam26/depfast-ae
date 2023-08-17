@@ -109,6 +109,14 @@ abstract service FpgaRaft {
 }
 
 
+abstract service Test {
+
+  defer cRPC(uint64_t id,
+            MarshallDeputy cmd, 
+            vector<uint16_t> addrChain, 
+            MarshallDeputy state);
+}
+
 abstract service Copilot {
   defer Forward(MarshallDeputy cmd);
 
