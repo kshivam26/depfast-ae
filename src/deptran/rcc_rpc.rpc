@@ -144,6 +144,13 @@ abstract service Copilot {
                MarshallDeputy cmd);
 }
 
+abstract service SampleCrpc {
+  defer cRPC(uint64_t id,
+            MarshallDeputy cmd,
+            vector<uint16_t> addrChain,
+            MarshallDeputy state);
+}
+
 // below is for 2PL and OCC
 abstract service Classic {
   defer MsgString(string arg | string ret);

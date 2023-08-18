@@ -465,7 +465,8 @@ map<string, int> &Frame::FrameNameToMode() {
       {"multi_paxos",   MODE_MULTI_PAXOS},
       {"fpga_raft",     MODE_FPGA_RAFT},
       {"epaxos",        MODE_NOT_READY},
-      {"rep_commit",    MODE_NOT_READY}
+      {"rep_commit",    MODE_NOT_READY},
+      {"sample_crpc",   MODE_SAMPLE_CRPC}
   };
   return frame_name_mode_s;
 }
