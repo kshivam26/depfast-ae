@@ -132,11 +132,11 @@ def main():
 
     # Define file paths based on user input
     if file_option == "0":
-        input_file_path = "logtest_no_crpc.txt"
-        output_file_path = "analysis_test_no_crpc.txt"
+        input_file_path = "logfile_no_crpc.txt"
+        output_file_path = "analysis_60c1s21r1p_no_crpc.txt"
     elif file_option == "1":
-        input_file_path = "logtest_crpc.txt"
-        output_file_path = "analysis_test_crpc.txt"
+        input_file_path = "logfile_crpc.txt"
+        output_file_path = "analysis_60c1s21r1p_crpc.txt"
     else:
         print("Invalid file option.")
         exit()

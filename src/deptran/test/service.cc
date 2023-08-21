@@ -2,7 +2,7 @@
 #include "server.h"
 
 namespace janus {
-bool hasPrinted = false;
+static bool hasPrinted = false;
 
 TestServiceImpl::TestServiceImpl(TxLogServer *sched)
     : sched_((TestServer *)sched) {

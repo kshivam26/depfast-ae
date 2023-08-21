@@ -8,13 +8,15 @@
 namespace janus {
 
 class TestServer : public TxLogServer {
- public:
-  TestServer(Frame *frame) ;
-  ~TestServer() ;
-  void OnCRPC(const uint64_t& id,
-              const MarshallDeputy& cmd, 
-              const std::vector<uint16_t>& addrChain, 
-              const MarshallDeputy& state);
+  private:
+    void Setup();
+  public:
+    TestServer(Frame *frame) ;
+    ~TestServer() ;
+    void OnCRPC(const uint64_t& id,
+                const MarshallDeputy& cmd, 
+                const std::vector<uint16_t>& addrChain, 
+                const MarshallDeputy& state);
 };
 
 } // namespace janus

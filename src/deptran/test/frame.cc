@@ -1,7 +1,7 @@
 #include "../__dep__.h"
 #include "../constants.h"
 #include "frame.h"
-//#include "coordinator.h"
+#include "coordinator.h"
 #include "commo.h"
 #include "service.h"
 #include "server.h"
@@ -16,7 +16,7 @@ TestFrame::~TestFrame() {
   Log_info("using test frame");
 }
 
-/*
+
 Coordinator *TestFrame::CreateCoordinator(cooid_t coo_id,
                                           Config *config,
                                           int benchmark,
@@ -24,23 +24,25 @@ Coordinator *TestFrame::CreateCoordinator(cooid_t coo_id,
                                           uint32_t id,
                                           shared_ptr<TxnRegistry> txn_reg) {
   verify(config != nullptr);
-  auto coo = new CoordinatorTest(coo_id, benchmark, ccsi, id);
+  CoordinatorTest *coo;
+  coo = new CoordinatorTest(coo_id, benchmark, ccsi, id);
   coo->frame_ = this;
   verify(commo_ != nullptr);
   coo->commo_ = commo_;
   verify(sch_ != nullptr);
   coo->sch_ = this->sch_;
-  coo->slot_hint_ = &slot_hint_;
-  coo->slot_id_ = slot_hint_++;
-  coo->n_replica_ = config->GetPartitionSize(site_info_->partition_id_);
+  //coo->slot_hint_ = &slot_hint_;
+  //coo->slot_id_ = slot_hint_++;
+  //coo->n_replica_ = config->GetPartitionSize(site_info_->partition_id_);
   coo->loc_id_ = this->site_info_->locale_id;
-  verify(coo->n_replica_ != 0);
+  //verify(coo->n_replica_ != 0);
   Log_info("create new test coord, coo_id: %d", (int) coo->coo_id_);
   return coo;
 }
-*/
+
 
 TxLogServer *TestFrame::CreateScheduler() {
+  Log_info("Inside CreateScheduler");
   if (sch_ == nullptr) {
     sch_ = new TestServer(this);
   } else {
@@ -51,6 +53,7 @@ TxLogServer *TestFrame::CreateScheduler() {
 }
 
 Communicator *TestFrame::CreateCommo(PollMgr *poll) {
+  Log_info("Inside CreateCommo");
   if (commo_ == nullptr) {
     commo_ = new TestCommo(poll);
   }

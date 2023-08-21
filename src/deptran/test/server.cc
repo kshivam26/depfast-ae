@@ -7,6 +7,8 @@ TestServer::TestServer(Frame * frame) {
   frame_ = frame ;
 }
 
+void TestServer::Setup() {}
+
 TestServer::~TestServer() {}
 
 void TestServer::OnCRPC(const uint64_t& id,
