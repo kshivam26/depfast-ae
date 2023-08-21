@@ -4,6 +4,7 @@
 #include "../constants.h"
 #include "../scheduler.h"
 #include "../classic/tpc_command.h"
+#include "append_entries_command.h"
 
 namespace janus {
 class Command;
@@ -14,10 +15,10 @@ class SampleCrpcServer : public TxLogServer {
   SampleCrpcServer(Frame *frame) ;
   ~SampleCrpcServer() ;
 
-  void OnCRPC(const uint64_t& id,
-              const MarshallDeputy& cmd, 
+  void OnCRPC3(const uint64_t& id,
+              const MarshallDeputy& cmd,
               const std::vector<uint16_t>& addrChain, 
-              const MarshallDeputy& state);
+              const std::vector<AppendEntriesAdd>& state);
 
   void removeCmd(slotid_t slot);
 };

@@ -6,6 +6,7 @@
 #include "../procedure.h"
 #include "../command_marshaler.h"
 #include "../rcc_rpc.h"
+#include "append_entries_command.h"
 
 namespace janus {
 
@@ -13,36 +14,18 @@ SampleCrpcCommo::SampleCrpcCommo(PollMgr* poll) : Communicator(poll) {
 //  verify(poll != nullptr);
 }
 
-void SampleCrpcCommo::cRPC(const parid_t par_id,
+void SampleCrpcCommo::CrpcAppendEntries(const parid_t par_id,
               const uint64_t& id,
-              const MarshallDeputy& cmd, 
+              const AppendEntriesCommandToyCrpc& cmd, 
               const std::vector<uint16_t>& addrChain, 
-              const MarshallDeputy& state){
-  // // Log_info("*** inside SampleCrpcCommo::cRPC");
-
-  FutureAttr fuattr;
-  fuattr.callback = [](Future *fu)
-  {
-    // // Log_info("*** received a response back, in cRPC");
-  };
-
+              const std::vector<AppendEntriesAdd>& state){
+  // Log_info("inside SampleCrpcCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
   auto proxies = rpc_par_proxies_[par_id];
   SampleCrpcProxy *proxy = nullptr;
 
   proxy = (SampleCrpcProxy *)rpc_proxies_[addrChain[0]];
-  // for (auto p : proxies)          // #cPRC TODO: room for optimization?
-  // {
-  //   if (p.first == addrChain[0])
-  //   {
-  //       proxy = (SampleCrpcProxy *)p.second;
-  //       break;
-  //   }
-  // }
-
-  // // Log_info("*** calling proxy->proxy->async_cRPC");
-  auto f = proxy->async_cRPC(id, cmd, addrChain, state, fuattr);  // #profile - 1.57%
+  auto f = proxy->async_CrpcAppendEntries(id, cmd.md_cmd, addrChain, state);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
 }
-
 
 } // namespace janus

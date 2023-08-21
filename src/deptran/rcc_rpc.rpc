@@ -145,10 +145,10 @@ abstract service Copilot {
 }
 
 abstract service SampleCrpc {
-  defer cRPC(uint64_t id,
-            MarshallDeputy cmd,
-            vector<uint16_t> addrChain,
-            MarshallDeputy state);
+  defer CrpcAppendEntries(uint64_t id,
+               MarshallDeputy cmd,
+               vector<uint16_t> addrChain,
+               vector<AppendEntriesAdd> state);
 }
 
 // below is for 2PL and OCC
@@ -387,6 +387,10 @@ struct AppendEntriesResult {
 	uint64_t followerAppendOK;
   uint64_t followerCurrentTerm;
   uint64_t followerLastLogIndex;
+}
+
+struct AppendEntriesAdd {
+	uint64_t value;
 }
 
 abstract service ClientControl {

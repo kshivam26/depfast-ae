@@ -7,8 +7,8 @@
 namespace janus {
 
 class TxData;
-class AppendEntriesCommand;
-class AppendEntriesResult;
+class AppendEntriesCommandToyCrpc;
+class AppendEntriesAdd;
 
 class SampleCrpcCommo : public Communicator {
 
@@ -20,11 +20,11 @@ friend class SampleCrpcProxy;
   SampleCrpcCommo() = delete;
   SampleCrpcCommo(PollMgr*);
 
-  void cRPC(const parid_t par_id,
+  void CrpcAppendEntries(const parid_t par_id,
               const uint64_t& id,
-              const MarshallDeputy& cmd, 
+              const AppendEntriesCommandToyCrpc& cmd, 
               const std::vector<uint16_t>& addrChain, 
-              const MarshallDeputy& state);
+              const std::vector<AppendEntriesAdd>& state);
 };
 
 } // namespace janus

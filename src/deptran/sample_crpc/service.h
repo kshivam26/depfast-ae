@@ -18,11 +18,11 @@ class SampleCrpcServiceImpl : public SampleCrpcService {
  public:
   SampleCrpcServer* sched_;
   SampleCrpcServiceImpl(TxLogServer* sched);
-  void cRPC(const uint64_t& id,
-            const MarshallDeputy& cmd, 
-            const std::vector<uint16_t>& addrChain, 
-            const MarshallDeputy& state, 
-            rrr::DeferredReply* defer) override;
+  void CrpcAppendEntries(const uint64_t& id,
+                          const MarshallDeputy& cmd, 
+                          const std::vector<uint16_t>& addrChain, 
+                          const std::vector<AppendEntriesAdd>& state, 
+                          rrr::DeferredReply* defer) override;
 
 };
 
