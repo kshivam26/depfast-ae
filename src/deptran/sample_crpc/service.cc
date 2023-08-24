@@ -15,9 +15,10 @@ SampleCrpcServiceImpl::SampleCrpcServiceImpl(TxLogServer *sched)
 }
 
 void SampleCrpcServiceImpl::CrpcAppendEntries(const uint64_t& id, 
-                        const MarshallDeputy& cmd, 
+                        const int64_t& value1,
+                        const int64_t& value2,
                         const std::vector<uint16_t>& addrChain, 
-                        const std::vector<AppendEntriesAdd>& state, 
+                        const std::vector<ResultAdd>& state, 
                         rrr::DeferredReply* defer){
 // just create a appendEntriesCommand. no casting required
 // TODO: make Result as a base class and let AppendEntriesResult inherit it
@@ -32,7 +33,7 @@ void SampleCrpcServiceImpl::CrpcAppendEntries(const uint64_t& id,
   //                                     cmd);
 
   verify(sched_ != nullptr);
-  // Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; tid: %d", gettid());
+  Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; tid: %d", gettid());
   if (!hasPrinted) {
       Log_info("tid of non-leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
@@ -49,7 +50,8 @@ void SampleCrpcServiceImpl::CrpcAppendEntries(const uint64_t& id,
   // Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; cp 2 tid: %d", gettid());
   Coroutine::CreateRun([&] () {
       sched_->OnCRPC3(id,
-                    cmd,
+                    value1,
+                    value2,
                     addrChain,
                     state);
       // Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; cp 3 tid: %d", gettid());

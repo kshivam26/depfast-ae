@@ -3,4 +3,4 @@ mode:
   ab: sample_crpc # atomic broadcast
   batch: false
   retry: 20
-  ongoing: 1 # per clients
+  ongoing: 1 # per client

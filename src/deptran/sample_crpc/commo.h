@@ -7,24 +7,26 @@
 namespace janus {
 
 class TxData;
-class AppendEntriesCommandToyCrpc;
-class AppendEntriesAdd;
+class ResultCommand;
 
 class SampleCrpcCommo : public Communicator {
 
 friend class SampleCrpcProxy;
  public:
-	std::unordered_map<siteid_t, uint64_t> matchedIndex {};
-	int index;
-	
-  SampleCrpcCommo() = delete;
+	SampleCrpcCommo() = delete;
   SampleCrpcCommo(PollMgr*);
+
+  void crpc_add(parid_t par_id,
+              const int64_t& value1,
+              const int64_t& value2,
+              shared_ptr<Marshallable> cmd);
 
   void CrpcAppendEntries(const parid_t par_id,
               const uint64_t& id,
-              const AppendEntriesCommandToyCrpc& cmd, 
+              const int64_t& value1,
+              const int64_t& value2,
               const std::vector<uint16_t>& addrChain, 
-              const std::vector<AppendEntriesAdd>& state);
+              const std::vector<ResultAdd>& state);
 };
 
 } // namespace janus

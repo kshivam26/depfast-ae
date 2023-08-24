@@ -13,13 +13,18 @@ SampleCrpcServer::SampleCrpcServer(Frame * frame) {
   frame_ = frame ;
 }
 
+void SampleCrpcServer::Setup() {
+	Log_info("*** inside SampleCrpcServer::Setup;");
+}
+
 SampleCrpcServer::~SampleCrpcServer() {
 }
 
   void SampleCrpcServer::OnCRPC3(const uint64_t& id,
-              const MarshallDeputy& cmd,
+              const int64_t& value1,
+              const int64_t& value2,
               const std::vector<uint16_t>& addrChain, 
-              const std::vector<AppendEntriesAdd>& state){
+              const std::vector<ResultAdd>& state){
     Log_info("*** inside SampleCrpcServer::OnCRPC; cp 1 tid: %d", gettid());
     // if (addrChain.size() == 1)
     // {
@@ -34,12 +39,12 @@ SampleCrpcServer::~SampleCrpcServer() {
 
     //     // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
     //     // auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);   // #profile - 0.54%
-    //     for (auto el : state)
-    //     {
-    //       // Log_info("inside SampleCrpcServer::OnCRPC2; checkpoint 3 @ %d", gettid());
-    //       bool y = ((el.followerAppendOK == 1) && (this->IsLeader()) && (currentTerm == el.followerCurrentTerm));
-    //       ev->FeedResponse(y, el.followerLastLogIndex);
-    //     }
+    //     // for (auto el : state)
+    //     // {
+    //     //   // Log_info("inside SampleCrpcServer::OnCRPC2; checkpoint 3 @ %d", gettid());
+    //     //   bool y = ((el.followerAppendOK == 1) && (this->IsLeader()) && (currentTerm == el.followerCurrentTerm));
+    //     //   ev->FeedResponse(y, el.followerLastLogIndex);
+    //     // }
     //     // Log_info("inside SampleCrpcServer::OnCRPC2; checkpoint 4 @ %d", gettid());
     //     // Log_info("==== returning from cRPC");
     //     return;
@@ -50,17 +55,8 @@ SampleCrpcServer::~SampleCrpcServer() {
     // // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
     // AppendEntriesResult res;
     // auto r = Coroutine::CreateRun([&]()
-    //                               { this->OnAppendEntries(slot_id,
-    //                                                       ballot,
-    //                                                       leaderCurrentTerm,
-    //                                                       leaderPrevLogIndex,
-    //                                                       leaderPrevLogTerm,
-    //                                                       leaderCommitIndex,
-    //                                                       dep_id,
-    //                                                       const_cast<MarshallDeputy &>(cmd).sp_data_,
-    //                                                       &res.followerAppendOK,
-    //                                                       &res.followerCurrentTerm,
-    //                                                       &res.followerLastLogIndex,
+    //                               { this->OnAppendEntries(const_cast<MarshallDeputy &>(cmd).sp_data_,
+    //                                                       &res.value,
     //                                                       []() {}); }); // #profile - 2.88%
     // // Log_info("###################cp1");
     // // this->OnAppendEntries(slot_id,
