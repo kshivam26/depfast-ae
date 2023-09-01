@@ -23,6 +23,7 @@ void CoordinatorSampleCrpc::Submit(shared_ptr<Marshallable>& cmd,
   verify(cmd_ == nullptr);
   cmd_ = cmd;
   verify(cmd_->kind_ != MarshallDeputy::UNKNOWN);
+  Log_info("*** inside void CoordinatorSampleCrpc::Submit, cmd kind: %d", cmd_->kind_);
   AppendEntries();
   Log_info("*** returning from void CoordinatorSampleCrpc::Submit");
 }
@@ -32,8 +33,11 @@ void CoordinatorSampleCrpc::AppendEntries() {
     Log_info("*** inside void CoordinatorSampleCrpc::AppendEntries;");
     // Log_info("*** inside void CoordinatorSampleCrpc::AppendEntries; count: %ld; tid is: %d", count, gettid());
 
-    int64_t value1 = 2;
-    int64_t value2 = 3;
+    TpcCommitAddCommand* add_cmd_ = dynamic_cast<TpcCommitAddCommand*>(cmd_.get());
+
+    Log_info("*** inside inside void CoordinatorSampleCrpc::AppendEntries; value1: %d, value2: %d", add_cmd_->value_1, add_cmd_->value_2);
+    int64_t value1 = add_cmd_->value_1;
+    int64_t value2 = add_cmd_->value_2;
     commo()->crpc_add(par_id_, value1, value2, cmd_);
 
     // Log_info("*** returning from void CoordinatorSampleCrpc::AppendEntries");

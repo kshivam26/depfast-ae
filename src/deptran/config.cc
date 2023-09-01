@@ -1036,6 +1036,10 @@ bool Config::IsReplicated() {
   return true;
 }
 
+bool Config::IsSampleCrpc() {
+  return (replica_proto_ == MODE_SAMPLE_CRPC);
+}
+
 const char * Config::log_path() {
   return logging_path_.c_str();
 }

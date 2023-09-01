@@ -228,8 +228,23 @@ int SchedulerClassic::OnCommit(txnid_t tx_id,
 //  verify(!sp_tx->inuse);
 //  sp_tx->inuse = true;
 //
+  if (Config::GetConfig()->IsReplicated() && Config::GetConfig()->IsSampleCrpc()){
+    auto cmd = std::make_shared<TpcCommitAddCommand>();
+    cmd->tx_id_ = tx_id;
+    cmd->ret_ = commit_or_abort;
+    cmd->cmd_ = sp_tx->cmd_;
+    cmd->value_1 = rand() % 100;
+    cmd->value_2 = rand() % 100;
+    sp_tx->is_leader_hint_ = true;
+    auto sp_m = dynamic_pointer_cast<Marshallable>(cmd);
+    shared_ptr<Coordinator> coo(CreateRepCoord(dep_id.id));
+    // Log_info("***** inside SchedulerClassic::OnCommit; cp1; tid: %d", gettid());
+    coo->Submit(sp_m);
+    sp_tx->commit_result->Wait();
+		slow_ = coo->slow_;
+  }
   //always true
-  if (Config::GetConfig()->IsReplicated()) {
+  else if (Config::GetConfig()->IsReplicated()) {
     auto cmd = std::make_shared<TpcCommitCommand>();
     cmd->tx_id_ = tx_id;
     cmd->ret_ = commit_or_abort;
