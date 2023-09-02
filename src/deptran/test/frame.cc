@@ -10,10 +10,12 @@ namespace janus {
 
 REG_FRAME(MODE_TEST, vector<string>({"test"}), TestFrame);
 
-TestFrame::TestFrame(int mode) : Frame(mode) {}
+TestFrame::TestFrame(int mode) : Frame(mode) {
+  Log_info("@@@ Test CP 1: TestFrame::TestFrame");}
 
 TestFrame::~TestFrame() { 
-  Log_info("using test frame");
+  Log_info("@@@ Test CP 2: TestFrame::~TestFrame");
+  Log_info("Inside CreateScheduler");
 }
 
 
@@ -23,6 +25,7 @@ Coordinator *TestFrame::CreateCoordinator(cooid_t coo_id,
                                           ClientControlServiceImpl *ccsi,
                                           uint32_t id,
                                           shared_ptr<TxnRegistry> txn_reg) {
+  Log_info("@@@ Test CP 3: TestFrame::CreateCoordinator");
   verify(config != nullptr);
   CoordinatorTest *coo;
   coo = new CoordinatorTest(coo_id, benchmark, ccsi, id);
@@ -31,17 +34,18 @@ Coordinator *TestFrame::CreateCoordinator(cooid_t coo_id,
   coo->commo_ = commo_;
   verify(sch_ != nullptr);
   coo->sch_ = this->sch_;
-  //coo->slot_hint_ = &slot_hint_;
-  //coo->slot_id_ = slot_hint_++;
-  //coo->n_replica_ = config->GetPartitionSize(site_info_->partition_id_);
+  coo->slot_hint_ = &slot_hint_;
+  coo->slot_id_ = slot_hint_++;
+  coo->n_replica_ = config->GetPartitionSize(site_info_->partition_id_);
   coo->loc_id_ = this->site_info_->locale_id;
-  //verify(coo->n_replica_ != 0);
+  verify(coo->n_replica_ != 0);
   Log_info("create new test coord, coo_id: %d", (int) coo->coo_id_);
   return coo;
 }
 
 
 TxLogServer *TestFrame::CreateScheduler() {
+  Log_info("@@@ Test CP 4: TestFrame::CreateScheduler");
   Log_info("Inside CreateScheduler");
   if (sch_ == nullptr) {
     sch_ = new TestServer(this);
@@ -53,6 +57,7 @@ TxLogServer *TestFrame::CreateScheduler() {
 }
 
 Communicator *TestFrame::CreateCommo(PollMgr *poll) {
+  Log_info("@@@ Test CP 5: TestFrame::CreateCommo");
   Log_info("Inside CreateCommo");
   if (commo_ == nullptr) {
     commo_ = new TestCommo(poll);
@@ -64,9 +69,12 @@ vector<rrr::Service *> TestFrame::CreateRpcServices(uint32_t site_id,
                                                     TxLogServer *rep_sched,
                                                     rrr::PollMgr *poll_mgr,
                                                     ServerControlServiceImpl *scsi) {
+  Log_info("@@@ Test CP 6: TestFrame::CreateRpcServices");
+  Log_info("Inside CreateRpcServices");
   auto config = Config::GetConfig();
   auto result = std::vector<Service *>();
   switch (config->replica_proto_) {
+    Log_info("@@@ Test CP 6A: TestFrame::CreateRpcServices");
     case MODE_TEST:result.push_back(new TestServiceImpl(rep_sched));
     default:break;
   }

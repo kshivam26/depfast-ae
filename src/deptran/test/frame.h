@@ -28,6 +28,8 @@ class TestFrame : public Frame {
                                              TxLogServer *dtxn_sched,
                                              rrr::PollMgr *poll_mgr,
                                              ServerControlServiceImpl *scsi) override;
+  private:
+    slotid_t slot_hint_ = 1;
 };
 
 }

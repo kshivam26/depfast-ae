@@ -18,6 +18,7 @@ struct hb_loop_args_type {
 };
 
 FpgaRaftServer::FpgaRaftServer(Frame * frame) {
+  Log_info("@@@ FpgaRaft CP 45: FpgaRaftServer::FpgaRaftServer");
   frame_ = frame ;
   setIsFPGALeader(frame_->site_info_->locale_id == 0) ;
   setIsLeader(frame_->site_info_->locale_id == 0) ;
@@ -26,6 +27,7 @@ FpgaRaftServer::FpgaRaftServer(Frame * frame) {
 }
 
 void FpgaRaftServer::Setup() {
+  Log_info("@@@ FpgaRaft CP 46: FpgaRaftServer::Setup");
 	if (heartbeat_ && !FpgaRaftServer::looping && IsLeader()) {
 		Log_info("starting loop at server");
 		FpgaRaftServer::looping = true;
@@ -39,6 +41,7 @@ void FpgaRaftServer::Setup() {
 }
 
 void* FpgaRaftServer::HeartbeatLoop(void* args) {
+  Log_info("@@@ FpgaRaft CP 47: FpgaRaftServer::HeartbeatLoop");
 	hb_loop_args_type* hb_loop_args = (hb_loop_args_type*) args;
 
 	FpgaRaftServer::looping = true;
@@ -80,6 +83,7 @@ void* FpgaRaftServer::HeartbeatLoop(void* args) {
 }
 
 FpgaRaftServer::~FpgaRaftServer() {
+  Log_info("@@@ FpgaRaft CP 48: FpgaRaftServer::~FpgaRaftServer");
 		if (heartbeat_ && FpgaRaftServer::looping) {
 			FpgaRaftServer::looping = false;
 			Pthread_join(loop_th_, nullptr);
@@ -91,6 +95,7 @@ FpgaRaftServer::~FpgaRaftServer() {
 }
 
 void FpgaRaftServer::RequestVote2FPGA() {
+  Log_info("@@@ FpgaRaft CP 49: FpgaRaftServer::RequestVote2FPGA");
 
   // currently don't request vote if no log
   if(this->commo_ == NULL || lastLogIndex == 0 ) return ;
@@ -150,6 +155,7 @@ void FpgaRaftServer::OnVote2FPGA(const slotid_t& lst_log_idx,
                             ballot_t *reply_term,
                             bool_t *vote_granted,
                             const function<void()> &cb) {
+  Log_info("@@@ FpgaRaft CP 50: FpgaRaftServer::OnVote2FPGA");
 
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   Log_debug("fpga raft receives vote from candidate: %llx", can_id);
@@ -200,6 +206,7 @@ void FpgaRaftServer::OnVote2FPGA(const slotid_t& lst_log_idx,
 
 
 bool FpgaRaftServer::RequestVote() {
+  Log_info("@@@ FpgaRaft CP 51: FpgaRaftServer::RequestVote");
   Log_info("inside FpgaRaftServer::RequestVote()");
   for(int i = 0; i < 1000; i++) Log_info("not calling the wrong method");
 
@@ -287,6 +294,7 @@ void FpgaRaftServer::OnVote(const slotid_t& lst_log_idx,
                             ballot_t *reply_term,
                             bool_t *vote_granted,
                             const function<void()> &cb) {
+  Log_info("@@@ FpgaRaft CP 52: FpgaRaftServer::OnVote");
 
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   Log_debug("fpga raft receives vote from candidate: %llx", can_id);
@@ -341,6 +349,7 @@ void FpgaRaftServer::OnVote(const slotid_t& lst_log_idx,
 
 void FpgaRaftServer::StartTimer()
 {
+  Log_info("@@@ FpgaRaft CP 53: FpgaRaftServer::StartTimer");
     if(!init_ ){
         resetTimer() ;
         Coroutine::CreateRun([&]() {
@@ -386,6 +395,7 @@ void FpgaRaftServer::StartTimer()
                                      uint64_t *followerCurrentTerm,
                                      uint64_t *followerLastLogIndex,
                                      const function<void()> &cb) {
+  Log_info("@@@ FpgaRaft CP 54: FpgaRaftServer::OnAppendEntries");
         std::lock_guard<std::recursive_mutex> lock(mtx_);
         //StartTimer() ;
         // Log_info("==== inside void FpgaRaftServer::OnAppendEntries");
@@ -470,6 +480,7 @@ void FpgaRaftServer::StartTimer()
     void FpgaRaftServer::OnForward(shared_ptr<Marshallable> &cmd, 
                                           uint64_t *cmt_idx,
                                           const function<void()> &cb) {
+  Log_info("@@@ FpgaRaft CP 55: FpgaRaftServer::OnForward");
         Log_info("==== inside void FpgaRaftServer::OnForward");
         this->rep_frame_ = this->frame_ ;
         auto co = ((TxLogServer *)(this))->CreateRepCoord(0);
@@ -491,6 +502,7 @@ void FpgaRaftServer::StartTimer()
   void FpgaRaftServer::OnCommit(const slotid_t slot_id,
                               const ballot_t ballot,
                               shared_ptr<Marshallable> &cmd) {
+  Log_info("@@@ FpgaRaft CP 56: FpgaRaftServer::OnCommit");
     std::lock_guard<std::recursive_mutex> lock(mtx_);
 		struct timespec begin, end;
 		//clock_gettime(CLOCK_MONOTONIC, &begin);
@@ -523,6 +535,7 @@ void FpgaRaftServer::StartTimer()
 		Log_info("time of decide on server: %d", (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);*/
   }
   void FpgaRaftServer::SpCommit(const uint64_t cmt_idx) {
+  Log_info("@@@ FpgaRaft CP 57: FpgaRaftServer::SpCommit");
       verify(0) ; // TODO delete it
       std::lock_guard<std::recursive_mutex> lock(mtx_);
       Log_debug("fpga raft spcommit for index: %lx for server %d", cmt_idx, loc_id_);
@@ -546,6 +559,7 @@ void FpgaRaftServer::StartTimer()
   }
 
   void FpgaRaftServer::removeCmd(slotid_t slot) {
+  Log_info("@@@ FpgaRaft CP 58: FpgaRaftServer::removeCmd");
     auto cmd = dynamic_pointer_cast<TpcCommitCommand>(raft_logs_[slot]->log_);
     if (!cmd)
       return;
@@ -557,6 +571,7 @@ void FpgaRaftServer::StartTimer()
               const MarshallDeputy& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const MarshallDeputy& state){
+  Log_info("@@@ FpgaRaft CP 59: FpgaRaftServer::OnCRPC");
     // Log_info("==== inside void FpgaRaftServer::OnCRPC");
 
     switch (cmd.kind_){
@@ -625,6 +640,7 @@ void FpgaRaftServer::StartTimer()
               const MarshallDeputy& cmd,
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
+  Log_info("@@@ FpgaRaft CP 60: FpgaRaftServer::OnCRPC3");
     // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 1 tid: %d", gettid());
     if (addrChain.size() == 1)
     {
@@ -719,6 +735,7 @@ void FpgaRaftServer::StartTimer()
               const std::vector<uint16_t>& addrChain, 
               std::vector<AppendEntriesResult>* state,
               const function<void()> &cb){
+  Log_info("@@@ FpgaRaft CP 61: FpgaRaftServer::OnCRPC_no_chain");
     // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, calling this->OnAppendEntries; tid is %d", gettid());
 
     AppendEntriesResult res;
@@ -797,6 +814,7 @@ void FpgaRaftServer::StartTimer()
               const AppendEntriesCommand& cmd,
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
+  Log_info("@@@ FpgaRaft CP 62: FpgaRaftServer::OnCRPC2");
     // Log_info("==== inside void FpgaRaftServer::OnCRPC");
     // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 0 @ %d", gettid());
     switch (cmd.kind_){
