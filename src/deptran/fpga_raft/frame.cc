@@ -39,11 +39,9 @@ struct foo : automatic_register<foo> {
 
 FpgaRaftFrame::FpgaRaftFrame(int mode) : Frame(mode) {
 
-  Log_info("@@@ FpgaRaft CP 1: FpgaRaftFrame::FpgaRaftFrame");
 }
 
 Executor *FpgaRaftFrame::CreateExecutor(cmdid_t cmd_id, TxLogServer *sched) {
-  Log_info("@@@ FpgaRaft CP 2: FpgaRaftFrame::CreateExecutor");
   Executor *exec = new FpgaRaftExecutor(cmd_id, sched);
   return exec;
 }
@@ -54,10 +52,7 @@ Coordinator *FpgaRaftFrame::CreateCoordinator(cooid_t coo_id,
                                                 ClientControlServiceImpl *ccsi,
                                                 uint32_t id,
                                                 shared_ptr<TxnRegistry> txn_reg) {
-
-
-  Log_info("@@@ FpgaRaft CP 3: FpgaRaftFrame::CreateCoordinator");
-  Log_info("*** Inside Coordinator *FpgaRaftFrame::CreateCoordinator");
+  // Log_info("*** Inside Coordinator *FpgaRaftFrame::CreateCoordinator");
   verify(config != nullptr);
   CoordinatorFpgaRaft *coo;
   coo = new CoordinatorFpgaRaft(coo_id,
@@ -80,8 +75,6 @@ Coordinator *FpgaRaftFrame::CreateCoordinator(cooid_t coo_id,
 }
 
 TxLogServer *FpgaRaftFrame::CreateScheduler() {
-
-  Log_info("@@@ FpgaRaft CP 4: FpgaRaftFrame::CreateScheduler");
   if(sch_ == nullptr)
   {
     sch_ = new FpgaRaftServer(this);
@@ -90,7 +83,7 @@ TxLogServer *FpgaRaftFrame::CreateScheduler() {
   {
     verify(0) ;
   }
-  Log_info("create new fpga raft sched loc: %d", this->site_info_->locale_id);
+  Log_debug("create new fpga raft sched loc: %d", this->site_info_->locale_id);
   return sch_ ;
 }
 
@@ -98,9 +91,6 @@ Communicator *FpgaRaftFrame::CreateCommo(PollMgr *poll) {
   // We only have 1 instance of FpgaRaftFrame object that is returned from
   // GetFrame method. FpgaRaftCommo currently seems ok to share among the
   // clients of this method.
-
-  Log_info("@@@ FpgaRaft CP 5: FpgaRaftFrame::CreateCommo");
-  Log_info("Inside CreateCommo");
   if (commo_ == nullptr) {
     commo_ = new FpgaRaftCommo(poll);
   }
@@ -112,13 +102,9 @@ FpgaRaftFrame::CreateRpcServices(uint32_t site_id,
                                    TxLogServer *rep_sched,
                                    rrr::PollMgr *poll_mgr,
                                    ServerControlServiceImpl *scsi) {
-
-  Log_info("@@@ FpgaRaft CP 6: FpgaRaftFrame::CreateRpcServices");
-  Log_info("Inside CreateRpcServices");
   auto config = Config::GetConfig();
   auto result = std::vector<Service *>();
   switch (config->replica_proto_) {
-    Log_info("@@@ FpgaRaft CP 6A: FpgaRaftFrame::CreateRpcServices");
     case MODE_FPGA_RAFT:result.push_back(new FpgaRaftServiceImpl(rep_sched));
     default:break;
   }

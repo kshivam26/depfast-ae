@@ -8,11 +8,9 @@ static bool hasPrinted = false;
 
 TestServiceImpl::TestServiceImpl(TxLogServer *sched)
     : sched_((TestServer *)sched) {
-  Log_info("@@@ Test CP 14: TestServiceImpl::TestServiceImpl");
 }
 
 void TestServiceImpl::cRPCSVC(const uint64_t& id, const std::vector<uint16_t>& addrChain, const MarshallDeputy& cmd, rrr::DeferredReply* defer) {
-  Log_info("@@@ Test CP 15: TestServiceImpl::cRPCSVC");
   Log_info("==== inside void TestServiceImpl::cRPCSVC");
   // just create a appendEntriesCommand. no casting required
   // TODO: make Result as a base class and let AppendEntriesResult inherit it

@@ -7,21 +7,17 @@
 namespace janus {
 
 TestServer::TestServer(Frame * frame) {
-  Log_info("@@@ Test CP 16: TestServer::TestServer");
   frame_ = frame ;
   stop_ = false ;
 }
 
 void TestServer::Setup() {
-  Log_info("@@@ Test CP 17: TestServer::Setup");}
 
 TestServer::~TestServer() {
-  Log_info("@@@ Test CP 18: TestServer::~TestServer");
 	stop_ = true;
 }
 
 void TestServer::cRPCSRV(const uint64_t& id, const std::vector<uint16_t>& addrChain, const MarshallDeputy& cmd){
-  Log_info("@@@ Test CP 19: TestServer::cRPCSRV");
   Log_info("==== inside void TestServer::cRPCSRV");
   toyCounter++;
     if (addrChain.size() == 1) {

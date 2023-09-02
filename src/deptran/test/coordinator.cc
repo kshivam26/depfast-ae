@@ -10,20 +10,17 @@ CoordinatorTest::CoordinatorTest(uint32_t coo_id,
                                  int32_t benchmark,
                                  ClientControlServiceImpl *ccsi,
                                  uint32_t thread_id) : Coordinator(coo_id, benchmark, ccsi, thread_id) {
-  Log_info("@@@ Test CP 7: CoordinatorTest::CoordinatorTest");
 
   Log_info("*** inside CoordinatorTest");
 }
 
 CoordinatorTest::~CoordinatorTest() {
-  Log_info("@@@ Test CP 8: CoordinatorTest::~CoordinatorTest");
   Log_info("Test coord %d destroyed", (int)coo_id_);
 }
 
 void CoordinatorTest::Submit(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
                                    const function<void()>& exe_callback) {
-  Log_info("@@@ Test CP 9: CoordinatorTest::Submit");
   Log_info("*** inside void CoordinatorTest::Submit");
   /* if (!IsLeader()) {
     //Log_fatal("i am not the leader; site %d; locale %d",
@@ -44,7 +41,6 @@ void CoordinatorTest::Submit(shared_ptr<Marshallable>& cmd,
 }
 
 void CoordinatorTest::StartChain() {
-  Log_info("@@@ Test CP 10: CoordinatorTest::StartChain");
 
   Log_info("*** inside void CoordinatorTest::StartChain");
 

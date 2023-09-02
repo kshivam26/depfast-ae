@@ -11,14 +11,12 @@
 namespace janus {
 
 FpgaRaftCommo::FpgaRaftCommo(PollMgr* poll) : Communicator(poll) {
-  Log_info("@@@ FpgaRaft CP 16: FpgaRaftCommo::FpgaRaftCommo");
 //  verify(poll != nullptr);
 }
 
 shared_ptr<FpgaRaftForwardQuorumEvent> FpgaRaftCommo::SendForward(parid_t par_id, 
                                             parid_t self_id, shared_ptr<Marshallable> cmd)
 {
-  Log_info("@@@ FpgaRaft CP 17: FpgaRaftCommo::SendForward");
     int n = Config::GetConfig()->GetPartitionSize(par_id);
     auto e = Reactor::CreateSpEvent<FpgaRaftForwardQuorumEvent>(1,1);
     parid_t fid = (self_id + 1 ) % n ;
@@ -46,7 +44,6 @@ shared_ptr<FpgaRaftForwardQuorumEvent> FpgaRaftCommo::SendForward(parid_t par_id
 
 void FpgaRaftCommo::BroadcastHeartbeat(parid_t par_id,
 																			 uint64_t logIndex) {
-  Log_info("@@@ FpgaRaft CP 18: FpgaRaftCommo::BroadcastHeartbeat");
 	//Log_info("heartbeat for log index: %d", logIndex);
   Log_info("inside FpgaRaftCommo::BroadcastHeartbeat");
   auto proxies = rpc_par_proxies_[par_id];
@@ -80,7 +77,6 @@ void FpgaRaftCommo::BroadcastHeartbeat(parid_t par_id,
 void FpgaRaftCommo::SendHeartbeat(parid_t par_id,
 																	siteid_t site_id,
 																  uint64_t logIndex) {
-  Log_info("@@@ FpgaRaft CP 19: FpgaRaftCommo::SendHeartbeat");
   auto proxies = rpc_par_proxies_[par_id];
   vector<Future*> fus;
 	WAN_WAIT;
@@ -112,7 +108,6 @@ void FpgaRaftCommo::SendAppendEntriesAgain(siteid_t site_id,
 																					 uint64_t prevLogTerm,
 																					 uint64_t commitIndex,
 																					 shared_ptr<Marshallable> cmd) {
-  Log_info("@@@ FpgaRaft CP 20: FpgaRaftCommo::SendAppendEntriesAgain");
   auto proxies = rpc_par_proxies_[par_id];
   vector<Future*> fus;
 	WAN_WAIT;
@@ -284,7 +279,6 @@ FpgaRaftCommo::crpc_ring_BroadcastAppendEntries(parid_t par_id,
                                       uint64_t prevLogTerm,
                                       uint64_t commitIndex,
                                       shared_ptr<Marshallable> cmd) {
-  Log_info("@@@ FpgaRaft CP 21: FpgaRaftCommo::crpc_ring_BroadcastAppendEntries");
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
       Log_info("In crpcAppendEntries_ring_back; tid of leader is %d", gettid());
@@ -408,7 +402,6 @@ FpgaRaftCommo::crpc_BroadcastAppendEntries(parid_t par_id,
                                       uint64_t prevLogTerm,
                                       uint64_t commitIndex,
                                       shared_ptr<Marshallable> cmd) {
-  Log_info("@@@ FpgaRaft CP 22: FpgaRaftCommo::crpc_BroadcastAppendEntries");
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
       Log_info("In crpcAppendEntries_no_chain; tid of leader is %d", gettid());
@@ -522,7 +515,6 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
                                       uint64_t prevLogTerm,
                                       uint64_t commitIndex,
                                       shared_ptr<Marshallable> cmd) {
-  Log_info("@@@ FpgaRaft CP 23: FpgaRaftCommo::BroadcastAppendEntries");
   static bool hasPrinted = false;  // Static variable to track if it has printed
 
   if (!hasPrinted) {
@@ -631,7 +623,6 @@ void FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
                                            uint64_t commitIndex,
                                            shared_ptr<Marshallable> cmd,
                                            const function<void(Future*)>& cb) {
-  Log_info("@@@ FpgaRaft CP 24: FpgaRaftCommo::BroadcastAppendEntries");
   verify(0); // deprecated function
   auto proxies = rpc_par_proxies_[par_id];
   vector<Future*> fus;
@@ -662,7 +653,6 @@ void FpgaRaftCommo::BroadcastDecide(const parid_t par_id,
 																			const i64 dep_id,
                                       const ballot_t ballot,
                                       const shared_ptr<Marshallable> cmd) {
-  Log_info("@@@ FpgaRaft CP 25: FpgaRaftCommo::BroadcastDecide");
   auto proxies = rpc_par_proxies_[par_id];
   vector<Future*> fus;
   for (auto& p : proxies) {
@@ -684,7 +674,6 @@ void FpgaRaftCommo::BroadcastVote(parid_t par_id,
                                         parid_t self_id,
                                         ballot_t cur_term,
                                        const function<void(Future*)>& cb) {
-  Log_info("@@@ FpgaRaft CP 26: FpgaRaftCommo::BroadcastVote");
   verify(0); // deprecated function
   auto proxies = rpc_par_proxies_[par_id];
   for (auto& p : proxies) {
@@ -701,7 +690,6 @@ FpgaRaftCommo::BroadcastVote(parid_t par_id,
                                     ballot_t lst_log_term,
                                     parid_t self_id,
                                     ballot_t cur_term ) {
-  Log_info("@@@ FpgaRaft CP 27: FpgaRaftCommo::BroadcastVote");
   // // Log_info("*** inside FpgaRaftCommo::BroadcastVote");
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftVoteQuorumEvent>(n, n/2);
@@ -733,7 +721,6 @@ void FpgaRaftCommo::BroadcastVote2FPGA(parid_t par_id,
                                         parid_t self_id,
                                         ballot_t cur_term,
                                        const function<void(Future*)>& cb) {
-  Log_info("@@@ FpgaRaft CP 28: FpgaRaftCommo::BroadcastVote2FPGA");
   verify(0); // deprecated function
   auto proxies = rpc_par_proxies_[par_id];
   for (auto& p : proxies) {
@@ -750,7 +737,6 @@ FpgaRaftCommo::BroadcastVote2FPGA(parid_t par_id,
                                     ballot_t lst_log_term,
                                     parid_t self_id,
                                     ballot_t cur_term ) {
-  Log_info("@@@ FpgaRaft CP 29: FpgaRaftCommo::BroadcastVote2FPGA");
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftVote2FPGAQuorumEvent>(n, n/2);
   auto proxies = rpc_par_proxies_[par_id];
@@ -777,7 +763,6 @@ void FpgaRaftCommo::cRPC(const parid_t par_id,
               const MarshallDeputy& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const MarshallDeputy& state){
-  Log_info("@@@ FpgaRaft CP 30: FpgaRaftCommo::cRPC");
   // // Log_info("*** inside FpgaRaftCommo::cRPC");
 
   FutureAttr fuattr;
@@ -810,7 +795,6 @@ void FpgaRaftCommo::CrpcAppendEntries(const parid_t par_id,
               const AppendEntriesCommand& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
-  Log_info("@@@ FpgaRaft CP 31: FpgaRaftCommo::CrpcAppendEntries");
   // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
   auto proxies = rpc_par_proxies_[par_id];
   FpgaRaftProxy *proxy = nullptr;
@@ -832,7 +816,6 @@ void FpgaRaftCommo::CrpcAppendEntries3(const parid_t par_id,
               const MarshallDeputy& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
-  Log_info("@@@ FpgaRaft CP 32: FpgaRaftCommo::CrpcAppendEntries3");
   // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
   // auto proxies = rpc_par_proxies_[par_id];
   // FpgaRaftProxy *proxy = nullptr;
@@ -856,7 +839,6 @@ void FpgaRaftCommo::CrpcAppendEntries_no_chain(const parid_t par_id,
               const std::vector<uint16_t>& addrChain, 
               std::vector<AppendEntriesResult>* state,
               const function<void()> &cb){
-  Log_info("@@@ FpgaRaft CP 33: FpgaRaftCommo::CrpcAppendEntries_no_chain");
   // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
   // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain, calling proxy->CrpcAppendEntries3; tid is %d", gettid());
   auto proxies = rpc_par_proxies_[par_id];

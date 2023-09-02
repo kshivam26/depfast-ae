@@ -6,12 +6,10 @@
 namespace janus {
 
 TestCommo::TestCommo(PollMgr* poll) : Communicator(poll) {
-  Log_info("@@@ Test CP 11: TestCommo::TestCommo");
 //  verify(poll != nullptr);
 }
 
 shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd) {
-  Log_info("@@@ Test CP 12: TestCommo::cRPC");
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
     Log_info("In TestCommo::cRPC; tid of leader is %d", gettid());
@@ -115,7 +113,6 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_sit
 }
 
 void TestCommo::cRPC2(const uint64_t& id, const std::vector<uint16_t>& addrChain, const MarshallDeputy& cmd) {
-  Log_info("@@@ Test CP 13: TestCommo::cRPC2");
   auto proxy = (TestProxy *)rpc_proxies_[addrChain[0]];
   auto f = proxy->async_cRPCSVC(id, addrChain, cmd);
   Future::safe_release(f);

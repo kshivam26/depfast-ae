@@ -13,23 +13,19 @@ CoordinatorFpgaRaft::CoordinatorFpgaRaft(uint32_t coo_id,
                                              ClientControlServiceImpl* ccsi,
                                              uint32_t thread_id)
     : Coordinator(coo_id, benchmark, ccsi, thread_id) {
-  Log_info("@@@ FpgaRaft CP 7: CoordinatorFpgaRaft::CoordinatorFpgaRaft");
 }
 
 bool CoordinatorFpgaRaft::IsLeader() {
-  Log_info("@@@ FpgaRaft CP 8: CoordinatorFpgaRaft::IsLeader");
    return this->sch_->IsLeader() ;
 }
 
 bool CoordinatorFpgaRaft::IsFPGALeader() {
-  Log_info("@@@ FpgaRaft CP 9: CoordinatorFpgaRaft::IsFPGALeader");
    return this->sch_->IsFPGALeader() ;
 }
 
 void CoordinatorFpgaRaft::Forward(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
                                    const function<void()>& exe_callback) {
-  Log_info("@@@ FpgaRaft CP 10: CoordinatorFpgaRaft::Forward");
     //for(int i = 0; i < 100; i++) Log_info("inside forward");
 		verify(0) ; // TODO delete it
     auto e = commo()->SendForward(par_id_, loc_id_, cmd);
@@ -45,7 +41,6 @@ void CoordinatorFpgaRaft::Forward(shared_ptr<Marshallable>& cmd,
 void CoordinatorFpgaRaft::Submit(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
                                    const function<void()>& exe_callback) {
-  Log_info("@@@ FpgaRaft CP 11: CoordinatorFpgaRaft::Submit");
   // Log_info("*** inside void CoordinatorFpgaRaft::Submit");
   if (!IsLeader()) {
     //Log_fatal("i am not the leader; site %d; locale %d",
@@ -67,7 +62,7 @@ void CoordinatorFpgaRaft::Submit(shared_ptr<Marshallable>& cmd,
 }
 
 void CoordinatorFpgaRaft::AppendEntries() {
-  Log_info("@@@ FpgaRaft CP 12: CoordinatorFpgaRaft::AppendEntries");    
+    
     std::lock_guard<std::recursive_mutex> lock(mtx_);
     verify(!in_append_entries);
     // verify(this->sch_->IsLeader()); TODO del it yidawu
@@ -210,7 +205,6 @@ void CoordinatorFpgaRaft::AppendEntries() {
 }
 
 void CoordinatorFpgaRaft::Commit() {
-  Log_info("@@@ FpgaRaft CP 13: CoordinatorFpgaRaft::Commit");   
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   commit_callback_();
   Log_debug("fpga-raft broadcast commit for partition: %d, slot %d",
@@ -221,7 +215,6 @@ void CoordinatorFpgaRaft::Commit() {
 }
 
 void CoordinatorFpgaRaft::LeaderLearn() {
-  Log_info("@@@ FpgaRaft CP 14: CoordinatorFpgaRaft::LeaderLearn");
     std::lock_guard<std::recursive_mutex> lock(mtx_);
     commit_callback_();
     uint64_t prevCommitIndex = this->sch_->commitIndex;
@@ -241,7 +234,6 @@ void CoordinatorFpgaRaft::LeaderLearn() {
 }
 
 void CoordinatorFpgaRaft::GotoNextPhase() {
-  Log_info("@@@ FpgaRaft CP 15: CoordinatorFpgaRaft::GotoNextPhase");
   // Log_info("*** inside CoordinatorFpgaRaft::GotoNextPhase");
   int n_phase = 4;
   int current_phase = phase_ % n_phase;
