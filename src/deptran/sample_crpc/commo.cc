@@ -13,22 +13,23 @@ SampleCrpcCommo::SampleCrpcCommo(PollMgr* poll) : Communicator(poll) {
 //  verify(poll != nullptr);
 }
 
-void SampleCrpcCommo::CrpcAppendEntries(const parid_t par_id,
+void SampleCrpcCommo::CrpcAppendEntries3(const parid_t par_id,
               const uint64_t& id,
               const int64_t& value1,
               const int64_t& value2, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<ResultAdd>& state){
   Log_info("inside SampleCrpcCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
-  auto proxies = rpc_par_proxies_[par_id];
-  SampleCrpcProxy *proxy = nullptr;
+  // auto proxies = rpc_par_proxies_[par_id];
+  // SampleCrpcProxy *proxy = nullptr;
 
-  proxy = (SampleCrpcProxy *)rpc_proxies_[addrChain[0]];
+  auto proxy = (SampleCrpcProxy *)rpc_proxies_[addrChain[0]];
   auto f = proxy->async_CrpcAppendEntries(id, value1, value2, addrChain, state);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
 }
 
-void SampleCrpcCommo::crpc_add(parid_t par_id,
+shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
+                                      siteid_t leader_site_id,
                                       const int64_t& value1,
                                       const int64_t& value2,
                                       shared_ptr<Marshallable> cmd) {
@@ -40,6 +41,7 @@ void SampleCrpcCommo::crpc_add(parid_t par_id,
   }
 
   int n = Config::GetConfig()->GetPartitionSize(par_id);
+  auto e = Reactor::CreateSpEvent<SampleCrpcAppendQuorumEvent>(n, n/2 + 1);
   auto proxies = rpc_par_proxies_[par_id];
 
   unordered_set<std::string> ip_addrs {};
@@ -57,13 +59,17 @@ void SampleCrpcCommo::crpc_add(parid_t par_id,
       ip = cli_it->second->host();
     }
     ip_addrs.insert(ip);
-    sitesInfo_.push_back(id); // #cPRC additional
+    if (id != leader_site_id) { // #cPRC additional
+      sitesInfo_.push_back(id); // #cPRC additional
+    }                           // #cPRC additional
 		//clients.push_back(cli);
   }
   //e->clients_ = clients;
 
   // TODO: remove line below, adding this to shorten the chain
   // sitesInfo_.pop_back();
+
+  sitesInfo_.push_back(leader_site_id); // #cPRC additional
 
   // MarshallDeputy aes_md(dynamic_pointer_cast<Marshallable>(std::make_shared<AppendEntriesCommandState>())); // additional
   for (auto& p : proxies) {    
@@ -74,8 +80,14 @@ void SampleCrpcCommo::crpc_add(parid_t par_id,
     if (cli_it != rpc_clients_.end()) {
       ip = cli_it->second->host();
     }
+	  if (p.first == leader_site_id) {
+        // fix the 1c1s1p bug
+        // Log_info("leader_site_id %d", leader_site_id);
+        e->FeedResponse(true, 1, ip);
+        continue;
+    }
 
-    MarshallDeputy md(cmd); // commented, cause segmentation fault?
+    MarshallDeputy md(cmd);
 		verify(md.sp_data_ != nullptr);
     // auto ae_cmd = std::make_shared<AppendEntriesCommand>(slot_id, 
     //                                                     ballot, 
@@ -89,11 +101,11 @@ void SampleCrpcCommo::crpc_add(parid_t par_id,
     // Log_info("returning std::make_shared<AppendEntriesCommand>");
 
     // MarshallDeputy ae_md(dynamic_pointer_cast<Marshallable>(ae_cmd));
-    
+
     // crpc_id generation is also not abstracted
-    uint64_t crpc_id;
+    uint64_t crpc_id = reinterpret_cast<uint64_t>(&e);
     // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
-    // verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
+    verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
 
     std::vector<ResultAdd> state;
 
@@ -113,11 +125,15 @@ void SampleCrpcCommo::crpc_add(parid_t par_id,
                                                         sitesInfo_, state); // this can definitely be pushed into the cRPC function below // #profile (crpc2) - 2.05%
     Future::safe_release(f);
 
+    // this too should be abstracted
+    cRPCEvents[crpc_id] = e;
+
     // rather than breaking, do something else; when iterating through proxies
     break;
 
     }
   // // Log_info("*** returning from SampleCrpcCommo::crpc_ring_BroadcastAppendEntries");
+  return e;
 }
 
 } // namespace janus

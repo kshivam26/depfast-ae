@@ -26,11 +26,16 @@ void CoordinatorSampleCrpc::Submit(shared_ptr<Marshallable>& cmd,
   Log_info("*** inside void CoordinatorSampleCrpc::Submit, cmd kind: %d", cmd_->kind_);
   AppendEntries();
   Log_info("*** returning from void CoordinatorSampleCrpc::Submit");
+  this->sch_->app_next_(*cmd);
 }
 
 void CoordinatorSampleCrpc::AppendEntries() {
 
     Log_info("*** inside void CoordinatorSampleCrpc::AppendEntries;");
+
+    std::lock_guard<std::recursive_mutex> lock(mtx_);
+
+
     // Log_info("*** inside void CoordinatorSampleCrpc::AppendEntries; count: %ld; tid is: %d", count, gettid());
 
     TpcCommitAddCommand* add_cmd_ = dynamic_cast<TpcCommitAddCommand*>(cmd_.get());
@@ -38,7 +43,16 @@ void CoordinatorSampleCrpc::AppendEntries() {
     Log_info("*** inside inside void CoordinatorSampleCrpc::AppendEntries; value1: %d, value2: %d", add_cmd_->value_1, add_cmd_->value_2);
     int64_t value1 = add_cmd_->value_1;
     int64_t value2 = add_cmd_->value_2;
-    commo()->crpc_add(par_id_, value1, value2, cmd_);
+
+    shared_ptr<SampleCrpcAppendQuorumEvent> sp_quorum = nullptr;
+    static uint64_t count = 0;
+    count++;
+
+    sp_quorum = commo()->crpc_add(par_id_, this->sch_->site_id_, value1, value2, cmd_);
+
+    Log_info("=== waiting for quorum");
+    sp_quorum->Wait();
+    Log_info("*** quorum reached");
 
     // Log_info("*** returning from void CoordinatorSampleCrpc::AppendEntries");
 }

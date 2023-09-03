@@ -15,6 +15,11 @@ class SampleCrpcServer : public TxLogServer {
   SampleCrpcServer(Frame *frame) ;
   ~SampleCrpcServer() ;
 
+  void OnAppendEntries(const int64_t value1,
+                       const int64_t value2,
+                       int64_t *resultSum,
+                       const function<void()> &cb);
+
   void OnCRPC3(const uint64_t& id,
               const int64_t& value1,
               const int64_t& value2,

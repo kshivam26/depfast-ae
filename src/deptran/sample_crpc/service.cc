@@ -48,6 +48,7 @@ void SampleCrpcServiceImpl::CrpcAppendEntries(const uint64_t& id,
   // });
 
   // Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; cp 2 tid: %d", gettid());
+  Log_info("*** --- inside SampleCrpcServiceImpl::CrpcAppendEntries, entering OnCRPC3");
   Coroutine::CreateRun([&] () {
       sched_->OnCRPC3(id,
                     value1,

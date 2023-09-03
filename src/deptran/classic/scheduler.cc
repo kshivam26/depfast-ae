@@ -329,6 +329,49 @@ int SchedulerClassic::CommitReplicated(TpcCommitCommand& tpc_commit_cmd) {
   return 0;
 }
 
+int SchedulerClassic::CommitAddReplicated(TpcCommitAddCommand& tpc_commit_cmd) {
+  std::lock_guard<std::recursive_mutex> lock(mtx_);
+  auto tx_id = tpc_commit_cmd.tx_id_;
+  auto sp_tx = dynamic_pointer_cast<TxClassic>(GetOrCreateTx(tx_id));
+  /**
+   * In Copilot, the same cmd commits twice, one in pilot log, another
+   * in copilot log. Must omit the second attempt to commit
+   */
+  if (sp_tx->commit_result->IsReady())
+    return 0;
+  int commit_or_abort = tpc_commit_cmd.ret_;
+  if (!sp_tx->cmd_)
+    sp_tx->cmd_ = tpc_commit_cmd.cmd_;
+  if (!sp_tx->is_leader_hint_) {
+    if (commit_or_abort == REJECT) {
+      sp_tx->commit_result->Set(1);
+      return 0;
+    } else {
+      verify(sp_tx->cmd_);
+      unique_ptr<TxnOutput> out = std::make_unique<TxnOutput>();
+			DepId di = { "dep", 0 };
+      SchedulerClassic::Dispatch(sp_tx->tid_, di, sp_tx->cmd_, *out);
+      DoPrepare(sp_tx->tid_);
+    }
+  }
+  if (commit_or_abort == SUCCESS) {
+    sp_tx->committed_ = true;
+    DoCommit(*sp_tx);
+  } else if (commit_or_abort == REJECT) {
+    sp_tx->aborted_ = true;
+    DoAbort(*sp_tx);
+  } else {
+    verify(0);
+  }
+  // if (sp_tx->is_leader_hint_) {
+  //   // mostly for debug
+  //   sp_tx->commit_result->Set(1);
+  // }
+  sp_tx->commit_result->Set(1);
+  sp_tx->ev_execute_ready_->Set(1);
+  return 0;
+}
+
 bool SchedulerClassic::CheckCommitted(Marshallable& tpc_commit_cmd) { //todo
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   auto &c = dynamic_cast<TpcCommitCommand&>(tpc_commit_cmd);
@@ -346,6 +389,9 @@ void SchedulerClassic::Next(Marshallable& cmd) {
   } else if (cmd.kind_ == MarshallDeputy::CMD_TPC_COMMIT) {
     auto& c = dynamic_cast<TpcCommitCommand&>(cmd);
     CommitReplicated(c);
+  } else if (cmd.kind_ == MarshallDeputy::CMD_SAMPLE_CRPC_APPEND_ENTRIES) {
+    auto& c = dynamic_cast<TpcCommitAddCommand&>(cmd);
+    CommitAddReplicated(c);
   } else if (cmd.kind_ == MarshallDeputy::CMD_TPC_EMPTY) {
     // do nothing
     auto& c = dynamic_cast<TpcEmptyCommand&>(cmd);
