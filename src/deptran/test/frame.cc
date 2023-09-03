@@ -2,15 +2,15 @@
 #include "../constants.h"
 #include "frame.h"
 #include "coordinator.h"
-#include "commo.h"
-#include "service.h"
 #include "server.h"
+#include "service.h"
+#include "commo.h"
 
 namespace janus {
 
 REG_FRAME(MODE_TEST, vector<string>({"test"}), TestFrame);
 
-TestFrame::TestFrame(int mode) : Frame(mode) {
+TestFrame::TestFrame(int mode) : Frame(mode) {}
 
 TestFrame::~TestFrame() { 
   Log_info("Inside CreateScheduler");

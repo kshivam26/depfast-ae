@@ -1,5 +1,7 @@
 #include "../__dep__.h"
 #include "../constants.h"
+#include "../scheduler.h"
+#include "../classic/tpc_command.h"
 #include "coordinator.h"
 #include "commo.h"
 #include "server.h"
@@ -14,9 +16,7 @@ CoordinatorTest::CoordinatorTest(uint32_t coo_id,
   Log_info("*** inside CoordinatorTest");
 }
 
-CoordinatorTest::~CoordinatorTest() {
-  Log_info("Test coord %d destroyed", (int)coo_id_);
-}
+CoordinatorTest::~CoordinatorTest() {}
 
 void CoordinatorTest::Submit(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
@@ -37,11 +37,11 @@ void CoordinatorTest::Submit(shared_ptr<Marshallable>& cmd,
   verify(cmd_->kind_ != MarshallDeputy::UNKNOWN);
   commit_callback_ = func;
   StartChain();
+  this->sch_->app_next_(*cmd);
   Log_info("*** returning from void CoordinatorTest::Submit");
 }
 
 void CoordinatorTest::StartChain() {
-
   Log_info("*** inside void CoordinatorTest::StartChain");
 
   std::lock_guard<std::recursive_mutex> lock(mtx_);
@@ -56,15 +56,15 @@ void CoordinatorTest::StartChain() {
 
   // struct timespec start_, end_;
   // clock_gettime(CLOCK_MONOTONIC, &start_);
-  // Log_info("=== waiting for quorum");
+  Log_info("=== waiting for quorum");
   sp_quorum->Wait();
-  // Log_info("*** quorum reached");
+  Log_info("*** quorum reached");
   // struct timespec end_;
   // clock_gettime(CLOCK_MONOTONIC, &end_);
 
   // quorum_events_.push_back(sp_quorum);
   // Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
-  // slow_ = sp_quorum->IsSlow();  // #profile - 2.13%
+  slow_ = sp_quorum->IsSlow();  // #profile - 2.13%
 
   // long leader_time;
   // std::vector<long> follower_times {};
@@ -101,23 +101,23 @@ void CoordinatorTest::StartChain() {
   // }
 
   // Log_info("slow?: %d", slow_);
-  // if (sp_quorum->Yes()) {
+  if (sp_quorum->Yes()) {
   //   minIndex = sp_quorum->minIndex;
   //   Log_info("%d vs %d", minIndex, this->sch_->commitIndex);
   //   verify(minIndex >= this->sch_->commitIndex) ;
   //   committed_ = true;
   //   Log_debug("fpga-raft append commited loc:%d minindex:%d", loc_id_, minIndex ) ;
-  // } else if (sp_quorum->No()) {
-  //     verify(0);
+  } else if (sp_quorum->No()) {
+      verify(0);
       // TODO should become a follower if the term is smaller
       // if(!IsLeader())
       /* {
         Forward(cmd_,commit_callback_) ;
         return ;
       } */
-  // } else {
-  //     verify(0);
-  // }
+  } else {
+      verify(0);
+  }
 
   Log_info("*** returning from void CoordinatorTest::StartChain");
 }

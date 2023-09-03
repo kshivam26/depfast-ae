@@ -3,11 +3,12 @@
 #include "../__dep__.h"
 #include "../constants.h"
 #include "../communicator.h"
-#include "server.h"
 
 namespace janus {
 
 class TxData;
+class AppendEntriesCommand;
+class AppendEntriesResult;
 
 class ChainQuorumEvent: public QuorumEvent {
   public:
@@ -16,7 +17,7 @@ class ChainQuorumEvent: public QuorumEvent {
     void FeedResponse(bool appendOK, uint64_t index, std::string ip_addr = "") {
       // Log_info("==== inside ChainQuorumEvent:FeedResponse");
       if (appendOK) {
-        // Log_info("==== inside ChainQuorumEvent:FeedRespons; checkpoint 0");
+        Log_info("==== inside ChainQuorumEvent:FeedRespons; checkpoint 0");
           if ((n_voted_yes_ == 0) && (n_voted_no_ == 0)){
             // Log_info("==== inside ChainQuorumEvent:FeedRespons; checkpoint 00");
               minIndex = index;
@@ -45,7 +46,7 @@ friend class TestProxy;
     TestCommo() = delete;
     TestCommo(PollMgr*);
     shared_ptr<ChainQuorumEvent> cRPC(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd);
-    void cRPC2(const uint64_t& id, const std::vector<uint16_t>& addrChain, const MarshallDeputy& cmd);
+    void cRPC2(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain);
 };
 
 }
