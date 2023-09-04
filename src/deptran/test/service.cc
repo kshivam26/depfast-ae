@@ -10,7 +10,7 @@ TestServiceImpl::TestServiceImpl(TxLogServer *sched)
     : sched_((TestServer *)sched) {
 }
 
-void TestServiceImpl::cRPCSVC(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, rrr::DeferredReply* defer) {
+void TestServiceImpl::cRPCSVC(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state, rrr::DeferredReply* defer) {
   Log_info("==== inside void TestServiceImpl::cRPCSVC");
   // just create a appendEntriesCommand. no casting required
   // TODO: make Result as a base class and let AppendEntriesResult inherit it
@@ -41,7 +41,7 @@ void TestServiceImpl::cRPCSVC(const uint64_t& id, const MarshallDeputy& cmd, con
 
   // Log_info("*** inside TestServiceImpl::cRPCSVC; cp 2 tid: %d", gettid());
   Coroutine::CreateRun([&] () {
-    sched_->cRPCSRV(id, cmd, addrChain);
+    sched_->cRPCSRV(id, cmd, addrChain, state);
     // Log_info("*** inside TestServiceImpl::cRPCSVC; cp 3 tid: %d", gettid());
     defer->reply();
     // Log_info("*** inside TestServiceImpl::cRPCSVC; cp 4 tid: %d", gettid());

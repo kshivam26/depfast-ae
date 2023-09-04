@@ -46,7 +46,7 @@ friend class TestProxy;
     TestCommo() = delete;
     TestCommo(PollMgr*);
     shared_ptr<ChainQuorumEvent> cRPC(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd);
-    void cRPC2(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain);
+    void cRPC2(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state);
 };
 
 }

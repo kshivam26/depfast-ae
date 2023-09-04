@@ -18,13 +18,10 @@ class TestServer : public TxLogServer {
     void Setup();
     bool stop_ = false ;
   public:
-    // uint64_t lastLogIndex = 0;
-    // uint64_t commitIndex = 0;
     uint64_t toyCounter = 0;
-    uint64_t stateCounter = 0;
     TestServer(Frame *frame) ;
     ~TestServer() ;
-    void cRPCSRV(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain);
+    void cRPCSRV(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state);
 };
 
 } // namespace janus

@@ -100,7 +100,7 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_sit
     //   Log_info("*** inside fuattr.callback, response received; tid is %d", gettid());
     // };
     // just call cRPC something with the above paramters, and no other changes
-    auto f = proxy->async_cRPCSVC(crpc_id, md, sitesInfo_); // this can definitely be pushed into the cRPC function below // #profile (crpc2) - 2.05%
+    auto f = proxy->async_cRPCSVC(crpc_id, md, sitesInfo_, state); // this can definitely be pushed into the cRPC function below // #profile (crpc2) - 2.05%
     Future::safe_release(f);
 
     // this too should be abstracted
@@ -115,9 +115,9 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_sit
   return e;
 }
 
-void TestCommo::cRPC2(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain) {
+void TestCommo::cRPC2(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state) {
   auto proxy = (TestProxy *)rpc_proxies_[addrChain[0]];
-  auto f = proxy->async_cRPCSVC(id, cmd, addrChain);
+  auto f = proxy->async_cRPCSVC(id, cmd, addrChain, state);
   Future::safe_release(f);
 }
 
