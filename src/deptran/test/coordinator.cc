@@ -54,16 +54,16 @@ void CoordinatorTest::StartChain() {
   // sp_quorum = commo()->cRPC(par_id_, this->sch_->site_id_, prevLogIndex, dep_id_, cmd_);
   sp_quorum = commo()->cRPC(par_id_, this->sch_->site_id_, cmd_);
 
-  // struct timespec start_, end_;
-  // clock_gettime(CLOCK_MONOTONIC, &start_);
+  struct timespec start_, end_;
+  clock_gettime(CLOCK_MONOTONIC, &start_);
   Log_info("=== waiting for quorum");
   sp_quorum->Wait();
   Log_info("*** quorum reached");
   // struct timespec end_;
-  // clock_gettime(CLOCK_MONOTONIC, &end_);
+  clock_gettime(CLOCK_MONOTONIC, &end_);
 
   // quorum_events_.push_back(sp_quorum);
-  // Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+	Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
   slow_ = sp_quorum->IsSlow();  // #profile - 2.13%
 
   // long leader_time;
