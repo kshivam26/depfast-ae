@@ -1,7 +1,7 @@
 
 site:
   server: # each line is a partition, the first is the master site_name:port
-    - ["s101:8000", "s201:8001", "s301:8002"]
+    - ["s101:8000", "s201:8001", "s301:8002", "s401:8003", "s501:8004", "s601:8005", "s701:8006"]
   client: # each line is a partition
     - ["c101", "c201", "c301"]
 
@@ -10,6 +10,10 @@ process:
   s101: localhost
   s201: localhost
   s301: localhost
+  s401: localhost
+  s501: localhost
+  s601: localhost
+  s701: localhost
   c101: localhost
   c201: localhost
   c301: localhost

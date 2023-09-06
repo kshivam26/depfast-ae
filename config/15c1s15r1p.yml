@@ -32,6 +32,11 @@ process:
   c801: localhost
   c901: localhost
   c1001: localhost
+  c1101: localhost
+  c1201: localhost
+  c1301: localhost
+  c1401: localhost
+  c1501: localhost
 
 host:
   localhost: 127.0.0.1
