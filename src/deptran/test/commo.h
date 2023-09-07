@@ -30,7 +30,7 @@ class ChainQuorumEvent: public QuorumEvent {
         Log_info("==== inside ChainQuorumEvent:FeedRespons; checkpoint 1");
         VoteNo();
       }
-      /*Log_debug("fpga-raft comm accept event, "
+      /*Log_debug("test comm accept event, "
         "yes vote: %d, no vote: %d, min index: %d",
         n_voted_yes_, n_voted_no_, minIndex);*/
       // Log_info("==== inside ChainQuorumEvent:FeedRespons; checkpoint final");
@@ -47,6 +47,7 @@ friend class TestProxy;
     TestCommo(PollMgr*);
     shared_ptr<ChainQuorumEvent> cRPC(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd);
     void cRPC2(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state);
+    shared_ptr<ChainQuorumEvent> cRPC_B(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd);
 };
 
 }

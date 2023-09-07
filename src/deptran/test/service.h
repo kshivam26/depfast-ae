@@ -19,6 +19,7 @@ class TestServiceImpl : public TestService {
     TestServer* sched_;
     TestServiceImpl(TxLogServer* sched);
     void cRPCSVC(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state, rrr::DeferredReply* defer) override;
+    void cRPCSVC_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, rrr::DeferredReply* defer) override;
 };
 
 } // namespace janus

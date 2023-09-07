@@ -22,6 +22,7 @@ class TestServer : public TxLogServer {
     TestServer(Frame *frame) ;
     ~TestServer() ;
     void cRPCSRV(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state);
+    void cRPCSRV_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, const function<void()> &cb);
 };
 
 } // namespace janus

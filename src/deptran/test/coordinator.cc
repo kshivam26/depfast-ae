@@ -52,7 +52,13 @@ void CoordinatorTest::StartChain() {
 
   shared_ptr<ChainQuorumEvent> sp_quorum = nullptr;
   // sp_quorum = commo()->cRPC(par_id_, this->sch_->site_id_, prevLogIndex, dep_id_, cmd_);
-  sp_quorum = commo()->cRPC(par_id_, this->sch_->site_id_, cmd_);
+  if(Config::GetConfig()->get_cRPC_version() == 2){
+    sp_quorum = commo()->cRPC(par_id_, this->sch_->site_id_, cmd_);
+  } else if (Config::GetConfig()->get_cRPC_version() == 0) {
+    sp_quorum = commo()->cRPC_B(par_id_, this->sch_->site_id_, cmd_);
+  } else {
+    verify(0);
+  }
 
   struct timespec start_, end_;
   clock_gettime(CLOCK_MONOTONIC, &start_);
@@ -106,7 +112,7 @@ void CoordinatorTest::StartChain() {
   //   Log_info("%d vs %d", minIndex, this->sch_->commitIndex);
   //   verify(minIndex >= this->sch_->commitIndex) ;
   //   committed_ = true;
-  //   Log_debug("fpga-raft append commited loc:%d minindex:%d", loc_id_, minIndex ) ;
+  //   Log_debug("test append commited loc:%d minindex:%d", loc_id_, minIndex ) ;
   } else if (sp_quorum->No()) {
       verify(0);
       // TODO should become a follower if the term is smaller

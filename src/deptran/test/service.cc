@@ -50,4 +50,25 @@ void TestServiceImpl::cRPCSVC(const uint64_t& id, const MarshallDeputy& cmd, con
   Log_info("*** returning from TestServiceImpl::cRPCSVC; tid: %d", gettid());
 }
 
+void TestServiceImpl::cRPCSVC_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, rrr::DeferredReply* defer) {
+  // Log_info("@@@ Test CP 15A: TestServiceImpl::cRPCSVC_B");
+  Log_info("==== inside void TestServiceImpl::cRPCSVC_B");
+  verify(sched_ != nullptr);
+  // Log_info("*** inside TestServiceImpl::cRPCSVC_B; tid: %d", gettid());
+  if (!hasPrinted) {
+    Log_info("tid of non-leader is %d", gettid());
+    hasPrinted = true;  // Update the static variable
+  }
+
+  // Log_info("*** inside TestServiceImpl::_B; cp 2 tid: %d", gettid());
+  Coroutine::CreateRun([&] () {
+    sched_->cRPCSRV_B(cmd, AcceptOK, std::bind(&rrr::DeferredReply::reply, defer));
+    // Log_info("*** inside TestServiceImpl::cRPCSVC_B; cp 3 tid: %d", gettid());
+    // defer->reply();
+    // Log_info("*** inside TestServiceImpl::cRPCSVC_B; cp 4 tid: %d", gettid());
+  });
+
+  Log_info("*** returning from TestServiceImpl::cRPCSVC_B; tid: %d", gettid());
+}
+
 }
