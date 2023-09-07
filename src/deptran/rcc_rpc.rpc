@@ -150,6 +150,10 @@ abstract service SampleCrpc {
                int64_t value2,
                vector<uint16_t> addrChain,
                vector<ResultAdd> state);
+
+  defer BroadcastAppendEntries(int64_t value1,
+               int64_t value2 |
+               int64_t result);
 }
 
 // below is for 2PL and OCC

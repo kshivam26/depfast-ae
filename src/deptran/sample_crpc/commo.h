@@ -51,6 +51,12 @@ friend class SampleCrpcProxy;
               const int64_t& value1,
               const int64_t& value2,
               shared_ptr<Marshallable> cmd);
+              
+  shared_ptr<SampleCrpcAppendQuorumEvent> broadcast_add(parid_t par_id,
+              siteid_t leader_site_id,
+              const int64_t& value1,
+              const int64_t& value2,
+              shared_ptr<Marshallable> cmd);
 
   void CrpcAppendEntries3(const parid_t par_id,
               const uint64_t& id,

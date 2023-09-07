@@ -48,7 +48,16 @@ void CoordinatorSampleCrpc::AppendEntries() {
     static uint64_t count = 0;
     count++;
 
-    sp_quorum = commo()->crpc_add(par_id_, this->sch_->site_id_, value1, value2, cmd_);
+    if(Config::GetConfig()->get_cRPC_version() == 1) {
+        sp_quorum = commo()->broadcast_add(par_id_, this->sch_->site_id_, value1, value2, cmd_);
+    }
+    else if(Config::GetConfig()->get_cRPC_version() == 2) {
+        sp_quorum = commo()->crpc_add(par_id_, this->sch_->site_id_, value1, value2, cmd_);
+    }
+    else {
+        verify(0);
+    }
+    
 
     Log_info("=== waiting for quorum");
     sp_quorum->Wait();

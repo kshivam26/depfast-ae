@@ -24,6 +24,11 @@ class SampleCrpcServiceImpl : public SampleCrpcService {
                           const std::vector<uint16_t>& addrChain, 
                           const std::vector<ResultAdd>& state, 
                           rrr::DeferredReply* defer) override;
+                          
+  void BroadcastAppendEntries(const int64_t& value1,
+                          const int64_t& value2,
+                          int64_t *result,
+                          rrr::DeferredReply* defer) override;
 
 };
 

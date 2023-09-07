@@ -136,4 +136,95 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
   return e;
 }
 
+shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
+                                      siteid_t leader_site_id,
+                                      const int64_t& value1,
+                                      const int64_t& value2,
+                                      shared_ptr<Marshallable> cmd) {
+  static bool hasPrinted = false;  // Static variable to track if it has printed
+
+  if (!hasPrinted) {
+      Log_info("in no cRPC; tid of leader is %d", gettid());
+      hasPrinted = true;  // Update the static variable
+  }
+  static uint64_t count = 0;
+  count++;
+  // Log_info("*** inside void SampleCrpcCommo::BroadcastAppendEntries; count: %ld", count);
+  // Log_info("*** inside void SampleCrpcCommo::BroadcastAppendEntries; slot_id: %ld; tid is: %d", slot_id, gettid());
+
+  int n = Config::GetConfig()->GetPartitionSize(par_id);
+  auto e = Reactor::CreateSpEvent<SampleCrpcAppendQuorumEvent>(n, n/2 + 1);
+  auto proxies = rpc_par_proxies_[par_id];
+
+  unordered_set<std::string> ip_addrs {};
+  std::vector<std::shared_ptr<rrr::Client>> clients;
+
+  vector<Future*> fus;
+  WAN_WAIT;
+
+  for (auto& p : proxies) {
+    auto id = p.first;
+    auto proxy = (SampleCrpcProxy*) p.second;
+    auto cli_it = rpc_clients_.find(id);
+    std::string ip = "";
+    if (cli_it != rpc_clients_.end()) {
+      ip = cli_it->second->host();
+			//cli = cli_it->second;
+    }
+    ip_addrs.insert(ip);
+		//clients.push_back(cli);
+  }
+  //e->clients_ = clients;
+  
+  for (auto& p : proxies) {
+    auto follower_id = p.first;
+    auto proxy = (SampleCrpcProxy*) p.second;
+    auto cli_it = rpc_clients_.find(follower_id);
+    std::string ip = "";
+    if (cli_it != rpc_clients_.end()) {
+      ip = cli_it->second->host();  
+    }
+	if (p.first == leader_site_id) {
+        // fix the 1c1s1p bug
+        // Log_info("leader_site_id %d", leader_site_id);
+        
+        e->FeedResponse(true, 1, ip);
+        continue;
+    }
+    FutureAttr fuattr;
+    struct timespec begin;
+    clock_gettime(CLOCK_MONOTONIC, &begin);
+
+    fuattr.callback = [this, e, n, ip, begin] (Future* fu) {
+      Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
+      Log_info("*** inside SampleCrpcCommo::BroadcastAppendEntries; received response");
+      int64_t accept = std::numeric_limits<int64_t>::min();
+			
+			fu->get_reply() >> accept;
+			
+			struct timespec end;
+			//clock_gettime(CLOCK_MONOTONIC, &begin);
+			this->outbound--;
+			Log_info("reply from server: %s and is_ready: %d", ip.c_str(), e->IsReady());
+			clock_gettime(CLOCK_MONOTONIC, &end);
+			//Log_info("time of reply on server %d: %ld", follower_id, (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);
+			
+      bool y = (accept != std::numeric_limits<int64_t>::min());
+      e->FeedResponse(y, 1, ip);
+    };
+    MarshallDeputy md(cmd);
+		verify(md.sp_data_ != nullptr);
+		outbound++;
+    
+    // // Log_info("*** inside SampleCrpcCommo::BroadcastAppendEntries; calling proxy->async_AppendEntries");
+    auto f = proxy->async_BroadcastAppendEntries(value1,
+                                        value2,
+                                        fuattr); // #profile - 1.36%
+    Future::safe_release(f);
+  }
+  verify(!e->IsReady());
+  // // Log_info("*** returning from SampleCrpcCommo::BroadcastAppendEntries");
+  return e;
+}
+
 } // namespace janus
