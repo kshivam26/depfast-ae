@@ -27,7 +27,7 @@ class SampleCrpcAppendQuorumEvent: public QuorumEvent {
             }
             VoteYes();
         } else {
-            Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedRespons; checkpoint 1");
+            //Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedRespons; checkpoint 1");
             VoteNo();
         }
         /*Log_debug("fpga-raft comm accept event, "

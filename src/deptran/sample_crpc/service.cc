@@ -22,14 +22,14 @@ void SampleCrpcServiceImpl::CrpcAppendEntries(const uint64_t& id,
                         rrr::DeferredReply* defer){
 
   verify(sched_ != nullptr);
-  Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; tid: %d", gettid());
+  //Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; tid: %d", gettid());
   if (!hasPrinted) {
-      Log_info("tid of non-leader is %d", gettid());
+      //Log_info("tid of non-leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
   }
 
   // Log_info("*** inside SampleCrpcServiceImpl::CrpcAppendEntries; cp 2 tid: %d", gettid());
-  Log_info("*** --- inside SampleCrpcServiceImpl::CrpcAppendEntries, entering OnCRPC3");
+  //Log_info("*** --- inside SampleCrpcServiceImpl::CrpcAppendEntries, entering OnCRPC3");
   Coroutine::CreateRun([&] () {
       sched_->OnCRPC3(id,
                     value1,
@@ -50,7 +50,7 @@ void SampleCrpcServiceImpl::BroadcastAppendEntries(const int64_t& value1,
                                         rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
   if (!hasPrinted) {
-      Log_info("*** inside SampleCrpcServiceImpl::BroadcastAppendEntries tid of non-leader is %d", gettid());
+      //Log_info("*** inside SampleCrpcServiceImpl::BroadcastAppendEntries tid of non-leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
   }
 

@@ -21,7 +21,7 @@ Coordinator *SampleCrpcFrame::CreateCoordinator(cooid_t coo_id,
                                                 ClientControlServiceImpl *ccsi,
                                                 uint32_t id,
                                                 shared_ptr<TxnRegistry> txn_reg) {
-  Log_info("*** Inside Coordinator *SampleCrpcFrame::CreateCoordinator");
+  //Log_info("*** Inside Coordinator *SampleCrpcFrame::CreateCoordinator");
   verify(config != nullptr);
   CoordinatorSampleCrpc *coo;
   coo = new CoordinatorSampleCrpc(coo_id,

@@ -29,7 +29,7 @@ SampleCrpcServer::~SampleCrpcServer() {
         
 
             *resultSum = value1 + value2;
-            Log_info("*** --- SampleCrpcServer::OnAppendEntries sum is: %ld + %ld = %ld, tid: %d", value1, value2, *resultSum, gettid());
+            //Log_info("*** --- SampleCrpcServer::OnAppendEntries sum is: %ld + %ld = %ld, tid: %d", value1, value2, *resultSum, gettid());
 						// if (cmd->kind_ == MarshallDeputy::CMD_TPC_COMMIT){
             //   auto p_cmd = dynamic_pointer_cast<TpcCommitCommand>(cmd);
             //   auto sp_vec_piece = dynamic_pointer_cast<VecPieceData>(p_cmd->cmd_)->sp_vec_piece_data_;
@@ -68,7 +68,7 @@ SampleCrpcServer::~SampleCrpcServer() {
               const int64_t& value2,
               const std::vector<uint16_t>& addrChain, 
               const std::vector<ResultAdd>& state){
-    Log_info("*** inside SampleCrpcServer::OnCRPC; cp 1 tid: %d", gettid());
+    //Log_info("*** inside SampleCrpcServer::OnCRPC; cp 1 tid: %d", gettid());
     if (addrChain.size() == 1)
     {
         // Log_info("==== reached the final link in the chain");

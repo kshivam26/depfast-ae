@@ -19,7 +19,7 @@ void SampleCrpcCommo::CrpcAppendEntries3(const parid_t par_id,
               const int64_t& value2, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<ResultAdd>& state){
-  Log_info("inside SampleCrpcCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
+  //Log_info("inside SampleCrpcCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
   // auto proxies = rpc_par_proxies_[par_id];
   // SampleCrpcProxy *proxy = nullptr;
 
@@ -33,7 +33,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
                                       const int64_t& value1,
                                       const int64_t& value2,
                                       shared_ptr<Marshallable> cmd) {
-  Log_info("Inside SampleCrpcCommo::crpc_add");
+  //Log_info("Inside SampleCrpcCommo::crpc_add");
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
       Log_info("In crpcAppendEntries_ring_back; tid of leader is %d", gettid());
@@ -117,7 +117,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
     // };
     // just call cRPC something with the above paramters, and no other changes
     
-    Log_info("*** SampleCrpcCommo::crpc_add auto f = proxy->");
+    //Log_info("*** SampleCrpcCommo::crpc_add auto f = proxy->");
     
     auto f = proxy->async_CrpcAppendEntries(crpc_id, 
                                                         value1,
@@ -196,8 +196,8 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t p
     clock_gettime(CLOCK_MONOTONIC, &begin);
 
     fuattr.callback = [this, e, n, ip, begin] (Future* fu) {
-      Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
-      Log_info("*** inside SampleCrpcCommo::BroadcastAppendEntries; received response");
+      //Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
+      //Log_info("*** inside SampleCrpcCommo::BroadcastAppendEntries; received response");
       int64_t accept = std::numeric_limits<int64_t>::min();
 			
 			fu->get_reply() >> accept;
@@ -205,7 +205,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t p
 			struct timespec end;
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
 			this->outbound--;
-			Log_info("reply from server: %s and is_ready: %d", ip.c_str(), e->IsReady());
+			//Log_info("reply from server: %s and is_ready: %d", ip.c_str(), e->IsReady());
 			clock_gettime(CLOCK_MONOTONIC, &end);
 			//Log_info("time of reply on server %d: %ld", follower_id, (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);
 			
