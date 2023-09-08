@@ -13,7 +13,7 @@ REG_FRAME(MODE_TEST, vector<string>({"test"}), TestFrame);
 TestFrame::TestFrame(int mode) : Frame(mode) {}
 
 TestFrame::~TestFrame() { 
-  Log_info("Inside CreateScheduler");
+  // Log_info("Inside CreateScheduler");
 }
 
 
@@ -36,24 +36,24 @@ Coordinator *TestFrame::CreateCoordinator(cooid_t coo_id,
   coo->n_replica_ = config->GetPartitionSize(site_info_->partition_id_);
   coo->loc_id_ = this->site_info_->locale_id;
   verify(coo->n_replica_ != 0);
-  Log_info("create new test coord, coo_id: %d", (int) coo->coo_id_);
+  // Log_info("create new test coord, coo_id: %d", (int) coo->coo_id_);
   return coo;
 }
 
 
 TxLogServer *TestFrame::CreateScheduler() {
-  Log_info("Inside CreateScheduler");
+  // Log_info("Inside CreateScheduler");
   if (sch_ == nullptr) {
     sch_ = new TestServer(this);
   } else {
     verify(0);
   }
-  Log_info("create test sched loc: %d", this->site_info_->locale_id);
+  // Log_info("create test sched loc: %d", this->site_info_->locale_id);
   return sch_;
 }
 
 Communicator *TestFrame::CreateCommo(PollMgr *poll) {
-  Log_info("Inside CreateCommo");
+  // Log_info("Inside CreateCommo");
   if (commo_ == nullptr) {
     commo_ = new TestCommo(poll);
   }
@@ -64,7 +64,7 @@ vector<rrr::Service *> TestFrame::CreateRpcServices(uint32_t site_id,
                                                     TxLogServer *rep_sched,
                                                     rrr::PollMgr *poll_mgr,
                                                     ServerControlServiceImpl *scsi) {
-  Log_info("Inside CreateRpcServices");
+  // Log_info("Inside CreateRpcServices");
   auto config = Config::GetConfig();
   auto result = std::vector<Service *>();
   switch (config->replica_proto_) {

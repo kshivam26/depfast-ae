@@ -25,7 +25,9 @@ class CoordinatorTest : public Coordinator {
                     ClientControlServiceImpl *ccsi,
                     uint32_t thread_id);
     virtual ~CoordinatorTest();
-    void DoTxAsync(TxRequest &req) override {Log_info("inside CoordinatorTest::DoTxAsync in header file");}
+    void DoTxAsync(TxRequest &req) override {
+      // Log_info("inside CoordinatorTest::DoTxAsync in header file");
+    }
     void Submit(shared_ptr<Marshallable> &cmd,
               const std::function<void()> &func = []() {},
               const std::function<void()> &exe_callback = []() {}) override;

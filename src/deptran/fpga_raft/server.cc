@@ -27,7 +27,7 @@ FpgaRaftServer::FpgaRaftServer(Frame * frame) {
 
 void FpgaRaftServer::Setup() {
 	if (heartbeat_ && !FpgaRaftServer::looping && IsLeader()) {
-		Log_info("starting loop at server");
+		// Log_info("starting loop at server");
 		FpgaRaftServer::looping = true;
 		memset(&loop_th_, 0, sizeof(loop_th_));
 		hb_loop_args_type* hb_loop_args = new hb_loop_args_type();
@@ -60,7 +60,7 @@ void* FpgaRaftServer::HeartbeatLoop(void* args) {
 		auto matcheds = hb_loop_args->commo->matchedIndex;
 		for (auto it = matcheds.begin(); it != matcheds.end(); it++) {
 			if (prevLogIndex > it->second + 10000 && cmd) {
-				Log_info("leader_id: %d vs follower_id for %d: %d", prevLogIndex, it->first, it->second);
+				// Log_info("leader_id: %d vs follower_id for %d: %d", prevLogIndex, it->first, it->second);
 				//hb_loop_args->commo->SendHeartbeat(partition_id, it->first, prevLogIndex);
 				hb_loop_args->commo->SendAppendEntriesAgain(it->first,
 																				partition_id,
@@ -86,8 +86,7 @@ FpgaRaftServer::~FpgaRaftServer() {
 		}
     
 		stop_ = true ;
-    Log_info("site par %d, loc %d: prepare %d, accept %d, commit %d", partition_id_, loc_id_, n_prepare_, n_accept_, 
-    n_commit_);
+    // Log_info("site par %d, loc %d: prepare %d, accept %d, commit %d", partition_id_, loc_id_, n_prepare_, n_accept_, n_commit_);
 }
 
 void FpgaRaftServer::RequestVote2FPGA() {
@@ -200,8 +199,8 @@ void FpgaRaftServer::OnVote2FPGA(const slotid_t& lst_log_idx,
 
 
 bool FpgaRaftServer::RequestVote() {
-  Log_info("inside FpgaRaftServer::RequestVote()");
-  for(int i = 0; i < 1000; i++) Log_info("not calling the wrong method");
+  // Log_info("inside FpgaRaftServer::RequestVote()");
+  for(int i = 0; i < 1000; i++) // Log_info("not calling the wrong method");
 
   // currently don't request vote if no log
   if(this->commo_ == NULL || lastLogIndex == 0 ) return false;
@@ -252,7 +251,7 @@ bool FpgaRaftServer::RequestVote() {
     //RequestVote2FPGA() ;
     if(IsLeader())
     {
-	  	//for(int i = 0; i < 100; i++) Log_info("wait wait wait");
+	  	//for(int i = 0; i < 100; i++) // Log_info("wait wait wait");
       Log_debug("vote accepted %d curterm %d", loc_id, currentTerm);
   		req_voting_ = false ;
 			return true;
@@ -349,7 +348,7 @@ void FpgaRaftServer::StartTimer()
             while(!stop_)
             {
                 if ( !IsLeader() && timer_->elapsed() > duration) {
-                    Log_info(" timer time out") ;
+                    // Log_info(" timer time out") ;
                     // ask to vote
                     // req_voting_ = true ;
                     RequestVote() ;
@@ -388,7 +387,7 @@ void FpgaRaftServer::StartTimer()
                                      const function<void()> &cb) {
         std::lock_guard<std::recursive_mutex> lock(mtx_);
         //StartTimer() ;
-        // Log_info("==== inside void FpgaRaftServer::OnAppendEntries");
+        // // Log_info("==== inside void FpgaRaftServer::OnAppendEntries");
         Log_debug("fpga-raft scheduler on append entries for "
                 "slot_id: %llx, loc: %d, PrevLogIndex: %d",
                 slot_id, this->loc_id_, leaderPrevLogIndex);
@@ -404,7 +403,7 @@ void FpgaRaftServer::StartTimer()
 
 						//this means that this is a retry of a previous one for a simulation
 						/*if (slot_id == 100000000 || leaderPrevLogIndex + 1 < lastLogIndex) {
-							for (int i = 0; i < 1000000; i++) Log_info("Dropping this AE message: %d %d", leaderPrevLogIndex, lastLogIndex);
+							for (int i = 0; i < 1000000; i++) // Log_info("Dropping this AE message: %d %d", leaderPrevLogIndex, lastLogIndex);
 							//verify(0);
 							*followerAppendOK = 0;
 							cb();
@@ -464,13 +463,13 @@ void FpgaRaftServer::StartTimer()
 					usleep(25*1000);
 				}*/
         cb();  // #profile(n_crpc) - 1.15%
-        // Log_info("==== returning from void FpgaRaftServer::OnAppendEntries");
+        // // Log_info("==== returning from void FpgaRaftServer::OnAppendEntries");
     }
 
     void FpgaRaftServer::OnForward(shared_ptr<Marshallable> &cmd, 
                                           uint64_t *cmt_idx,
                                           const function<void()> &cb) {
-        Log_info("==== inside void FpgaRaftServer::OnForward");
+        // Log_info("==== inside void FpgaRaftServer::OnForward");
         this->rep_frame_ = this->frame_ ;
         auto co = ((TxLogServer *)(this))->CreateRepCoord(0);
         ((CoordinatorFpgaRaft*)co)->Submit(cmd);
@@ -485,7 +484,7 @@ void FpgaRaftServer::StartTimer()
 
         verify(*cmt_idx != 0) ;
         cb() ;
-        // Log_info("==== returning from void FpgaRaftServer::OnForward");        
+        // // Log_info("==== returning from void FpgaRaftServer::OnForward");        
     }
 
   void FpgaRaftServer::OnCommit(const slotid_t slot_id,
@@ -520,7 +519,7 @@ void FpgaRaftServer::StartTimer()
     min_active_slot_ = i;
 
 		/*clock_gettime(CLOCK_MONOTONIC, &end);
-		Log_info("time of decide on server: %d", (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);*/
+		// Log_info("time of decide on server: %d", (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);*/
   }
   void FpgaRaftServer::SpCommit(const uint64_t cmt_idx) {
       verify(0) ; // TODO delete it
@@ -557,14 +556,14 @@ void FpgaRaftServer::StartTimer()
               const MarshallDeputy& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const MarshallDeputy& state){
-    // Log_info("==== inside void FpgaRaftServer::OnCRPC");
+    // // Log_info("==== inside void FpgaRaftServer::OnCRPC");
 
     switch (cmd.kind_){
       case MarshallDeputy::CMD_RAFT_APPEND_ENTRIES:
-        // Log_info("==== inside switch->CMD_RAFT_APPEND_ENTRIES");
+        // // Log_info("==== inside switch->CMD_RAFT_APPEND_ENTRIES");
 
         if (addrChain.size() == 1){
-          // Log_info("==== reached the final link in the chain");
+          // // Log_info("==== reached the final link in the chain");
 
           // // add a verify statement
           auto x = (FpgaRaftCommo *)(this->commo_);
@@ -572,20 +571,20 @@ void FpgaRaftServer::StartTimer()
           auto ev = x->cRPCEvents[id];
           x->cRPCEvents.erase(id);
 
-          // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
+          // // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
           auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);   // #profile - 0.54%
           for (auto el : st->results)
           {
             bool y = ((el.followerAppendOK == 1) && (this->IsLeader()) && (currentTerm == el.followerCurrentTerm));
             ev->FeedResponse(y, el.followerLastLogIndex);
           }
-          // Log_info("==== returning from cRPC");
+          // // Log_info("==== returning from cRPC");
           return;
         }
 
-        // Log_info("calling dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
+        // // Log_info("calling dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
         auto c = dynamic_pointer_cast<AppendEntriesCommand>(cmd.sp_data_);
-        // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
+        // // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
         AppendEntriesResult res;
         auto r = Coroutine::CreateRun([&]()   
                                       { this->OnAppendEntries(c->slot,
@@ -600,9 +599,9 @@ void FpgaRaftServer::StartTimer()
                                                               &res.followerCurrentTerm,
                                                               &res.followerLastLogIndex,
                                                               [](){}); });  // #profile - 2.88%
-        // Log_info("calling dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+        // // Log_info("calling dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
         auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);  // #profile - 1.23%  ==> dont think can do anything about it
-        // Log_info("returned dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+        // // Log_info("returned dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
         st->results.push_back(res);
 
         auto addrChainCopy = addrChain;
@@ -610,7 +609,7 @@ void FpgaRaftServer::StartTimer()
         
         parid_t par_id = this->frame_->site_info_->partition_id_;
         ((FpgaRaftCommo *)(this->commo_))->cRPC(par_id, id, cmd, addrChainCopy, state);   // #profile - 1.77%
-        // Log_info("==== returning from void FpgaRaftServer::OnCRPC");
+        // // Log_info("==== returning from void FpgaRaftServer::OnCRPC");
     }
   }
 
@@ -625,34 +624,34 @@ void FpgaRaftServer::StartTimer()
               const MarshallDeputy& cmd,
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
-    // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 1 tid: %d", gettid());
+    // // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 1 tid: %d", gettid());
     if (addrChain.size() == 1)
     {
-        // Log_info("==== reached the final link in the chain");
-        // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 1 @ %d", gettid());
+        // // Log_info("==== reached the final link in the chain");
+        // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 1 @ %d", gettid());
         // // add a verify statement
         auto x = (FpgaRaftCommo *)(this->commo_);
         verify(x->cRPCEvents.find(id) != x->cRPCEvents.end()); // #profile - 1.40%
-        // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 2 @ %d", gettid());
+        // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 2 @ %d", gettid());
         auto ev = x->cRPCEvents[id];
         x->cRPCEvents.erase(id);
 
-        // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
+        // // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
         // auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);   // #profile - 0.54%
         for (auto el : state)
         {
-          // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 3 @ %d", gettid());
+          // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 3 @ %d", gettid());
           bool y = ((el.followerAppendOK == 1) && (this->IsLeader()) && (currentTerm == el.followerCurrentTerm));
           ev->FeedResponse(y, el.followerLastLogIndex);
         }
-        // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 4 @ %d", gettid());
-        // Log_info("==== returning from cRPC");
+        // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 4 @ %d", gettid());
+        // // Log_info("==== returning from cRPC");
         return;
     }
 
-    // Log_info("calling dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
+    // // Log_info("calling dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
     // auto c = dynamic_pointer_cast<AppendEntriesCommand>(cmd.sp_data_);
-    // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
+    // // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
     AppendEntriesResult res;
     auto r = Coroutine::CreateRun([&]()
                                   { this->OnAppendEntries(slot_id,
@@ -667,7 +666,7 @@ void FpgaRaftServer::StartTimer()
                                                           &res.followerCurrentTerm,
                                                           &res.followerLastLogIndex,
                                                           []() {}); }); // #profile - 2.88%
-    // Log_info("###################cp1");
+    // // Log_info("###################cp1");
     // this->OnAppendEntries(slot_id,
     //                               ballot,
     //                               leaderCurrentTerm,
@@ -680,18 +679,18 @@ void FpgaRaftServer::StartTimer()
     //                               &res.followerCurrentTerm,
     //                               &res.followerLastLogIndex,
     //                               []() {});
-    // Log_info("###################cp2");
-    // Log_info("calling dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+    // // Log_info("###################cp2");
+    // // Log_info("calling dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
     std::vector<AppendEntriesResult> st(state);
     // auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);  // #profile - 1.23%  ==> dont think can do anything about it
-    // Log_info("returned dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+    // // Log_info("returned dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
     st.push_back(res);
 
     vector<uint16_t> addrChainCopy(addrChain.begin() + 1, addrChain.end());
     // auto addrChainCopy = addrChain;
     // addrChainCopy.erase(addrChainCopy.begin());
-    // Log_info("inside FpgaRaftServer::OnCRPC3; calling CrpcAppendEntries3");
-    // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 2 tid: %d", gettid());
+    // // Log_info("inside FpgaRaftServer::OnCRPC3; calling CrpcAppendEntries3");
+    // // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 2 tid: %d", gettid());
     parid_t par_id = this->frame_->site_info_->partition_id_;
     ((FpgaRaftCommo *)(this->commo_))->CrpcAppendEntries3(par_id, id, 
                                                         slot_id,
@@ -702,8 +701,8 @@ void FpgaRaftServer::StartTimer()
                                                           leaderCommitIndex,
                                                           dep_id,
                                                           cmd, addrChainCopy, st); // #profile (crpc2) - 4.02%%
-                                                                                              // Log_info("==== returning from void FpgaRaftServer::OnCRPC");
-    // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 3 tid: %d", gettid());
+                                                                                              // // Log_info("==== returning from void FpgaRaftServer::OnCRPC");
+    // // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 3 tid: %d", gettid());
   }
 
 
@@ -719,7 +718,7 @@ void FpgaRaftServer::StartTimer()
               const std::vector<uint16_t>& addrChain, 
               std::vector<AppendEntriesResult>* state,
               const function<void()> &cb){
-    // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, calling this->OnAppendEntries; tid is %d", gettid());
+    // // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, calling this->OnAppendEntries; tid is %d", gettid());
 
     AppendEntriesResult res;
     // // commenting the below coroutine, because this itself is running as a coroutine
@@ -753,10 +752,10 @@ void FpgaRaftServer::StartTimer()
     vector<uint16_t> addrChainCopy(addrChain.begin() + 1, addrChain.end());
     // auto addrChainCopy = addrChain;
     // addrChainCopy.erase(addrChainCopy.begin());
-    // Log_info("inside FpgaRaftServer::OnCRPC3; calling CrpcAppendEntries3");
+    // // Log_info("inside FpgaRaftServer::OnCRPC3; calling CrpcAppendEntries3");
     if (addrChainCopy.size() > 0){
       // for (auto chain: addrChainCopy){
-      //   // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, chain is: %d; tid is %d",chain, gettid());
+      //   // // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, chain is: %d; tid is %d",chain, gettid());
       // }
       parid_t par_id = this->frame_->site_info_->partition_id_;
       // // commenting the below coroutine, because this itself is running as a coroutine
@@ -771,7 +770,7 @@ void FpgaRaftServer::StartTimer()
                                                           leaderCommitIndex,
                                                           dep_id,
                                                           cmd, addrChainCopy, state, cb);
-                                    // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, calling callback function 1; tid is %d", gettid());
+                                    // // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, calling callback function 1; tid is %d", gettid());
                                     // cb();
                                   });
       // ((FpgaRaftCommo *)(this->commo_))->CrpcAppendEntries_no_chain(par_id, id, 
@@ -786,7 +785,7 @@ void FpgaRaftServer::StartTimer()
                                   
     }
     else{
-      // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, calling callback function 2; tid is %d", gettid());
+      // // Log_info("$$$ inside FpgaRaftServer::OnCRPC_no_chain, calling callback function 2; tid is %d", gettid());
       cb();
     }
     
@@ -797,39 +796,39 @@ void FpgaRaftServer::StartTimer()
               const AppendEntriesCommand& cmd,
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
-    // Log_info("==== inside void FpgaRaftServer::OnCRPC");
-    // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 0 @ %d", gettid());
+    // // Log_info("==== inside void FpgaRaftServer::OnCRPC");
+    // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 0 @ %d", gettid());
     switch (cmd.kind_){
       // 
       case MarshallDeputy::CMD_RAFT_APPEND_ENTRIES:
-        // Log_info("==== inside switch->CMD_RAFT_APPEND_ENTRIES");
-        // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 00 @ %d", gettid());
+        // // Log_info("==== inside switch->CMD_RAFT_APPEND_ENTRIES");
+        // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 00 @ %d", gettid());
         if (addrChain.size() == 1){
-          // Log_info("==== reached the final link in the chain");
-          // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 1 @ %d", gettid());
+          // // Log_info("==== reached the final link in the chain");
+          // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 1 @ %d", gettid());
           // // add a verify statement
           auto x = (FpgaRaftCommo *)(this->commo_);
           verify(x->cRPCEvents.find(id) != x->cRPCEvents.end()); // #profile - 1.40%
-          // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 2 @ %d", gettid());
+          // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 2 @ %d", gettid());
           auto ev = x->cRPCEvents[id];
           x->cRPCEvents.erase(id);
 
-          // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
+          // // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
           // auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);   // #profile - 0.54%
           for (auto el : state)
           {
-            // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 3 @ %d", gettid());
+            // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 3 @ %d", gettid());
             bool y = ((el.followerAppendOK == 1) && (this->IsLeader()) && (currentTerm == el.followerCurrentTerm));
             ev->FeedResponse(y, el.followerLastLogIndex);
           }
-          // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 4 @ %d", gettid());
-          // Log_info("==== returning from cRPC");
+          // // Log_info("inside FpgaRaftServer::OnCRPC2; checkpoint 4 @ %d", gettid());
+          // // Log_info("==== returning from cRPC");
           return;
         }
 
-        // Log_info("calling dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
+        // // Log_info("calling dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
         // auto c = dynamic_pointer_cast<AppendEntriesCommand>(cmd.sp_data_);
-        // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
+        // // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
         AppendEntriesResult res;
         auto r = Coroutine::CreateRun([&]()   
                                       { this->OnAppendEntries(cmd.slot,
@@ -844,10 +843,10 @@ void FpgaRaftServer::StartTimer()
                                                               &res.followerCurrentTerm,
                                                               &res.followerLastLogIndex,
                                                               [](){}); });  // #profile - 2.88%
-        // Log_info("calling dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+        // // Log_info("calling dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
         std::vector<AppendEntriesResult> st(state);
         // auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);  // #profile - 1.23%  ==> dont think can do anything about it
-        // Log_info("returned dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+        // // Log_info("returned dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
         st.push_back(res);
 
         vector<uint16_t> addrChainCopy(addrChain.begin()+1, addrChain.end());
@@ -856,7 +855,7 @@ void FpgaRaftServer::StartTimer()
         
         parid_t par_id = this->frame_->site_info_->partition_id_;
         ((FpgaRaftCommo *)(this->commo_))->CrpcAppendEntries(par_id, id, cmd, addrChainCopy, st);   // #profile (crpc2) - 4.02%%
-        // Log_info("==== returning from void FpgaRaftServer::OnCRPC");
+        // // Log_info("==== returning from void FpgaRaftServer::OnCRPC");
     }
   }
 

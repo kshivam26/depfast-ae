@@ -13,7 +13,7 @@ CoordinatorTest::CoordinatorTest(uint32_t coo_id,
                                  ClientControlServiceImpl *ccsi,
                                  uint32_t thread_id) : Coordinator(coo_id, benchmark, ccsi, thread_id) {
 
-  Log_info("*** inside CoordinatorTest");
+  // Log_info("*** inside CoordinatorTest");
 }
 
 CoordinatorTest::~CoordinatorTest() {}
@@ -21,7 +21,7 @@ CoordinatorTest::~CoordinatorTest() {}
 void CoordinatorTest::Submit(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
                                    const function<void()>& exe_callback) {
-  Log_info("*** inside void CoordinatorTest::Submit");
+  // Log_info("*** inside void CoordinatorTest::Submit");
   /* if (!IsLeader()) {
     //Log_fatal("i am not the leader; site %d; locale %d",
     //          frame_->site_info_->id, loc_id_);
@@ -38,11 +38,11 @@ void CoordinatorTest::Submit(shared_ptr<Marshallable>& cmd,
   commit_callback_ = func;
   StartChain();
   this->sch_->app_next_(*cmd);
-  Log_info("*** returning from void CoordinatorTest::Submit");
+  // Log_info("*** returning from void CoordinatorTest::Submit");
 }
 
 void CoordinatorTest::StartChain() {
-  Log_info("*** inside void CoordinatorTest::StartChain");
+  // Log_info("*** inside void CoordinatorTest::StartChain");
 
   std::lock_guard<std::recursive_mutex> lock(mtx_);
   verify(!in_start_chain);
@@ -62,14 +62,14 @@ void CoordinatorTest::StartChain() {
 
   struct timespec start_, end_;
   clock_gettime(CLOCK_MONOTONIC, &start_);
-  Log_info("=== waiting for quorum");
+  // Log_info("=== waiting for quorum");
   sp_quorum->Wait();
-  Log_info("*** quorum reached");
+  // Log_info("*** quorum reached");
   // struct timespec end_;
   clock_gettime(CLOCK_MONOTONIC, &end_);
 
   // quorum_events_.push_back(sp_quorum);
-	Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+	// Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
   slow_ = sp_quorum->IsSlow();  // #profile - 2.13%
 
   // long leader_time;
@@ -77,7 +77,7 @@ void CoordinatorTest::StartChain() {
 
   // int total_ob = 0;
   // int avg_ob = 0;
-  // Log_info("begin_index: %d", commo()->begin_index);
+  // // Log_info("begin_index: %d", commo()->begin_index);
   // if (commo()->begin_index >= 1000) {
   //   if (commo()->ob_index < 100) {
   //     commo()->outbounds[commo()->ob_index] = commo()->outbound;
@@ -97,7 +97,7 @@ void CoordinatorTest::StartChain() {
   // avg_ob = total_ob/100;
 
   // for (auto it = commo()->rpc_clients_.begin(); it != commo()->rpc_clients_.end(); it++) {
-  //   if (avg_ob > 0 && it->second->time_ > 0) Log_info("time for %d is: %d", it->first, it->second->time_/avg_ob);
+  //   if (avg_ob > 0 && it->second->time_ > 0) // Log_info("time for %d is: %d", it->first, it->second->time_/avg_ob);
   //   if (it->first != loc_id_) follower_times.push_back(it->second->time_);
   // }
   // if (avg_ob > 0 && !slow_) {
@@ -106,10 +106,10 @@ void CoordinatorTest::StartChain() {
   //   slow_ = follower_times[0]/avg_ob > 80000 && follower_times[1]/avg_ob > 80000;
   // }
 
-  // Log_info("slow?: %d", slow_);
+  // // Log_info("slow?: %d", slow_);
   if (sp_quorum->Yes()) {
   //   minIndex = sp_quorum->minIndex;
-  //   Log_info("%d vs %d", minIndex, this->sch_->commitIndex);
+  //   // Log_info("%d vs %d", minIndex, this->sch_->commitIndex);
   //   verify(minIndex >= this->sch_->commitIndex) ;
   //   committed_ = true;
   //   Log_debug("test append commited loc:%d minindex:%d", loc_id_, minIndex ) ;
@@ -125,7 +125,7 @@ void CoordinatorTest::StartChain() {
       verify(0);
   }
 
-  Log_info("*** returning from void CoordinatorTest::StartChain");
+  // Log_info("*** returning from void CoordinatorTest::StartChain");
 }
 
 }

@@ -44,8 +44,8 @@ shared_ptr<FpgaRaftForwardQuorumEvent> FpgaRaftCommo::SendForward(parid_t par_id
 
 void FpgaRaftCommo::BroadcastHeartbeat(parid_t par_id,
 																			 uint64_t logIndex) {
-	//Log_info("heartbeat for log index: %d", logIndex);
-  Log_info("inside FpgaRaftCommo::BroadcastHeartbeat");
+	//// Log_info("heartbeat for log index: %d", logIndex);
+  // Log_info("inside FpgaRaftCommo::BroadcastHeartbeat");
   auto proxies = rpc_par_proxies_[par_id];
   vector<Future*> fus;
   for (auto& p : proxies) {
@@ -61,7 +61,7 @@ void FpgaRaftCommo::BroadcastHeartbeat(parid_t par_id,
       fu->get_reply() >> index;
 			this->matchedIndex[follower_id] = index;
 			
-			//Log_info("follower_index for %d: %d and leader_index: %d", follower_id, index, logIndex);
+			//// Log_info("follower_index for %d: %d and leader_index: %d", follower_id, index, logIndex);
 			
     };
 
@@ -70,7 +70,7 @@ void FpgaRaftCommo::BroadcastHeartbeat(parid_t par_id,
 		di.id = -1;
     auto f = proxy->async_Heartbeat(logIndex, di, fuattr);
     Future::safe_release(f);
-    // // Log_info("*** returning from FpgaRaftCommo::BroadcastHeartbeat");
+    // // // Log_info("*** returning from FpgaRaftCommo::BroadcastHeartbeat");
   }
 }
 
@@ -92,7 +92,7 @@ void FpgaRaftCommo::SendHeartbeat(parid_t par_id,
 		di.str = "dep";
 		di.id = -1;
 		
-		//Log_info("heartbeat2 for log index: %d", logIndex);
+		//// Log_info("heartbeat2 for log index: %d", logIndex);
     auto f = proxy->async_Heartbeat(logIndex, di, fuattr);
     Future::safe_release(f);
   }
@@ -126,7 +126,7 @@ void FpgaRaftCommo::SendAppendEntriesAgain(siteid_t site_id,
 		di.str = "dep";
 		di.id = -1;
 
-		Log_info("heartbeat2 for log index: %d", prevLogIndex);
+		// Log_info("heartbeat2 for log index: %d", prevLogIndex);
     auto f = proxy->async_AppendEntries(slot_id,
                                         ballot,
                                         currentTerm,
@@ -154,14 +154,14 @@ void FpgaRaftCommo::SendAppendEntriesAgain(siteid_t site_id,
 //                                       uint64_t prevLogTerm,
 //                                       uint64_t commitIndex,
 //                                       shared_ptr<Marshallable> cmd) {
-//   // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries");
-//   // Log_info("1) the pid for leader is: %d", ::getpid());
-//   // Log_info("2) the thread id for leader is: %d", gettid());
+//   // // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries");
+//   // // Log_info("1) the pid for leader is: %d", ::getpid());
+//   // // Log_info("2) the thread id for leader is: %d", gettid());
 
 //   static bool hasPrinted = false;  // Static variable to track if it has printed
 
 //   if (!hasPrinted) {
-//       Log_info("in CRPC; tid of leader is %d", gettid());
+//       // Log_info("in CRPC; tid of leader is %d", gettid());
 //       hasPrinted = true;  // Update the static variable
 //   }
 
@@ -207,18 +207,18 @@ void FpgaRaftCommo::SendAppendEntriesAgain(siteid_t site_id,
 //     }
 // 	  if (p.first == leader_site_id) {
 //         // fix the 1c1s1p bug
-//         // Log_info("leader_site_id %d", leader_site_id);
+//         // // Log_info("leader_site_id %d", leader_site_id);
 //         e->FeedResponse(true, prevLogIndex + 1, ip);
 //         continue;
 //     }
 
-//     // // Log_info("*** inside broadcastAppendEntries; ip is: %s", ip.c_str());
+//     // // // Log_info("*** inside broadcastAppendEntries; ip is: %s", ip.c_str());
 //     FutureAttr fuattr;  
 //     struct timespec begin;
 //     clock_gettime(CLOCK_MONOTONIC, &begin);
 
 //     fuattr.callback = [this, e, isLeader, currentTerm, follower_id, n, ip, begin] (Future* fu) {
-//       // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; received response"); 
+//       // // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; received response"); 
 //     };
 //     MarshallDeputy md(cmd);
 // 		verify(md.sp_data_ != nullptr);
@@ -226,9 +226,9 @@ void FpgaRaftCommo::SendAppendEntriesAgain(siteid_t site_id,
 // 		DepId di;
 // 		di.str = "dep";
 // 		di.id = dep_id;
-//  // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; calling proxy->async_AppendEntries");
+//  // // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; calling proxy->async_AppendEntries");
     
-//     // Log_info("calling std::make_shared<AppendEntriesCommand>");
+//     // // Log_info("calling std::make_shared<AppendEntriesCommand>");
 //     // #cPRC additional conversion here
 //     // #cPRC not abstracted from the user
 //     auto ae_cmd = std::make_shared<AppendEntriesCommand>(slot_id, 
@@ -240,13 +240,13 @@ void FpgaRaftCommo::SendAppendEntriesAgain(siteid_t site_id,
 //                                                         di, 
 //                                                         md); // call missing just fuattr parameter, everything else same
 
-//     // Log_info("returning std::make_shared<AppendEntriesCommand>");
+//     // // Log_info("returning std::make_shared<AppendEntriesCommand>");
 
 //     MarshallDeputy ae_md(dynamic_pointer_cast<Marshallable>(ae_cmd));
     
 //     // crpc_id generation is also not abstracted
 //     uint64_t crpc_id = reinterpret_cast<uint64_t>(&e);
-//     // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
+//     // // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
 //     verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
 
 //     // just call cRPC something with the above paramters, and no other changes
@@ -261,7 +261,7 @@ void FpgaRaftCommo::SendAppendEntriesAgain(siteid_t site_id,
 
 //     }
 //   verify(!e->IsReady());
-//   // // Log_info("*** returning from FpgaRaftCommo::BroadcastAppendEntries");
+//   // // // Log_info("*** returning from FpgaRaftCommo::BroadcastAppendEntries");
 //   return e;
 // }
 
@@ -327,7 +327,7 @@ FpgaRaftCommo::crpc_ring_BroadcastAppendEntries(parid_t par_id,
     }
 	  if (p.first == leader_site_id) {
         // fix the 1c1s1p bug
-        // Log_info("leader_site_id %d", leader_site_id);
+        // // Log_info("leader_site_id %d", leader_site_id);
         e->FeedResponse(true, prevLogIndex + 1, ip);
         continue;
     }
@@ -348,13 +348,13 @@ FpgaRaftCommo::crpc_ring_BroadcastAppendEntries(parid_t par_id,
     //                                                     di, 
     //                                                     md); // call missing just fuattr parameter, everything else same
 
-    // Log_info("returning std::make_shared<AppendEntriesCommand>");
+    // // Log_info("returning std::make_shared<AppendEntriesCommand>");
 
     // MarshallDeputy ae_md(dynamic_pointer_cast<Marshallable>(ae_cmd));
     
     // crpc_id generation is also not abstracted
     uint64_t crpc_id = reinterpret_cast<uint64_t>(&e);
-    // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
+    // // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
     verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
 
     std::vector<AppendEntriesResult> state;
@@ -363,7 +363,7 @@ FpgaRaftCommo::crpc_ring_BroadcastAppendEntries(parid_t par_id,
     // FutureAttr fuattr;
 
     // fuattr.callback = [this, e, isLeader, currentTerm, follower_id, n, ip] (Future* fu) {
-    //   Log_info("*** inside fuattr.callback, response received; tid is %d", gettid());
+    //   // Log_info("*** inside fuattr.callback, response received; tid is %d", gettid());
     // };
     // just call cRPC something with the above paramters, and no other changes
     auto f = proxy->async_CrpcAppendEntries(crpc_id,slot_id, 
@@ -384,7 +384,7 @@ FpgaRaftCommo::crpc_ring_BroadcastAppendEntries(parid_t par_id,
 
     }
   verify(!e->IsReady());
-  // Log_info("*** returning from FpgaRaftCommo::crpc_ring_BroadcastAppendEntries");
+  // // Log_info("*** returning from FpgaRaftCommo::crpc_ring_BroadcastAppendEntries");
   return e;
 }
 
@@ -408,7 +408,7 @@ FpgaRaftCommo::crpc_BroadcastAppendEntries(parid_t par_id,
       hasPrinted = true;  // Update the static variable
   }
 
-  // Log_info("*** inside void FpgaRaftCommo::BroadcastAppendEntries; slot_id: %ld", slot_id);
+  // // Log_info("*** inside void FpgaRaftCommo::BroadcastAppendEntries; slot_id: %ld", slot_id);
 
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftAppendQuorumEvent>(n, n/2 + 1);
@@ -446,7 +446,7 @@ FpgaRaftCommo::crpc_BroadcastAppendEntries(parid_t par_id,
     }
 	  if (p.first == leader_site_id) {
         // fix the 1c1s1p bug
-        // Log_info("leader_site_id %d", leader_site_id);
+        // // Log_info("leader_site_id %d", leader_site_id);
         e->FeedResponse(true, prevLogIndex + 1, ip);
         continue;
     }
@@ -454,7 +454,7 @@ FpgaRaftCommo::crpc_BroadcastAppendEntries(parid_t par_id,
     FutureAttr fuattr;
 
     fuattr.callback = [this, e, isLeader, currentTerm, follower_id, n, ip] (Future* fu) {
-      // Log_info("*** inside fuattr.callback, response received; tid is %d", gettid());
+      // // Log_info("*** inside fuattr.callback, response received; tid is %d", gettid());
 
       vector<AppendEntriesResult> result;			
       fu->get_reply() >> result;
@@ -462,12 +462,12 @@ FpgaRaftCommo::crpc_BroadcastAppendEntries(parid_t par_id,
 			// struct timespec end;
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
 			// this->outbound--;
-			//Log_info("reply from server: %s and is_ready: %d", ip.c_str(), e->IsReady());
+			//// Log_info("reply from server: %s and is_ready: %d", ip.c_str(), e->IsReady());
 			// clock_gettime(CLOCK_MONOTONIC, &end);
-			//Log_info("time of reply on server %d: %ld", follower_id, (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);
+			//// Log_info("time of reply on server %d: %ld", follower_id, (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);
 
 			for (auto r: result){
-        // Log_info("$$$ inside fuattr.callback, some result; tid is %d", gettid());
+        // // Log_info("$$$ inside fuattr.callback, some result; tid is %d", gettid());
         bool y = ((r.followerAppendOK == 1) && (isLeader) && (currentTerm == r.followerCurrentTerm));
         e->FeedResponse(y, r.followerLastLogIndex, ip);
       }      
@@ -480,7 +480,7 @@ FpgaRaftCommo::crpc_BroadcastAppendEntries(parid_t par_id,
 		di.str = "dep";
 		di.id = dep_id;
 
-    // Log_info("$$$ inside BroadcastAppendEntries; calling async_CrpcAppendEntries3; tid is %d", gettid());
+    // // Log_info("$$$ inside BroadcastAppendEntries; calling async_CrpcAppendEntries3; tid is %d", gettid());
     // just call cRPC something with the above paramters, and no other changes
     auto f = proxy->async_CrpcAppendEntries3(1, slot_id, 
                                                         ballot, 
@@ -496,7 +496,7 @@ FpgaRaftCommo::crpc_BroadcastAppendEntries(parid_t par_id,
     break;
   }
   verify(!e->IsReady());
-  // // Log_info("*** returning from FpgaRaftCommo::BroadcastAppendEntries");
+  // // // Log_info("*** returning from FpgaRaftCommo::BroadcastAppendEntries");
   return e;
 }
 
@@ -523,8 +523,8 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
   }
   // static uint64_t count = 0;
   // count++;
-  // // Log_info("*** inside void FpgaRaftCommo::BroadcastAppendEntries; count: %ld", count);
-  // Log_info("*** inside void FpgaRaftCommo::BroadcastAppendEntries; slot_id: %ld; tid is: %d", slot_id, gettid());
+  // // // Log_info("*** inside void FpgaRaftCommo::BroadcastAppendEntries; count: %ld", count);
+  // // Log_info("*** inside void FpgaRaftCommo::BroadcastAppendEntries; slot_id: %ld; tid is: %d", slot_id, gettid());
 
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftAppendQuorumEvent>(n, n/2 + 1);
@@ -560,7 +560,7 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
     }
 	if (p.first == leader_site_id) {
         // fix the 1c1s1p bug
-        // Log_info("leader_site_id %d", leader_site_id);
+        // // Log_info("leader_site_id %d", leader_site_id);
         
         e->FeedResponse(true, prevLogIndex + 1, ip);
         continue;
@@ -570,8 +570,8 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
     clock_gettime(CLOCK_MONOTONIC, &begin);
 
     fuattr.callback = [this, e, isLeader, currentTerm, follower_id, n, ip, begin] (Future* fu) {
-      // Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
-      // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; received response");
+      // // Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
+      // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; received response");
       uint64_t accept = 0;
       uint64_t term = 0;
       uint64_t index = 0;
@@ -583,9 +583,9 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
 			struct timespec end;
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
 			this->outbound--;
-			//Log_info("reply from server: %s and is_ready: %d", ip.c_str(), e->IsReady());
+			//// Log_info("reply from server: %s and is_ready: %d", ip.c_str(), e->IsReady());
 			clock_gettime(CLOCK_MONOTONIC, &end);
-			//Log_info("time of reply on server %d: %ld", follower_id, (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);
+			//// Log_info("time of reply on server %d: %ld", follower_id, (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);
 			
       bool y = ((accept == 1) && (isLeader) && (currentTerm == term));
       e->FeedResponse(y, index, ip);
@@ -596,7 +596,7 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
 		DepId di;
 		di.str = "dep";
 		di.id = dep_id;
-    // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; calling proxy->async_AppendEntries");
+    // // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; calling proxy->async_AppendEntries");
     auto f = proxy->async_AppendEntries(slot_id,
                                         ballot,
                                         currentTerm,
@@ -609,7 +609,7 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
     Future::safe_release(f);
   }
   verify(!e->IsReady());
-  // // Log_info("*** returning from FpgaRaftCommo::BroadcastAppendEntries");
+  // // // Log_info("*** returning from FpgaRaftCommo::BroadcastAppendEntries");
   return e;
 }
 
@@ -690,7 +690,7 @@ FpgaRaftCommo::BroadcastVote(parid_t par_id,
                                     ballot_t lst_log_term,
                                     parid_t self_id,
                                     ballot_t cur_term ) {
-  // // Log_info("*** inside FpgaRaftCommo::BroadcastVote");
+  // // // Log_info("*** inside FpgaRaftCommo::BroadcastVote");
   int n = Config::GetConfig()->GetPartitionSize(par_id);
   auto e = Reactor::CreateSpEvent<FpgaRaftVoteQuorumEvent>(n, n/2);
   auto proxies = rpc_par_proxies_[par_id];
@@ -701,7 +701,7 @@ FpgaRaftCommo::BroadcastVote(parid_t par_id,
     auto proxy = (FpgaRaftProxy*) p.second;
     FutureAttr fuattr;
     fuattr.callback = [e](Future* fu) {
-      // // Log_info("*** received response in vote in fuattr");
+      // // // Log_info("*** received response in vote in fuattr");
       ballot_t term = 0;
       bool_t vote = false ;
       fu->get_reply() >> term;
@@ -711,7 +711,7 @@ FpgaRaftCommo::BroadcastVote(parid_t par_id,
     };
     Future::safe_release(proxy->async_Vote(lst_log_idx, lst_log_term, self_id, cur_term, fuattr));
   }
-  // // Log_info("*** returning from FpgaRaftCommo::BroadcastVote");
+  // // // Log_info("*** returning from FpgaRaftCommo::BroadcastVote");
   return e;
 }
 
@@ -763,12 +763,12 @@ void FpgaRaftCommo::cRPC(const parid_t par_id,
               const MarshallDeputy& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const MarshallDeputy& state){
-  // // Log_info("*** inside FpgaRaftCommo::cRPC");
+  // // // Log_info("*** inside FpgaRaftCommo::cRPC");
 
   FutureAttr fuattr;
   fuattr.callback = [](Future *fu)
   {
-    // // Log_info("*** received a response back, in cRPC");
+    // // // Log_info("*** received a response back, in cRPC");
   };
 
   auto proxies = rpc_par_proxies_[par_id];
@@ -784,7 +784,7 @@ void FpgaRaftCommo::cRPC(const parid_t par_id,
   //   }
   // }
 
-  // // Log_info("*** calling proxy->proxy->async_cRPC");
+  // // // Log_info("*** calling proxy->proxy->async_cRPC");
   auto f = proxy->async_cRPC(id, cmd, addrChain, state, fuattr);  // #profile - 1.57%
   Future::safe_release(f);
 }
@@ -795,7 +795,7 @@ void FpgaRaftCommo::CrpcAppendEntries(const parid_t par_id,
               const AppendEntriesCommand& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
-  // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
+  // // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
   auto proxies = rpc_par_proxies_[par_id];
   FpgaRaftProxy *proxy = nullptr;
 
@@ -816,7 +816,7 @@ void FpgaRaftCommo::CrpcAppendEntries3(const parid_t par_id,
               const MarshallDeputy& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state){
-  // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
+  // // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
   // auto proxies = rpc_par_proxies_[par_id];
   // FpgaRaftProxy *proxy = nullptr;
 
@@ -839,26 +839,26 @@ void FpgaRaftCommo::CrpcAppendEntries_no_chain(const parid_t par_id,
               const std::vector<uint16_t>& addrChain, 
               std::vector<AppendEntriesResult>* state,
               const function<void()> &cb){
-  // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
-  // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain, calling proxy->CrpcAppendEntries3; tid is %d", gettid());
+  // // Log_info("inside FpgaRaftCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
+  // // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain, calling proxy->CrpcAppendEntries3; tid is %d", gettid());
   auto proxies = rpc_par_proxies_[par_id];
   FpgaRaftProxy *proxy = nullptr;
   FutureAttr fuattr;
-  // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, current state size 1:%d ; tid is %d",state->size(), gettid());
+  // // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, current state size 1:%d ; tid is %d",state->size(), gettid());
   fuattr.callback = [this, state, cb] (Future* fu) {
-      // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; received response");
-      // Log_info("$$$ inside fuattr.callback, response received; tid is %d", gettid());
+      // // // Log_info("*** inside FpgaRaftCommo::BroadcastAppendEntries; received response");
+      // // Log_info("$$$ inside fuattr.callback, response received; tid is %d", gettid());
       
       vector<AppendEntriesResult> result;			
       fu->get_reply() >> result;
       // fu->get_reply() >> *state;
-      // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, current state size 2:%d ; tid is %d",state->size(), gettid());
+      // // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, current state size 2:%d ; tid is %d",state->size(), gettid());
 			for (auto r: result){
-        // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, some result; tid is %d", gettid());
+        // // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, some result; tid is %d", gettid());
         state->push_back(r);
       }
-      // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, current state size 2:%d ; tid is %d",state->size(), gettid());
-       // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback checkpoint n; tid is %d", gettid());
+      // // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback, current state size 2:%d ; tid is %d",state->size(), gettid());
+       // // Log_info("$$$ inside FpgaRaftCommo::CrpcAppendEntries_no_chain; fuattr.callback checkpoint n; tid is %d", gettid());
        cb();
     };
   proxy = (FpgaRaftProxy *)rpc_proxies_[addrChain[0]];
@@ -866,7 +866,7 @@ void FpgaRaftCommo::CrpcAppendEntries_no_chain(const parid_t par_id,
                                           leaderCommitIndex, dep_id, cmd, addrChain, fuattr);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
 
-  // Log_info("$$$ returning FpgaRaftCommo::CrpcAppendEntries_no_chain; tid is %d", gettid());
+  // // Log_info("$$$ returning FpgaRaftCommo::CrpcAppendEntries_no_chain; tid is %d", gettid());
 }
 
 } // namespace janus

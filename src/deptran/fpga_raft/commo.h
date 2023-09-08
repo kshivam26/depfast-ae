@@ -106,26 +106,26 @@ class FpgaRaftAppendQuorumEvent: public QuorumEvent {
     uint64_t minIndex;
     using QuorumEvent::QuorumEvent;
     void FeedResponse(bool appendOK, uint64_t index, std::string ip_addr = "") {
-        // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedResponse");
+        // // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedResponse");
         if (appendOK) {
-          // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 0");
+          // // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 0");
             if ((n_voted_yes_ == 0) && (n_voted_no_ == 0)){
-                // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 00");
+                // // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 00");
                 minIndex = index;
             }
             else{
-                // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 01");
+                // // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 01");
                 minIndex = std::min(minIndex, index);
             }
             VoteYes();
         } else {
-            Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 1");
+            // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint 1");
             VoteNo();
         }
         /*Log_debug("fpga-raft comm accept event, "
                   "yes vote: %d, no vote: %d, min index: %d",
                   n_voted_yes_, n_voted_no_, minIndex);*/
-        // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint final");
+        // // Log_info("==== inside FpgaRaftAppendQuorumEvent:FeedRespons; checkpoint final");
     }
 };
 
