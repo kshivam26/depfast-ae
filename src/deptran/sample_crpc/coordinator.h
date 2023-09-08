@@ -29,7 +29,7 @@ class CoordinatorSampleCrpc : public Coordinator {
               const std::function<void()> &func = []() {},
               const std::function<void()> &exe_callback = []() {}) override;
 
-  void AppendEntries();
+  void Add();
 
   void Reset() override {}
   void Restart() override { verify(0); }

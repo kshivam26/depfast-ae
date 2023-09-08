@@ -9,31 +9,31 @@ namespace janus {
 class TxData;
 class ResultCommand;
 
-class SampleCrpcAppendQuorumEvent: public QuorumEvent {
+class SampleCrpcQuorumEvent: public QuorumEvent {
  public:
     uint64_t minIndex;
     using QuorumEvent::QuorumEvent;
-    void FeedResponse(bool appendOK, uint64_t index, std::string ip_addr = "") {
-        // Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedResponse");
-        if (appendOK) {
-          // Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedRespons; checkpoint 0");
+    void FeedResponse(bool OK, uint64_t index, std::string ip_addr = "") {
+        // Log_info("==== inside SampleCrpcQuorumEvent:FeedResponse");
+        if (OK) {
+          // Log_info("==== inside SampleCrpcQuorumEvent:FeedRespons; checkpoint 0");
             if ((n_voted_yes_ == 0) && (n_voted_no_ == 0)){
-                // Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedRespons; checkpoint 00");
+                // Log_info("==== inside SampleCrpcQuorumEvent:FeedRespons; checkpoint 00");
                 minIndex = index;
             }
             else{
-                // Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedRespons; checkpoint 01");
+                // Log_info("==== inside SampleCrpcQuorumEvent:FeedRespons; checkpoint 01");
                 minIndex = std::min(minIndex, index);
             }
             VoteYes();
         } else {
-            //Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedRespons; checkpoint 1");
+            //Log_info("==== inside SampleCrpcQuorumEvent:FeedRespons; checkpoint 1");
             VoteNo();
         }
         /*Log_debug("fpga-raft comm accept event, "
                   "yes vote: %d, no vote: %d, min index: %d",
                   n_voted_yes_, n_voted_no_, minIndex);*/
-        // Log_info("==== inside SampleCrpcAppendQuorumEvent:FeedRespons; checkpoint final");
+        // Log_info("==== inside SampleCrpcQuorumEvent:FeedRespons; checkpoint final");
     }
 };
 
@@ -41,24 +41,24 @@ class SampleCrpcCommo : public Communicator {
 
 friend class SampleCrpcProxy;
  public:
-  std::unordered_map<uint64_t, shared_ptr<SampleCrpcAppendQuorumEvent>> cRPCEvents {};
+  std::unordered_map<uint64_t, shared_ptr<SampleCrpcQuorumEvent>> cRPCEvents {};
 
 	SampleCrpcCommo() = delete;
   SampleCrpcCommo(PollMgr*);
 
-  shared_ptr<SampleCrpcAppendQuorumEvent> crpc_add(parid_t par_id,
+  shared_ptr<SampleCrpcQuorumEvent> crpc_add(parid_t par_id,
               siteid_t leader_site_id,
               const int64_t& value1,
               const int64_t& value2,
               shared_ptr<Marshallable> cmd);
               
-  shared_ptr<SampleCrpcAppendQuorumEvent> broadcast_add(parid_t par_id,
+  shared_ptr<SampleCrpcQuorumEvent> broadcast_add(parid_t par_id,
               siteid_t leader_site_id,
               const int64_t& value1,
               const int64_t& value2,
               shared_ptr<Marshallable> cmd);
 
-  void CrpcAppendEntries3(const parid_t par_id,
+  void CrpcAdd3(const parid_t par_id,
               const uint64_t& id,
               const int64_t& value1,
               const int64_t& value2,

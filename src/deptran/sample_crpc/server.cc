@@ -19,17 +19,17 @@ void SampleCrpcServer::Setup() {
 
 SampleCrpcServer::~SampleCrpcServer() {
 }
-  void SampleCrpcServer::OnAppendEntries(const int64_t value1,
+  void SampleCrpcServer::OnAdd(const int64_t value1,
                                      const int64_t value2,
                                      int64_t *resultSum,
                                      const function<void()> &cb) {
         std::lock_guard<std::recursive_mutex> lock(mtx_);
         //StartTimer() ;
-        // Log_info("==== inside void SampleCrpcServer::OnAppendEntries");
+        // Log_info("==== inside void SampleCrpcServer::OnAdd");
         
 
             *resultSum = value1 + value2;
-            //Log_info("*** --- SampleCrpcServer::OnAppendEntries sum is: %ld + %ld = %ld, tid: %d", value1, value2, *resultSum, gettid());
+            //Log_info("*** --- SampleCrpcServer::OnAdd sum is: %ld + %ld = %ld, tid: %d", value1, value2, *resultSum, gettid());
 						// if (cmd->kind_ == MarshallDeputy::CMD_TPC_COMMIT){
             //   auto p_cmd = dynamic_pointer_cast<TpcCommitCommand>(cmd);
             //   auto sp_vec_piece = dynamic_pointer_cast<VecPieceData>(p_cmd->cmd_)->sp_vec_piece_data_;
@@ -59,7 +59,7 @@ SampleCrpcServer::~SampleCrpcServer() {
 					usleep(25*1000);
 				}*/
         cb();  // #profile(n_crpc) - 1.15%
-        // Log_info("==== returning from void SampleCrpcServer::OnAppendEntries");
+        // Log_info("==== returning from void SampleCrpcServer::OnAdd");
     }
 
 
@@ -81,7 +81,7 @@ SampleCrpcServer::~SampleCrpcServer() {
         x->cRPCEvents.erase(id);
 
         // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
-        // auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);   // #profile - 0.54%
+        // auto st = dynamic_pointer_cast<AddCommandState>(state.sp_data_);   // #profile - 0.54%
         for (size_t i = 0; i < state.size(); ++i)
         {
           // Log_info("inside SampleCrpcServer::OnCRPC2; checkpoint 3 @ %d", gettid());
@@ -93,18 +93,18 @@ SampleCrpcServer::~SampleCrpcServer() {
         return;
     }
 
-    // Log_info("calling dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
-    // auto c = dynamic_pointer_cast<AppendEntriesCommand>(cmd.sp_data_);
-    // Log_info("return dynamic_pointer_cast<AppendEntriesCommand>(state.sp_data_)");
+    // Log_info("calling dynamic_pointer_cast<AddCommand>(state.sp_data_)");
+    // auto c = dynamic_pointer_cast<AddCommand>(cmd.sp_data_);
+    // Log_info("return dynamic_pointer_cast<AddCommand>(state.sp_data_)");
     ResultAdd res;
     auto r = Coroutine::CreateRun([&]()
-                                  { this->OnAppendEntries(value1,
+                                  { this->OnAdd(value1,
                                                           value2,
                                                           // const_cast<MarshallDeputy &>(cmd).sp_data_,
                                                           &res.result,
                                                           []() {}); }); // #profile - 2.88%
     // Log_info("###################cp1");
-    // this->OnAppendEntries(slot_id,
+    // this->OnAdd(slot_id,
     //                               ballot,
     //                               leaderCurrentTerm,
     //                               leaderPrevLogIndex,
@@ -117,19 +117,19 @@ SampleCrpcServer::~SampleCrpcServer() {
     //                               &res.followerLastLogIndex,
     //                               []() {});
     // Log_info("###################cp2");
-    // Log_info("calling dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+    // Log_info("calling dynamic_pointer_cast<AddCommandState>(state.sp_data_)");
     std::vector<ResultAdd> st(state);
-    // auto st = dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_);  // #profile - 1.23%  ==> dont think can do anything about it
-    // Log_info("returned dynamic_pointer_cast<AppendEntriesCommandState>(state.sp_data_)");
+    // auto st = dynamic_pointer_cast<AddCommandState>(state.sp_data_);  // #profile - 1.23%  ==> dont think can do anything about it
+    // Log_info("returned dynamic_pointer_cast<AddCommandState>(state.sp_data_)");
     st.push_back(res);
 
     vector<uint16_t> addrChainCopy(addrChain.begin() + 1, addrChain.end());
     // auto addrChainCopy = addrChain;
     // addrChainCopy.erase(addrChainCopy.begin());
-    // Log_info("inside SampleCrpcServer::OnCRPC3; calling CrpcAppendEntries3");
+    // Log_info("inside SampleCrpcServer::OnCRPC3; calling CrpcAdd3");
     // Log_info("*** inside SampleCrpcServer::OnCRPC; cp 2 tid: %d", gettid());
     parid_t par_id = this->frame_->site_info_->partition_id_;
-    ((SampleCrpcCommo *)(this->commo_))->CrpcAppendEntries3(par_id, id, 
+    ((SampleCrpcCommo *)(this->commo_))->CrpcAdd3(par_id, id, 
                                                           value1,
                                                           value2,
                                                           addrChainCopy, st); // #profile (crpc2) - 4.02%%

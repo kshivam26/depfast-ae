@@ -18,14 +18,14 @@ class SampleCrpcServiceImpl : public SampleCrpcService {
  public:
   SampleCrpcServer* sched_;
   SampleCrpcServiceImpl(TxLogServer* sched);
-  void CrpcAppendEntries(const uint64_t& id,
+  void CrpcAdd(const uint64_t& id,
                           const int64_t& value1,
                           const int64_t& value2,
                           const std::vector<uint16_t>& addrChain, 
                           const std::vector<ResultAdd>& state, 
                           rrr::DeferredReply* defer) override;
                           
-  void BroadcastAppendEntries(const int64_t& value1,
+  void BroadcastAdd(const int64_t& value1,
                           const int64_t& value2,
                           int64_t *result,
                           rrr::DeferredReply* defer) override;

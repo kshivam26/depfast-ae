@@ -13,22 +13,22 @@ SampleCrpcCommo::SampleCrpcCommo(PollMgr* poll) : Communicator(poll) {
 //  verify(poll != nullptr);
 }
 
-void SampleCrpcCommo::CrpcAppendEntries3(const parid_t par_id,
+void SampleCrpcCommo::CrpcAdd3(const parid_t par_id,
               const uint64_t& id,
               const int64_t& value1,
               const int64_t& value2, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<ResultAdd>& state){
-  //Log_info("inside SampleCrpcCommo::CrpcAppendEntries; checkpoint 0 @ %d", gettid());
+  //Log_info("inside SampleCrpcCommo::CrpcAdd; checkpoint 0 @ %d", gettid());
   // auto proxies = rpc_par_proxies_[par_id];
   // SampleCrpcProxy *proxy = nullptr;
 
   auto proxy = (SampleCrpcProxy *)rpc_proxies_[addrChain[0]];
-  auto f = proxy->async_CrpcAppendEntries(id, value1, value2, addrChain, state);  // #profile(crpc2) - 3.96%%
+  auto f = proxy->async_CrpcAdd(id, value1, value2, addrChain, state);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
 }
 
-shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
+shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
                                       siteid_t leader_site_id,
                                       const int64_t& value1,
                                       const int64_t& value2,
@@ -36,12 +36,12 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
   //Log_info("Inside SampleCrpcCommo::crpc_add");
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
-      Log_info("In crpcAppendEntries_ring_back; tid of leader is %d", gettid());
+      Log_info("In crpcAdd_ring_back; tid of leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
   }
 
   int n = Config::GetConfig()->GetPartitionSize(par_id);
-  auto e = Reactor::CreateSpEvent<SampleCrpcAppendQuorumEvent>(n, n/2 + 1);
+  auto e = Reactor::CreateSpEvent<SampleCrpcQuorumEvent>(n, n/2 + 1);
   auto proxies = rpc_par_proxies_[par_id];
 
   unordered_set<std::string> ip_addrs {};
@@ -71,7 +71,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
 
   sitesInfo_.push_back(leader_site_id); // #cPRC additional
 
-  // MarshallDeputy aes_md(dynamic_pointer_cast<Marshallable>(std::make_shared<AppendEntriesCommandState>())); // additional
+  // MarshallDeputy aes_md(dynamic_pointer_cast<Marshallable>(std::make_shared<AddCommandState>())); // additional
   for (auto& p : proxies) {    
     auto follower_id = p.first;
     auto proxy = (SampleCrpcProxy*) p.second;
@@ -89,7 +89,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
 
     MarshallDeputy md(cmd);
 		verify(md.sp_data_ != nullptr);
-    // auto ae_cmd = std::make_shared<AppendEntriesCommand>(slot_id, 
+    // auto ae_cmd = std::make_shared<AddCommand>(slot_id, 
     //                                                     ballot, 
     //                                                     currentTerm, 
     //                                                     prevLogIndex, 
@@ -98,7 +98,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
     //                                                     di, 
     //                                                     md); // call missing just fuattr parameter, everything else same
 
-    // Log_info("returning std::make_shared<AppendEntriesCommand>");
+    // Log_info("returning std::make_shared<AddCommand>");
 
     // MarshallDeputy ae_md(dynamic_pointer_cast<Marshallable>(ae_cmd));
 
@@ -119,7 +119,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
     
     //Log_info("*** SampleCrpcCommo::crpc_add auto f = proxy->");
     
-    auto f = proxy->async_CrpcAppendEntries(crpc_id, 
+    auto f = proxy->async_CrpcAdd(crpc_id, 
                                                         value1,
                                                         value2,
                                                         sitesInfo_, state); // this can definitely be pushed into the cRPC function below // #profile (crpc2) - 2.05%
@@ -132,11 +132,11 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id
     break;
 
     }
-  // // Log_info("*** returning from SampleCrpcCommo::crpc_ring_BroadcastAppendEntries");
+  // // Log_info("*** returning from SampleCrpcCommo::crpc_ring_BroadcastAdd");
   return e;
 }
 
-shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
+shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
                                       siteid_t leader_site_id,
                                       const int64_t& value1,
                                       const int64_t& value2,
@@ -149,11 +149,11 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t p
   }
   static uint64_t count = 0;
   count++;
-  // Log_info("*** inside void SampleCrpcCommo::BroadcastAppendEntries; count: %ld", count);
-  // Log_info("*** inside void SampleCrpcCommo::BroadcastAppendEntries; slot_id: %ld; tid is: %d", slot_id, gettid());
+  // Log_info("*** inside void SampleCrpcCommo::BroadcastAdd; count: %ld", count);
+  // Log_info("*** inside void SampleCrpcCommo::BroadcastAdd; slot_id: %ld; tid is: %d", slot_id, gettid());
 
   int n = Config::GetConfig()->GetPartitionSize(par_id);
-  auto e = Reactor::CreateSpEvent<SampleCrpcAppendQuorumEvent>(n, n/2 + 1);
+  auto e = Reactor::CreateSpEvent<SampleCrpcQuorumEvent>(n, n/2 + 1);
   auto proxies = rpc_par_proxies_[par_id];
 
   unordered_set<std::string> ip_addrs {};
@@ -197,7 +197,7 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t p
 
     fuattr.callback = [this, e, n, ip, begin] (Future* fu) {
       //Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
-      //Log_info("*** inside SampleCrpcCommo::BroadcastAppendEntries; received response");
+      //Log_info("*** inside SampleCrpcCommo::BroadcastAdd; received response");
       int64_t accept = std::numeric_limits<int64_t>::min();
 			
 			fu->get_reply() >> accept;
@@ -216,14 +216,14 @@ shared_ptr<SampleCrpcAppendQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t p
 		verify(md.sp_data_ != nullptr);
 		outbound++;
     
-    // // Log_info("*** inside SampleCrpcCommo::BroadcastAppendEntries; calling proxy->async_AppendEntries");
-    auto f = proxy->async_BroadcastAppendEntries(value1,
+    // // Log_info("*** inside SampleCrpcCommo::BroadcastAdd; calling proxy->async_Add");
+    auto f = proxy->async_BroadcastAdd(value1,
                                         value2,
                                         fuattr); // #profile - 1.36%
     Future::safe_release(f);
   }
   verify(!e->IsReady());
-  // // Log_info("*** returning from SampleCrpcCommo::BroadcastAppendEntries");
+  // // Log_info("*** returning from SampleCrpcCommo::BroadcastAdd");
   return e;
 }
 

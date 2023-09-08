@@ -24,27 +24,27 @@ void CoordinatorSampleCrpc::Submit(shared_ptr<Marshallable>& cmd,
   cmd_ = cmd;
   verify(cmd_->kind_ != MarshallDeputy::UNKNOWN);
   //Log_info("*** inside void CoordinatorSampleCrpc::Submit, cmd kind: %d", cmd_->kind_);
-  AppendEntries();
+  Add();
   //Log_info("*** returning from void CoordinatorSampleCrpc::Submit");
   this->sch_->app_next_(*cmd);
 }
 
-void CoordinatorSampleCrpc::AppendEntries() {
+void CoordinatorSampleCrpc::Add() {
 
-    //Log_info("*** inside void CoordinatorSampleCrpc::AppendEntries;");
+    //Log_info("*** inside void CoordinatorSampleCrpc::Add;");
 
     std::lock_guard<std::recursive_mutex> lock(mtx_);
 
 
-    // Log_info("*** inside void CoordinatorSampleCrpc::AppendEntries; count: %ld; tid is: %d", count, gettid());
+    // Log_info("*** inside void CoordinatorSampleCrpc::Add; count: %ld; tid is: %d", count, gettid());
 
     TpcCommitAddCommand* add_cmd_ = dynamic_cast<TpcCommitAddCommand*>(cmd_.get());
 
-    //Log_info("*** inside inside void CoordinatorSampleCrpc::AppendEntries; value1: %d, value2: %d", add_cmd_->value_1, add_cmd_->value_2);
+    //Log_info("*** inside inside void CoordinatorSampleCrpc::Add; value1: %d, value2: %d", add_cmd_->value_1, add_cmd_->value_2);
     int64_t value1 = add_cmd_->value_1;
     int64_t value2 = add_cmd_->value_2;
 
-    shared_ptr<SampleCrpcAppendQuorumEvent> sp_quorum = nullptr;
+    shared_ptr<SampleCrpcQuorumEvent> sp_quorum = nullptr;
     static uint64_t count = 0;
     count++;
 
@@ -63,7 +63,7 @@ void CoordinatorSampleCrpc::AppendEntries() {
     sp_quorum->Wait();
     //Log_info("*** quorum reached");
 
-    // Log_info("*** returning from void CoordinatorSampleCrpc::AppendEntries");
+    // Log_info("*** returning from void CoordinatorSampleCrpc::Add");
 }
 
 } // namespace janus
