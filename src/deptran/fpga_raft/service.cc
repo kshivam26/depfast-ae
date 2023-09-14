@@ -92,7 +92,7 @@ void FpgaRaftServiceImpl::AppendEntries(const uint64_t& slot,
                                         rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
   if (!hasPrinted) {
-      // Log_info("tid of non-leader is %d", gettid());
+      Log_info("tid of non-leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
   }
 	//// Log_info("CreateRunning2");
@@ -176,7 +176,7 @@ void FpgaRaftServiceImpl::CrpcAppendEntries(const uint64_t& id,
   verify(sched_ != nullptr);
   // // Log_info("*** inside FpgaRaftServiceImpl::CrpcAppendEntries; tid: %d", gettid());
   if (!hasPrinted) {
-      // Log_info("tid of non-leader is %d", gettid());
+      Log_info("tid of non-leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
   }
 
@@ -224,7 +224,7 @@ void FpgaRaftServiceImpl::CrpcAppendEntries3(const uint64_t& id,
   // // Log_info("$$$ inside FpgaRaftServiceImpl::CrpcAppendEntries3, calling sched_->OnCRPC_no_chain; tid is %d", gettid());
   verify(sched_ != nullptr);
   if (!hasPrinted) {
-      // Log_info("tid of non-leader is %d", gettid());
+      Log_info("tid of non-leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
   }
 
@@ -258,7 +258,7 @@ void FpgaRaftServiceImpl::cRPC(const uint64_t& id,
   // static bool hasPrinted = false;  // Static variable to track if it has printed
 
   if (!hasPrinted) {
-      // Log_info("tid of non-leader is %d", gettid());
+      Log_info("tid of non-leader is %d", gettid());
       hasPrinted = true;  // Update the static variable
   }
   // ProfilerStart("P1.prof");

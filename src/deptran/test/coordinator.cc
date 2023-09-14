@@ -69,7 +69,7 @@ void CoordinatorTest::StartChain() {
   clock_gettime(CLOCK_MONOTONIC, &end_);
 
   // quorum_events_.push_back(sp_quorum);
-	// Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+	Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
   slow_ = sp_quorum->IsSlow();  // #profile - 2.13%
 
   // long leader_time;

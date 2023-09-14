@@ -4,7 +4,7 @@
 #include <gperftools/profiler.h>
 
 namespace janus {
-static bool hasPrinted = false;
+thread_local bool tidPrinted = false;
 
 TestServiceImpl::TestServiceImpl(TxLogServer *sched)
     : sched_((TestServer *)sched) {
@@ -26,9 +26,9 @@ void TestServiceImpl::cRPCSVC(const uint64_t& id, const MarshallDeputy& cmd, con
 
   verify(sched_ != nullptr);
   // // Log_info("*** inside TestServiceImpl::cRPCSVC; tid: %d", gettid());
-  if (!hasPrinted) {
-    // Log_info("tid of non-leader is %d", gettid());
-    hasPrinted = true;  // Update the static variable
+  if (!tidPrinted) {
+    Log_info("tid of non-leader is %d", gettid());
+    tidPrinted = true;  // Update the static variable
   }
 
   // Coroutine::CreateRun([&] () {
@@ -55,9 +55,9 @@ void TestServiceImpl::cRPCSVC_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, r
   // Log_info("==== inside void TestServiceImpl::cRPCSVC_B");
   verify(sched_ != nullptr);
   // // Log_info("*** inside TestServiceImpl::cRPCSVC_B; tid: %d", gettid());
-  if (!hasPrinted) {
-    // Log_info("tid of non-leader is %d", gettid());
-    hasPrinted = true;  // Update the static variable
+  if (!tidPrinted) {
+    Log_info("tid of non-leader is %d", gettid());
+    tidPrinted = true;  // Update the static variable
   }
 
   // // Log_info("*** inside TestServiceImpl::_B; cp 2 tid: %d", gettid());

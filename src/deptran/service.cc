@@ -76,7 +76,7 @@ void ClassicServiceImpl::Dispatch(const i64& cmd_id,
     clock_gettime(CLOCK_MONOTONIC, &curr_);
     
     long long currentTimeMs = curr_.tv_sec * 1000LL + curr_.tv_nsec / 1000000LL;
-    Log_info("**** Current time in milliseconds since the epoch: %lld with tid:%d",currentTimeMs, gettid());
+    // Log_info("**** Current time in milliseconds since the epoch: %lld with tid:%d",currentTimeMs, gettid());
     *res = SUCCESS;
     if (!dtxn_sched()->Dispatch(cmd_id, sp, *output)) {
       *res = REJECT;

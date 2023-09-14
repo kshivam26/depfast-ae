@@ -304,7 +304,7 @@ void ClientWorker::Work() {
         struct timespec end_;
 		    clock_gettime(CLOCK_MONOTONIC, &end_);
         if (start_.tv_sec != 0){
-          Log_info("&&&& tid: %d; latency: %ld", gettid(), (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+          // Log_info("&&&& tid: %d; latency: %ld", gettid(), (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
         }
         start_ = end_;
         // Log_info("current start_.tv_sec: %ld", start_.tv_sec);

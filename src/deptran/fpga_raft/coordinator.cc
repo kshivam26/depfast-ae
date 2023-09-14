@@ -142,7 +142,7 @@ void CoordinatorFpgaRaft::AppendEntries() {
 		clock_gettime(CLOCK_MONOTONIC, &end_);
 
 		// quorum_events_.push_back(sp_quorum);
-		// Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+		Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
 		slow_ = sp_quorum->IsSlow();  // #profile - 2.13%
 		
 		long leader_time;
@@ -170,7 +170,7 @@ void CoordinatorFpgaRaft::AppendEntries() {
 		avg_ob = total_ob/100;
 
 		for (auto it = commo()->rpc_clients_.begin(); it != commo()->rpc_clients_.end(); it++) {
-			if (avg_ob > 0 && it->second->time_ > 0) // Log_info("time for %d is: %d", it->first, it->second->time_/avg_ob);
+			if (avg_ob > 0 && it->second->time_ > 0) Log_info("time for %d is: %d", it->first, it->second->time_/avg_ob);
 			if (it->first != loc_id_) {
 				follower_times.push_back(it->second->time_);
 			}
