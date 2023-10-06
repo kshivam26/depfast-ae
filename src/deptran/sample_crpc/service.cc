@@ -5,7 +5,7 @@
 # include <gperftools/profiler.h>
 
 namespace janus {
-static bool hasPrinted = false;
+thread_local bool hasPrinted2 = false;
 
 SampleCrpcServiceImpl::SampleCrpcServiceImpl(TxLogServer *sched)
     : sched_((SampleCrpcServer*)sched) {
@@ -23,9 +23,9 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id,
 
   verify(sched_ != nullptr);
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
-  if (!hasPrinted) {
+  if (!hasPrinted2) {
       //Log_info("tid of non-leader is %d", gettid());
-      hasPrinted = true;  // Update the static variable
+      hasPrinted2 = true;  // Update the static variable
   }
 
   // Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; cp 2 tid: %d", gettid());
@@ -49,9 +49,9 @@ void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1,
                                         int64_t *result,
                                         rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
-  if (!hasPrinted) {
+  if (!hasPrinted2) {
       //Log_info("*** inside SampleCrpcServiceImpl::BroadcastAdd tid of non-leader is %d", gettid());
-      hasPrinted = true;  // Update the static variable
+      hasPrinted2 = true;  // Update the static variable
   }
 
   Coroutine::CreateRun([&] () {
