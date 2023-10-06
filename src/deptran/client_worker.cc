@@ -180,10 +180,10 @@ void ClientWorker::Work() {
   if (ccsi) {
     ccsi->wait_for_start(id);
   }
-  Log_debug("after wait for start");
+  //Log_debug("after wait for start");
 
-  Log_info("1) the pid for client is: %d", ::getpid());
-  Log_info("2) the thread id for client is: %d", gettid());
+  //Log_info("1) the pid for client is: %d", ::getpid());
+  //Log_info("2) the thread id for client is: %d", gettid());
 
   bool failover = Config::GetConfig()->get_failover();
   if (failover) {
@@ -207,7 +207,7 @@ void ClientWorker::Work() {
         }
         Pause(idx);
         *failover_trigger_ = true;
-        Log_info("server %d paused for failover test", idx);
+        //Log_info("server %d paused for failover test", idx);
         auto s = Reactor::CreateSpEvent<NeverEvent>();
         s->Wait(stop_int);
         while (*failover_trigger_) {
@@ -227,7 +227,7 @@ void ClientWorker::Work() {
 
   // auto beg_time1 = Time::now();
   // auto cur_time1 = Time::now();
-  Log_info("current n_concurrent is: %d", n_concurrent_);
+  //Log_info("current n_concurrent is: %d", n_concurrent_);
   // Log_info("current n_concurrent is: %d", n_concurrent);
   for (uint32_t n_tx = 0; n_tx < n_concurrent_; n_tx++) {
     // Log_info("1) the client proc id is: %d", ::getpid());
@@ -291,11 +291,11 @@ void ClientWorker::Work() {
 						coo->commo_->total_ = this->outbound;
 						coo->commo_->qe->n_voted_yes_ = this->outbound;
 						coo->commo_->count_lock_.unlock();
-						Log_info("is it ready: %d", coo->commo_->qe->IsReady());
+						//Log_info("is it ready: %d", coo->commo_->qe->IsReady());
 						coo->commo_->qe->Test();
 						first = false;
 					}
-					Log_info("total: %d", coo->commo_->total_);
+					//Log_info("total: %d", coo->commo_->total_);
 					auto t = Reactor::CreateSpEvent<TimeoutEvent>(0.1*1000*1000);
 					t->Wait();
 				}
@@ -303,9 +303,9 @@ void ClientWorker::Work() {
         // Log_info("==== going to call this->DispatchRequest");
         struct timespec end_;
 		    clock_gettime(CLOCK_MONOTONIC, &end_);
-        if (start_.tv_sec != 0){
-          Log_info("&&&& tid: %d; latency: %ld", gettid(), (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
-        }
+        //if (start_.tv_sec != 0){
+          //Log_info("&&&& tid: %d; latency: %ld", gettid(), (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+        //}
         start_ = end_;
         // Log_info("current start_.tv_sec: %ld", start_.tv_sec);
 
@@ -379,10 +379,10 @@ void ClientWorker::Work() {
 
   
   while (all_done_ == 0) {
-    Log_info("wait for finish... n_ceased_cleints: %d,  "
-              "n_issued: %d, n_done: %d, n_created_coordinator: %d",
-              (int) n_ceased_client_.value_, (int) n_tx_issued_,
-              (int) sp_n_tx_done_.value_, (int) created_coordinators_.size());
+    // Log_info("wait for finish... n_ceased_cleints: %d,  "
+    //           "n_issued: %d, n_done: %d, n_created_coordinator: %d",
+    //           (int) n_ceased_client_.value_, (int) n_tx_issued_,
+    //           (int) sp_n_tx_done_.value_, (int) created_coordinators_.size());
     sleep(5);
   }
 
@@ -676,7 +676,7 @@ ClientWorker::ClientWorker(uint32_t id, Config::SiteInfo& site_info, Config* con
     failover_trigger_(failover_trigger),
     failover_server_quit_(failover_server_quit),
     failover_server_idx_(failover_server_idx) {
-  Log_info("inside client worker, tid is: %d", gettid());
+  // Log_info("inside client worker, tid is: %d", gettid());
   poll_mgr_ = poll_mgr == nullptr ? new PollMgr(1) : poll_mgr;
   // Log_info("***ClientWorker constructor; checkpoint 1");
   frame_ = Frame::GetFrame(config->tx_proto_);
@@ -711,4 +711,3 @@ void ClientWorker::Resume(locid_t locid) {
 }
 
 } // namespace janus
-
