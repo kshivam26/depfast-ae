@@ -14,10 +14,5 @@ process:
   c201: localhost
   c301: localhost
 
-# process_name - host_addr map
 host:
   localhost: 127.0.0.1
-  # h01: 127.0.0.1
-  # h02: 127.0.0.1
-  # h03: 127.0.0.1
-  # h04: 127.0.0.1
