@@ -18,11 +18,11 @@ class TestServer : public TxLogServer {
     void Setup();
     bool stop_ = false ;
   public:
-    uint64_t toyCounter = 0;
     TestServer(Frame *frame) ;
     ~TestServer() ;
-    void cRPCSRV(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state);
-    void cRPCSRV_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, const function<void()> &cb);
+    void OnAdd(const int64_t& value, int64_t *result, const function<void()> &cb);
+    void cRPCSRV(const uint64_t& id, const int64_t& value, const std::vector<uint16_t>& addrChain, const std::vector<ResultAdd>& state);
+    // void cRPCSRV_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, const function<void()> &cb);
 };
 
 } // namespace janus

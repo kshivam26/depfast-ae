@@ -44,7 +44,9 @@ class MarshallDeputy {
     CMD_NOOP = 10,
     CMD_TPC_BATCH = 11,
     CMD_RAFT_APPEND_ENTRIES = 12, // cRPC appendEntries
-    CMD_RAFT_APPEND_ENTRIES_STATE = 13 // cRPC appendEntries
+    CMD_RAFT_APPEND_ENTRIES_STATE = 13, // cRPC appendEntries
+    CMD_CRPC_TEST = 14, // cRPC test
+    CMD_CRPC_TEST_STATE = 15 // cRPC test
   };
   /**
    * This should be called by the rpc layer.

@@ -1036,6 +1036,10 @@ bool Config::IsReplicated() {
   return true;
 }
 
+bool Config::IsTest() {
+  return (replica_proto_ == MODE_TEST);
+}
+
 const char * Config::log_path() {
   return logging_path_.c_str();
 }

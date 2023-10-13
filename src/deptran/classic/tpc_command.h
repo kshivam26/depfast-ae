@@ -30,6 +30,18 @@ class TpcCommitCommand : public Marshallable {
   virtual Marshal& FromMarshal(Marshal&) override;
 };
 
+class TpcCommitTestCommand : public Marshallable {
+ public:
+  TpcCommitTestCommand() : Marshallable(MarshallDeputy::CMD_CRPC_TEST) {
+  }
+  txnid_t tx_id_ = 0;
+  int ret_ = -1;
+  int64_t value = 0;
+  shared_ptr<Marshallable> cmd_{nullptr};
+  virtual Marshal& ToMarshal(Marshal&) const override;
+  virtual Marshal& FromMarshal(Marshal&) override;
+};
+
 class TpcEmptyCommand : public Marshallable {
  private:
   shared_ptr<BoxEvent<bool>> event{Reactor::CreateSpEvent<BoxEvent<bool>>()};

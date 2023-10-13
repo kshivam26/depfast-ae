@@ -12,7 +12,7 @@ TestCommo::TestCommo(PollMgr* poll) : Communicator(poll) {
 //  verify(poll != nullptr);
 }
 
-shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd) {
+shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd, const int64_t& value) {
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
     Log_info("In TestCommo::cRPC; tid of leader is %d", gettid());
@@ -91,7 +91,7 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_sit
     // // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
     verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
 
-    std::vector<AppendEntriesResult> state;
+    std::vector<ResultAdd> state;
 
     // **** uncomment/comment the fuattr; just testing if ringback is even more costly
     // FutureAttr fuattr;
@@ -100,7 +100,7 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_sit
     //   // Log_info("*** inside fuattr.callback, response received; tid is %d", gettid());
     // };
     // just call cRPC something with the above paramters, and no other changes
-    auto f = proxy->async_cRPCSVC(crpc_id, md, sitesInfo_, state); // this can definitely be pushed into the cRPC function below // #profile (crpc2) - 2.05%
+    auto f = proxy->async_cRPCSVC(crpc_id, value, sitesInfo_, state); // this can definitely be pushed into the cRPC function below // #profile (crpc2) - 2.05%
     Future::safe_release(f);
 
     // this too should be abstracted
@@ -115,7 +115,7 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC(parid_t par_id, siteid_t leader_sit
   return e;
 }
 
-shared_ptr<ChainQuorumEvent> TestCommo::cRPC_B(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd) {
+shared_ptr<ChainQuorumEvent> TestCommo::cRPC_B(parid_t par_id, siteid_t leader_site_id, shared_ptr<Marshallable> cmd, const int64_t& value) {
   // // Log_info("@@@ Test CP 12A: TestCommo::cRPC_B");
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
@@ -171,11 +171,11 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC_B(parid_t par_id, siteid_t leader_s
     fuattr.callback = [this, e, n, ip, begin] (Future* fu) {
       // // Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
       // Log_info("*** TestCommo::cRPC_B; received response");
-      uint64_t accept = 0;
+      uint64_t result = 0;
       // uint64_t term = 0;
       // uint64_t index = 0;
 
-			fu->get_reply() >> accept;
+			fu->get_reply() >> result;
       // fu->get_reply() >> term;
       // fu->get_reply() >> index;
 
@@ -189,7 +189,7 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC_B(parid_t par_id, siteid_t leader_s
 
       // bool y = ((accept == 1) && (isLeader) && (currentTerm == term));
       // e->FeedResponse(y, index, ip);
-      bool y = (accept == 1);
+      bool y = (result == 2);
       verify(y);
       e->FeedResponse(y, 1, ip);
     };
@@ -202,7 +202,7 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC_B(parid_t par_id, siteid_t leader_s
 		// di.id = dep_id
 
     // Log_info("*** inside TestCommo::cRPC_B; calling proxy->async_AppendEntries");
-    auto f = proxy->async_cRPCSVC_B(md, fuattr); // #profile - 1.36%
+    auto f = proxy->async_cRPCSVC_B(value, fuattr); // #profile - 1.36%
     Future::safe_release(f);
   }
 
@@ -211,9 +211,9 @@ shared_ptr<ChainQuorumEvent> TestCommo::cRPC_B(parid_t par_id, siteid_t leader_s
   return e;
 }
 
-void TestCommo::cRPC2(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state) {
+void TestCommo::cRPC2(const uint64_t& id, const int64_t& value, const std::vector<uint16_t>& addrChain, const std::vector<ResultAdd>& state) {
   auto proxy = (TestProxy *)rpc_proxies_[addrChain[0]];
-  auto f = proxy->async_cRPCSVC(id, cmd, addrChain, state);
+  auto f = proxy->async_cRPCSVC(id, value, addrChain, state);
   Future::safe_release(f);
 }
 

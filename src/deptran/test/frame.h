@@ -11,7 +11,7 @@ namespace janus {
 class TestFrame : public Frame {
   public:
     TestFrame(int mode);
-    virtual ~TestFrame();
+    // virtual ~TestFrame();
     TestCommo *commo_ = nullptr;
     TestServer *sch_ = nullptr;
     

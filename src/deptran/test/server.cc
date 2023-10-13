@@ -17,8 +17,13 @@ TestServer::~TestServer() {
 	stop_ = true;
 }
 
-void TestServer::cRPCSRV(const uint64_t& id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<AppendEntriesResult>& state) {
-  toyCounter++;
+void TestServer::OnAdd(const int64_t& value, int64_t *result, const function<void()> &cb) {
+  std::lock_guard<std::recursive_mutex> lock(mtx_);
+  *result = value + value;
+  cb();
+}
+
+void TestServer::cRPCSRV(const uint64_t& id, const int64_t& value, const std::vector<uint16_t>& addrChain, const std::vector<ResultAdd>& state) {
   // Log_info("==== inside void TestServer::cRPCSRV; counter: %ld; tid is: %d", toyCounter, gettid());
     if (addrChain.size() == 1) {
         // Log_info("==== reached the final link in the chain");
@@ -43,24 +48,25 @@ void TestServer::cRPCSRV(const uint64_t& id, const MarshallDeputy& cmd, const st
         return;
     }
 
-  std::vector<AppendEntriesResult> st(state);
-  AppendEntriesResult res;
+  std::vector<ResultAdd> st(state);
+  ResultAdd res;
+  // auto r = Coroutine::CreateRun([&](){ this->OnAdd(value, &res.result, []() {}); });
+  this->OnAdd(value, &res.result, []() {});
   st.push_back(res);
 
   vector<uint16_t> addrChainCopy(addrChain.begin() + 1, addrChain.end());
   parid_t par_id = this->frame_->site_info_->partition_id_;
-  ((TestCommo *)(this->commo_))->cRPC2(id, cmd, addrChainCopy, st);
+  ((TestCommo *)(this->commo_))->cRPC2(id, value, addrChainCopy, st);
 }
 
-void TestServer::cRPCSRV_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, const function<void()> &cb) {
-  // Log_info("@@@ Test CP 19A: TestServer::cRPCSRV_B");
-  std::lock_guard<std::recursive_mutex> lock(mtx_);
+// void TestServer::cRPCSRV_B(const MarshallDeputy& cmd, uint64_t *AcceptOK, const function<void()> &cb) {
+//   // Log_info("@@@ Test CP 19A: TestServer::cRPCSRV_B");
+//   std::lock_guard<std::recursive_mutex> lock(mtx_);
 
-  toyCounter++;
-  // // Log_info("==== inside void TestServer::cRPCSRV_B; counter: %ld; tid is: %d", toyCounter, gettid());
-  *AcceptOK = 1;
-  cb();
-  // Log_info("==== returning from TestServer::cRPCSRV_B; counter: %ld; tid is: %d", toyCounter, gettid());
-}
+//   // // Log_info("==== inside void TestServer::cRPCSRV_B; counter: %ld; tid is: %d", toyCounter, gettid());
+//   *AcceptOK = 1;
+//   cb();
+//   // Log_info("==== returning from TestServer::cRPCSRV_B; counter: %ld; tid is: %d", toyCounter, gettid());
+// }
 
 }

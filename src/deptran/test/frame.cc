@@ -12,9 +12,9 @@ REG_FRAME(MODE_TEST, vector<string>({"test"}), TestFrame);
 
 TestFrame::TestFrame(int mode) : Frame(mode) {}
 
-TestFrame::~TestFrame() { 
-  // Log_info("Inside CreateScheduler");
-}
+// TestFrame::~TestFrame() { 
+//   // Log_info("Inside CreateScheduler");
+// }
 
 
 Coordinator *TestFrame::CreateCoordinator(cooid_t coo_id,
@@ -31,11 +31,11 @@ Coordinator *TestFrame::CreateCoordinator(cooid_t coo_id,
   coo->commo_ = commo_;
   verify(sch_ != nullptr);
   coo->sch_ = this->sch_;
-  coo->slot_hint_ = &slot_hint_;
-  coo->slot_id_ = slot_hint_++;
-  coo->n_replica_ = config->GetPartitionSize(site_info_->partition_id_);
+  // coo->slot_hint_ = &slot_hint_;
+  // coo->slot_id_ = slot_hint_++;
+  // coo->n_replica_ = config->GetPartitionSize(site_info_->partition_id_);
   coo->loc_id_ = this->site_info_->locale_id;
-  verify(coo->n_replica_ != 0);
+  // verify(coo->n_replica_ != 0);
   // Log_info("create new test coord, coo_id: %d", (int) coo->coo_id_);
   return coo;
 }
