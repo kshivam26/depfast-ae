@@ -97,12 +97,8 @@ SampleCrpcServer::~SampleCrpcServer() {
     // auto c = dynamic_pointer_cast<AddCommand>(cmd.sp_data_);
     // Log_info("return dynamic_pointer_cast<AddCommand>(state.sp_data_)");
     ResultAdd res;
-    auto r = Coroutine::CreateRun([&]()
-                                  { this->OnAdd(value1,
-                                                          value2,
-                                                          // const_cast<MarshallDeputy &>(cmd).sp_data_,
-                                                          &res.result,
-                                                          []() {}); }); // #profile - 2.88%
+    // auto r = Coroutine::CreateRun([&]() { this->OnAdd(value1, value2, &res.result, []() {}); }); // #profile - 2.88%
+    this->OnAdd(value1, value2, &res.result, []() {}); // #profile - 2.88%
     // Log_info("###################cp1");
     // this->OnAdd(slot_id,
     //                               ballot,

@@ -24,7 +24,7 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id,
   verify(sched_ != nullptr);
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
   if (!hasPrinted2) {
-      //Log_info("tid of non-leader is %d", gettid());
+      Log_info("tid of non-leader is %d", gettid());
       hasPrinted2 = true;  // Update the static variable
   }
 
@@ -50,7 +50,7 @@ void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1,
                                         rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
   if (!hasPrinted2) {
-      //Log_info("*** inside SampleCrpcServiceImpl::BroadcastAdd tid of non-leader is %d", gettid());
+      Log_info("tid of non-leader is %d", gettid());
       hasPrinted2 = true;  // Update the static variable
   }
 
