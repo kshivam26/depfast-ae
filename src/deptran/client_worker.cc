@@ -7,6 +7,7 @@
 #include "benchmark_control_rpc.h"
 
 namespace janus {
+// int ncl = 0;
 
 ClientWorker::~ClientWorker() {
   if (tx_generator_) {
@@ -182,8 +183,13 @@ void ClientWorker::Work() {
   }
   //Log_debug("after wait for start");
 
-  //Log_info("1) the pid for client is: %d", ::getpid());
-  //Log_info("2) the thread id for client is: %d", gettid());
+  thread_local pid_t t = gettid();
+  // Log_info("1) the pid for client is: %d", ::getpid());
+  Log_info("2) the tid for client is: %d", gettid());
+  // thread_local cpu_set_t cs;
+  // CPU_ZERO(&cs);
+  // CPU_SET(ncl++, &cs);
+  // verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
 
   bool failover = Config::GetConfig()->get_failover();
   if (failover) {

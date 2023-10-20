@@ -6,6 +6,8 @@
 #include "../procedure.h"
 #include "../command_marshaler.h"
 #include "../rcc_rpc.h"
+#include <sched.h>
+#include <pthread.h>
 
 namespace janus {
 
@@ -36,7 +38,12 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
   //Log_info("Inside SampleCrpcCommo::crpc_add");
   static bool hasPrinted = false;  // Static variable to track if it has printed
   if (!hasPrinted) {
-      Log_info("In crpcAdd_ring_back; tid of leader is %d", gettid());
+      pid_t t = gettid();
+      Log_info("In crpcAdd_ring_back; tid of leader is %d", t);
+      cpu_set_t cs;
+      CPU_ZERO(&cs);
+      CPU_SET(0, &cs);
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }
 
@@ -144,7 +151,12 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
   static bool hasPrinted = false;  // Static variable to track if it has printed
 
   if (!hasPrinted) {
-      Log_info("in no cRPC; tid of leader is %d", gettid());
+      pid_t t = gettid();
+      Log_info("in no cRPC; tid of leader is %d", t);
+      cpu_set_t cs;
+      CPU_ZERO(&cs);
+      CPU_SET(0, &cs);
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }
   static uint64_t count = 0;

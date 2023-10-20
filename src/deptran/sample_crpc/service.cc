@@ -2,10 +2,14 @@
 #include "service.h"
 #include "server.h"
 #include <thread>
-# include <gperftools/profiler.h>
+#include <gperftools/profiler.h>
+#include <sched.h>
+#include <pthread.h>
 
 namespace janus {
 thread_local bool hasPrinted2 = false;
+int grouping = 2;
+int i = grouping;
 
 SampleCrpcServiceImpl::SampleCrpcServiceImpl(TxLogServer *sched)
     : sched_((SampleCrpcServer*)sched) {
@@ -24,7 +28,12 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id,
   verify(sched_ != nullptr);
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
   if (!hasPrinted2) {
-      Log_info("tid of non-leader is %d", gettid());
+      thread_local pid_t t = gettid();
+      Log_info("tid of non-leader #%d is %d", i++, t);
+      thread_local cpu_set_t cs;
+      CPU_ZERO(&cs);
+      CPU_SET(i++ / grouping, &cs);
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted2 = true;  // Update the static variable
   }
 
@@ -50,7 +59,12 @@ void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1,
                                         rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
   if (!hasPrinted2) {
-      Log_info("tid of non-leader is %d", gettid());
+      thread_local pid_t t = gettid();
+      Log_info("tid of non-leader #%d is %d", i++, t);
+      thread_local cpu_set_t cs;
+      CPU_ZERO(&cs);
+      CPU_SET(i++ / grouping, &cs);
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted2 = true;  // Update the static variable
   }
 
