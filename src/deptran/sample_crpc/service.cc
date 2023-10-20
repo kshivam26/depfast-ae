@@ -29,7 +29,7 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id,
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
   if (!hasPrinted2) {
       thread_local pid_t t = gettid();
-      Log_info("tid of non-leader #%d is %d", i++, t);
+      Log_info("tid of non-leader is %d", t);
       thread_local cpu_set_t cs;
       CPU_ZERO(&cs);
       CPU_SET(i++ / grouping, &cs);
@@ -60,7 +60,7 @@ void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1,
   verify(sched_ != nullptr);
   if (!hasPrinted2) {
       thread_local pid_t t = gettid();
-      Log_info("tid of non-leader #%d is %d", i++, t);
+      Log_info("tid of non-leader is %d", t);
       thread_local cpu_set_t cs;
       CPU_ZERO(&cs);
       CPU_SET(i++ / grouping, &cs);
