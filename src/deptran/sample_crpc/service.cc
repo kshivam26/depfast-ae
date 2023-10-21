@@ -30,10 +30,10 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id,
   if (!hasPrinted2) {
       thread_local pid_t t = gettid();
       Log_info("tid of non-leader is %d", t);
-      thread_local cpu_set_t cs;
-      CPU_ZERO(&cs);
-      CPU_SET(i++ / grouping, &cs);
-      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+    //   thread_local cpu_set_t cs;
+    //   CPU_ZERO(&cs);
+    //   CPU_SET(i++ / grouping, &cs);
+    //   verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted2 = true;  // Update the static variable
   }
 
@@ -61,10 +61,10 @@ void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1,
   if (!hasPrinted2) {
       thread_local pid_t t = gettid();
       Log_info("tid of non-leader is %d", t);
-      thread_local cpu_set_t cs;
-      CPU_ZERO(&cs);
-      CPU_SET(i++ / grouping, &cs);
-      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+    //   thread_local cpu_set_t cs;
+    //   CPU_ZERO(&cs);
+    //   CPU_SET(i++ / grouping, &cs);
+    //   verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted2 = true;  // Update the static variable
   }
 

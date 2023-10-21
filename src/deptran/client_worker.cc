@@ -9,6 +9,7 @@
 namespace janus {
 // int ncl = 0;
 
+
 ClientWorker::~ClientWorker() {
   if (tx_generator_) {
     delete tx_generator_;
@@ -185,7 +186,7 @@ void ClientWorker::Work() {
 
   thread_local pid_t t = gettid();
   // Log_info("1) the pid for client is: %d", ::getpid());
-  Log_info("2) the tid for client is: %d", gettid());
+  // Log_info("2) the tid for client is: %d", gettid());
   // thread_local cpu_set_t cs;
   // CPU_ZERO(&cs);
   // CPU_SET(ncl++, &cs);
