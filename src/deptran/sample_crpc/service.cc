@@ -9,11 +9,11 @@
 
 namespace janus {
 thread_local bool hasPrinted2 = false;
-// int i = 1;      // #follower start
-// int g = 1;      // #followers inside same core
-// int c = 1;      // #core per follower
-// int s = 1;      // #core start
-// bool x = true;  // #core exclusion
+int i = 1;      // #follower start
+int g = 1;      // #followers inside same core
+int c = 1;      // #core per follower
+int s = 1;      // #core start
+bool x = false;  // #core exclusion
 
 SampleCrpcServiceImpl::SampleCrpcServiceImpl(TxLogServer *sched)
     : sched_((SampleCrpcServer*)sched) {
@@ -34,30 +34,17 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id,
   if (!hasPrinted2) {
       thread_local pid_t t = gettid();
       Log_info("tid of non-leader is %d", t);
-      // if (addrChain.size() > 1) {
-      //   thread_local cpu_set_t cs;
-      //   CPU_ZERO(&cs);
-      //   for (int k = 0; k < c; k++)
-      //     CPU_SET(s+k-((!x) ? ((i-1) / g) : 0 ), &cs);
-      //   s += (i % g == 0) ? c : 0;
-      //   i++;
-      //   verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
-      // }
+      if (addrChain.size() > 1) {
+        thread_local cpu_set_t cs;
+        CPU_ZERO(&cs);
+        for (int k = 0; k < c; k++)
+          CPU_SET(s+k-((!x) ? ((i-1) / g) : 0 ), &cs);
+        s += (i % g == 0) ? c : 0;
+        i++;
+        verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+      }
       hasPrinted2 = true;  // Update the static variable
   }
-
-  // // Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; cp 2 tid: %d", gettid());
-  // //Log_info("*** --- inside SampleCrpcServiceImpl::CrpcAdd, entering OnCRPC3");
-  // Coroutine::CreateRun([&] () {
-  //     sched_->OnCRPC3(id,
-  //                   value1,
-  //                   value2,
-  //                   addrChain,
-  //                   state);
-  //     // Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; cp 3 tid: %d", gettid());
-  //     defer->reply();
-  //     // Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; cp 4 tid: %d", gettid());
-  // });
 
   if (addrChain.size() == 1) {
     auto x = (SampleCrpcCommo *)(sched_->commo_);
@@ -76,7 +63,7 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id,
   st.push_back(res);
   vector<uint16_t> addrChainCopy(addrChain.begin() + 1, addrChain.end());
   parid_t par_id = sched_->frame_->site_info_->partition_id_;
-  ((SampleCrpcCommo *)(sched_->commo_))->CrpcAdd3(par_id, id, value1, value2, addrChainCopy, st);
+  ((SampleCrpcCommo *)(sched_->commo_))->CrpcAdd3(id, value1, value2, addrChainCopy, st);
 
   // Log_info("*** returning from SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
 }
@@ -89,13 +76,13 @@ void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1,
   if (!hasPrinted2) {
       thread_local pid_t t = gettid();
       Log_info("tid of non-leader is %d", t);
-      // thread_local cpu_set_t cs;
-      // CPU_ZERO(&cs);
-      // for (int k = 0; k < c; k++)
-      //   CPU_SET(s+k-((!x) ? ((i-1) / g) : 0 ), &cs);
-      // s += (i % g == 0) ? c : 0;
-      // i++;
-      // verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+      thread_local cpu_set_t cs;
+      CPU_ZERO(&cs);
+      for (int k = 0; k < c; k++)
+        CPU_SET(s+k-((!x) ? ((i-1) / g) : 0 ), &cs);
+      s += (i % g == 0) ? c : 0;
+      i++;
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted2 = true;  // Update the static variable
   }
 

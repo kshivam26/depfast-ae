@@ -233,8 +233,8 @@ int SchedulerClassic::OnCommit(txnid_t tx_id,
     cmd->tx_id_ = tx_id;
     cmd->ret_ = commit_or_abort;
     cmd->cmd_ = sp_tx->cmd_;
-    cmd->value_1 = rand() % 100;
-    cmd->value_2 = rand() % 100;
+    cmd->value_1 = 1;
+    cmd->value_2 = 2;
     sp_tx->is_leader_hint_ = true;
     auto sp_m = dynamic_pointer_cast<Marshallable>(cmd);
     shared_ptr<Coordinator> coo(CreateRepCoord(dep_id.id));

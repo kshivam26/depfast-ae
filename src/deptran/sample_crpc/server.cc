@@ -125,8 +125,7 @@ SampleCrpcServer::~SampleCrpcServer() {
     // Log_info("inside SampleCrpcServer::OnCRPC3; calling CrpcAdd3");
     // Log_info("*** inside SampleCrpcServer::OnCRPC; cp 2 tid: %d", gettid());
     parid_t par_id = this->frame_->site_info_->partition_id_;
-    ((SampleCrpcCommo *)(this->commo_))->CrpcAdd3(par_id, id, 
-                                                          value1,
+    ((SampleCrpcCommo *)(this->commo_))->CrpcAdd3(id, value1,
                                                           value2,
                                                           addrChainCopy, st); // #profile (crpc2) - 4.02%%
                                                                                               // Log_info("==== returning from void SampleCrpcServer::OnCRPC");

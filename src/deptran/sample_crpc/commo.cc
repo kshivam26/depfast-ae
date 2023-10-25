@@ -15,8 +15,7 @@ SampleCrpcCommo::SampleCrpcCommo(PollMgr* poll) : Communicator(poll) {
 //  verify(poll != nullptr);
 }
 
-void SampleCrpcCommo::CrpcAdd3(const parid_t par_id,
-              const uint64_t& id,
+void SampleCrpcCommo::CrpcAdd3(const uint64_t& id,
               const int64_t& value1,
               const int64_t& value2, 
               const std::vector<uint16_t>& addrChain, 
@@ -25,6 +24,18 @@ void SampleCrpcCommo::CrpcAdd3(const parid_t par_id,
   // auto proxies = rpc_par_proxies_[par_id];
   // SampleCrpcProxy *proxy = nullptr;
 
+  // if (addrChain.size() == 1) {
+  //   auto x = (SampleCrpcCommo *)(this);
+  //   verify(x->cRPCEvents.find(id) != x->cRPCEvents.end());
+  //   auto ev = x->cRPCEvents[id];
+  //   x->cRPCEvents.erase(id);
+  //   for (size_t i = 0; i < state.size(); ++i) {
+  //     verify(state[i].result == 3);
+  //     ev->FeedResponse(true, i);
+  //   }
+  //   return;
+  // }
+  
   auto proxy = (SampleCrpcProxy *)rpc_proxies_[addrChain[0]];
   auto f = proxy->async_CrpcAdd(id, value1, value2, addrChain, state);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
@@ -40,10 +51,10 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
   if (!hasPrinted) {
       pid_t t = gettid();
       Log_info("In crpcAdd_ring_back; tid of leader is %d", t);
-      // cpu_set_t cs;
-      // CPU_ZERO(&cs);
-      // CPU_SET(0, &cs);
-      // verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+      cpu_set_t cs;
+      CPU_ZERO(&cs);
+      CPU_SET(0, &cs);
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }
 
@@ -139,6 +150,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
     break;
 
     }
+  // verify(!e->IsReady());
   // // Log_info("*** returning from SampleCrpcCommo::crpc_ring_BroadcastAdd");
   return e;
 }
@@ -153,10 +165,10 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
   if (!hasPrinted) {
       pid_t t = gettid();
       Log_info("in no cRPC; tid of leader is %d", t);
-      // cpu_set_t cs;
-      // CPU_ZERO(&cs);
-      // CPU_SET(0, &cs);
-      // verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+      cpu_set_t cs;
+      CPU_ZERO(&cs);
+      CPU_SET(0, &cs);
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }
   static uint64_t count = 0;
@@ -210,7 +222,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
     fuattr.callback = [this, e, n, ip, begin] (Future* fu) {
       //Log_info("$$$ inside fuattr.callback, response received; count: %ld", count);
       //Log_info("*** inside SampleCrpcCommo::BroadcastAdd; received response");
-      int64_t accept = std::numeric_limits<int64_t>::min();
+      int64_t accept = 0;
 			
 			fu->get_reply() >> accept;
 			
@@ -221,8 +233,8 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
 			clock_gettime(CLOCK_MONOTONIC, &end);
 			//Log_info("time of reply on server %d: %ld", follower_id, (end.tv_sec - begin.tv_sec)*1000000000 + end.tv_nsec - begin.tv_nsec);
 			
-      bool y = (accept != std::numeric_limits<int64_t>::min());
-      e->FeedResponse(y, 1, ip);
+      verify(accept == 3);
+      e->FeedResponse(true, 1, ip);
     };
     MarshallDeputy md(cmd);
 		verify(md.sp_data_ != nullptr);
