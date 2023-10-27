@@ -11,7 +11,9 @@
 #include "event.h"
 #include "quorum_event.h"
 #include "epoll_wrapper.h"
-#include "sys/times.h" 
+#include "sys/times.h"
+#include <sched.h>
+#include <pthread.h>
 
 // #define DEBUG_WAIT
 
@@ -390,7 +392,12 @@ class PollMgr::PollThread {
     }
     
 		Log_info("starting poll thread");
-    // Log_info("From the function, the thread id = %d", gettid());
+    pid_t t = gettid();
+    // Log_info("From the function, poll thread %d; tid: %d", i, t);
+    cpu_set_t cs;
+    CPU_ZERO(&cs);
+    CPU_SET(0, &cs);
+    verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
     thiz->poll_loop();
     delete args;
 		delete args2;
