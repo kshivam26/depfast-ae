@@ -20,22 +20,21 @@ void SampleCrpcCommo::CrpcAdd3(const uint64_t& id,
               const int64_t& value2, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<ResultAdd>& state){
-  //Log_info("inside SampleCrpcCommo::CrpcAdd; checkpoint 0 @ %d", gettid());
   // auto proxies = rpc_par_proxies_[par_id];
   // SampleCrpcProxy *proxy = nullptr;
 
-  // if (addrChain.size() == 1) {
-  //   auto x = (SampleCrpcCommo *)(this);
-  //   verify(x->cRPCEvents.find(id) != x->cRPCEvents.end());
-  //   auto ev = x->cRPCEvents[id];
-  //   x->cRPCEvents.erase(id);
+  // if (addrChain.size() == 0) {
+  //   // Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; cp 0 %d", state.size());
+  //   verify(cRPCEvents.find(id) != cRPCEvents.end());
+  //   auto ev = cRPCEvents[id];
+  //   cRPCEvents.erase(id);
   //   for (size_t i = 0; i < state.size(); ++i) {
   //     verify(state[i].result == 3);
   //     ev->FeedResponse(true, i);
   //   }
   //   return;
   // }
-  
+
   auto proxy = (SampleCrpcProxy *)rpc_proxies_[addrChain[0]];
   auto f = proxy->async_CrpcAdd(id, value1, value2, addrChain, state);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
@@ -48,12 +47,13 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
                                       shared_ptr<Marshallable> cmd) {
   //Log_info("Inside SampleCrpcCommo::crpc_add");
   static bool hasPrinted = false;  // Static variable to track if it has printed
+
   if (!hasPrinted) {
       pid_t t = gettid();
       Log_info("In crpcAdd_ring_back; tid of leader is %d", t);
       cpu_set_t cs;
       CPU_ZERO(&cs);
-      CPU_SET(0, &cs);
+      CPU_SET(1, &cs);
       verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }
@@ -82,15 +82,14 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
     }                           // #cPRC additional
 		//clients.push_back(cli);
   }
-  //e->clients_ = clients;
+  // e->clients_ = clients;
 
   // TODO: remove line below, adding this to shorten the chain
   // sitesInfo_.pop_back();
 
   sitesInfo_.push_back(leader_site_id); // #cPRC additional
 
-  // MarshallDeputy aes_md(dynamic_pointer_cast<Marshallable>(std::make_shared<AddCommandState>())); // additional
-  for (auto& p : proxies) {    
+  for (auto& p : proxies) {
     auto follower_id = p.first;
     auto proxy = (SampleCrpcProxy*) p.second;
     auto cli_it = rpc_clients_.find(follower_id);
@@ -107,40 +106,18 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
 
     MarshallDeputy md(cmd);
 		verify(md.sp_data_ != nullptr);
-    // auto ae_cmd = std::make_shared<AddCommand>(slot_id, 
-    //                                                     ballot, 
-    //                                                     currentTerm, 
-    //                                                     prevLogIndex, 
-    //                                                     prevLogTerm, 
-    //                                                     commitIndex, 
-    //                                                     di, 
-    //                                                     md); // call missing just fuattr parameter, everything else same
-
-    // Log_info("returning std::make_shared<AddCommand>");
-
-    // MarshallDeputy ae_md(dynamic_pointer_cast<Marshallable>(ae_cmd));
 
     // crpc_id generation is also not abstracted
     uint64_t crpc_id = reinterpret_cast<uint64_t>(&e);
+
     // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
     verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
 
     std::vector<ResultAdd> state;
-
-    // **** uncomment/comment the fuattr; just testing if ringback is even more costly
-    // FutureAttr fuattr;
-
-    // fuattr.callback = [this, e, isLeader, currentTerm, follower_id, n, ip] (Future* fu) {
-    //   Log_info("*** inside fuattr.callback, response received; tid is %d", gettid());
-    // };
-    // just call cRPC something with the above paramters, and no other changes
     
-    //Log_info("*** SampleCrpcCommo::crpc_add auto f = proxy->");
-    
-    auto f = proxy->async_CrpcAdd(crpc_id, 
-                                                        value1,
-                                                        value2,
-                                                        sitesInfo_, state); // this can definitely be pushed into the cRPC function below // #profile (crpc2) - 2.05%
+    // this can definitely be pushed into the cRPC function below
+    // #profile (crpc2) - 2.05%
+    auto f = proxy->async_CrpcAdd(crpc_id, value1, value2, sitesInfo_, state);
     Future::safe_release(f);
 
     // this too should be abstracted
@@ -149,9 +126,8 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
     // rather than breaking, do something else; when iterating through proxies
     break;
 
-    }
-  // verify(!e->IsReady());
-  // // Log_info("*** returning from SampleCrpcCommo::crpc_ring_BroadcastAdd");
+  }
+  verify(!e->IsReady());
   return e;
 }
 
@@ -167,12 +143,12 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
       Log_info("in no cRPC; tid of leader is %d", t);
       cpu_set_t cs;
       CPU_ZERO(&cs);
-      CPU_SET(0, &cs);
+      CPU_SET(1, &cs);
       verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }
   static uint64_t count = 0;
-  count++;
+  // count++;
   // Log_info("*** inside void SampleCrpcCommo::BroadcastAdd; count: %ld", count);
   // Log_info("*** inside void SampleCrpcCommo::BroadcastAdd; slot_id: %ld; tid is: %d", slot_id, gettid());
 
@@ -183,7 +159,6 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
   unordered_set<std::string> ip_addrs {};
   std::vector<std::shared_ptr<rrr::Client>> clients;
 
-  vector<Future*> fus;
   WAN_WAIT;
 
   for (auto& p : proxies) {
@@ -199,7 +174,6 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
 		//clients.push_back(cli);
   }
   //e->clients_ = clients;
-  
   for (auto& p : proxies) {
     auto follower_id = p.first;
     auto proxy = (SampleCrpcProxy*) p.second;
@@ -211,7 +185,6 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
 	if (p.first == leader_site_id) {
         // fix the 1c1s1p bug
         // Log_info("leader_site_id %d", leader_site_id);
-        
         e->FeedResponse(true, 1, ip);
         continue;
     }
@@ -241,9 +214,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
 		outbound++;
     
     // // Log_info("*** inside SampleCrpcCommo::BroadcastAdd; calling proxy->async_Add");
-    auto f = proxy->async_BroadcastAdd(value1,
-                                        value2,
-                                        fuattr); // #profile - 1.36%
+    auto f = proxy->async_BroadcastAdd(value1, value2, fuattr); // #profile - 1.36%
     Future::safe_release(f);
   }
   verify(!e->IsReady());

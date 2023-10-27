@@ -30,11 +30,9 @@ void CoordinatorSampleCrpc::Submit(shared_ptr<Marshallable>& cmd,
 }
 
 void CoordinatorSampleCrpc::Add() {
-
     //Log_info("*** inside void CoordinatorSampleCrpc::Add;");
 
     std::lock_guard<std::recursive_mutex> lock(mtx_);
-
 
     // Log_info("*** inside void CoordinatorSampleCrpc::Add; count: %ld; tid is: %d", count, gettid());
 
@@ -57,7 +55,6 @@ void CoordinatorSampleCrpc::Add() {
     else {
         verify(0);
     }
-    
 
     //Log_info("=== waiting for quorum");
     sp_quorum->Wait();

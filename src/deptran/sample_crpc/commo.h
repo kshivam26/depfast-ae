@@ -43,7 +43,7 @@ friend class SampleCrpcProxy;
  public:
   std::unordered_map<uint64_t, shared_ptr<SampleCrpcQuorumEvent>> cRPCEvents {};
 
-	SampleCrpcCommo() = delete;
+  SampleCrpcCommo() = delete;
   SampleCrpcCommo(PollMgr*);
 
   shared_ptr<SampleCrpcQuorumEvent> crpc_add(parid_t par_id,
