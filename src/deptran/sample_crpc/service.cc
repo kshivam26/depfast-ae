@@ -25,9 +25,9 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& value1, c
   verify(sched_ != nullptr);
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
   if (!hasPrinted2) {
+    if (addrChain.size() > 1) {
       thread_local pid_t t = gettid();
       Log_info("tid of non-leader is %d", t);
-      if (addrChain.size() > 1) {
         thread_local cpu_set_t cs;
         CPU_ZERO(&cs);
         for (int k = 0; k < c; k++)
@@ -35,8 +35,8 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& value1, c
         s += (i % g == 0) ? c : 0;
         i++;
         verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
-      }
-      hasPrinted2 = true;  // Update the static variable
+    }
+    hasPrinted2 = true;  // Update the static variable
   }
 
   // if (addrChain.size() == 1) {
