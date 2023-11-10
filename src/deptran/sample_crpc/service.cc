@@ -26,6 +26,7 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& value1, c
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
   if (!hasPrinted2) {
     if (addrChain.size() > 1) {
+      s = Config::GetConfig()->par_clients_.size() + i;
       thread_local pid_t t = gettid();
       Log_info("tid of non-leader is %d", t);
         thread_local cpu_set_t cs;
@@ -70,6 +71,7 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& value1, c
 void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1, const int64_t& value2, int64_t *result, rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
   if (!hasPrinted2) {
+      s = Config::GetConfig()->par_clients_.size() + i;
       thread_local pid_t t = gettid();
       Log_info("tid of non-leader is %d", t);
       thread_local cpu_set_t cs;

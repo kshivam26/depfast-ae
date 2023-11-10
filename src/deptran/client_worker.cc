@@ -357,7 +357,7 @@ void ClientWorker::Work() {
           verify(ev->status_ != Event::TIMEOUT);
           if (coo->committed_) {
             success++;
-            Log_info("Tracepath: 4");
+            Log_info("Tracepath:  4; client thread id %d", gettid());
           }
           sp_n_tx_done_.Set(sp_n_tx_done_.value_+1);
           num_try.fetch_add(coo->n_retry_);
@@ -631,7 +631,7 @@ void ClientWorker::DispatchRequest(Coordinator* coo) {
       // Log_info("From the function, poll thread %d; tid: %d", i, t);
       thread_local cpu_set_t cs;
       CPU_ZERO(&cs);
-      CPU_SET(0, &cs);
+      CPU_SET(clw++, &cs);
       verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted3 = true;
     }

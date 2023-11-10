@@ -53,7 +53,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
       Log_info("In crpcAdd_ring_back; tid of leader is %d", t);
       cpu_set_t cs;
       CPU_ZERO(&cs);
-      CPU_SET(1, &cs);
+      CPU_SET(Config::GetConfig()->par_clients_.size(), &cs);
       verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }
@@ -143,7 +143,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
       Log_info("in no cRPC; tid of leader is %d", t);
       cpu_set_t cs;
       CPU_ZERO(&cs);
-      CPU_SET(1, &cs);
+      CPU_SET(Config::GetConfig()->par_clients_.size(), &cs);
       verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
       hasPrinted = true;  // Update the static variable
   }

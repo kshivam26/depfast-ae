@@ -25,7 +25,7 @@ void CoordinatorSampleCrpc::Submit(shared_ptr<Marshallable>& cmd,
   verify(cmd_->kind_ != MarshallDeputy::UNKNOWN);
   //Log_info("*** inside void CoordinatorSampleCrpc::Submit, cmd kind: %d", cmd_->kind_);
   Add();
-  Log_info("Tracepath: 3");
+  Log_info("Tracepath:  3; leader thread id %d", gettid());
   //Log_info("*** returning from void CoordinatorSampleCrpc::Submit");
   this->sch_->app_next_(*cmd);
 }
