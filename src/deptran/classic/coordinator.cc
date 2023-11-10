@@ -88,6 +88,8 @@ void CoordinatorClassic::DoTxAsync(TxRequest& req) {
   } else {
     Log_debug("start txn!!! : %d", forward_status_);
     // Log_info("*** start txn!!! : %d", forward_status_);
+        //Log_info("Could be right before CoordinatorNone::GotoNextPhase()");
+        // Log_info("%s: tracepath pid %d", __FUNCTION__, gettid());
     Coroutine::CreateRun([this]() { GotoNextPhase(); }, __FILE__, __LINE__);
   }
 }
@@ -232,6 +234,8 @@ void CoordinatorClassic::DispatchAsync() {
       dispatch_acks_[c->inn_id_] = false;
       sp_vec_piece->push_back(c);
     }
+        //Log_info("Could be right before Communicator::BroadcastDispatch()");
+        // Log_info("%s: tracepath pid %d", __FUNCTION__, gettid());
     commo()->BroadcastDispatch(sp_vec_piece,
                                this,
                                std::bind(&CoordinatorClassic::DispatchAck,

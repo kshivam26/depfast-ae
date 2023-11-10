@@ -7,6 +7,8 @@
 #include "benchmark_control_rpc.h"
 
 namespace janus {
+thread_local bool hasPrinted3 = false;
+int clw = 0;
 
 ClientWorker::~ClientWorker() {
   if (tx_generator_) {
@@ -67,7 +69,7 @@ void ClientWorker::RequestDone(Coordinator* coo, TxReply& txn_reply) {
     std::lock_guard<std::mutex> lock(coordinator_mutex);
     free_coordinators_.push_back(coo);
   } else if (have_more_time && config_->client_type_ == Config::Closed) {
-    Log_debug("there is still time to issue another request. continue.");
+    Log_info("there is still time to issue another request. continue.");
     Coroutine::CreateRun([this,coo]() { 
       DispatchRequest(coo); 
     });
@@ -315,18 +317,20 @@ void ClientWorker::Work() {
         // Log_info("current start_.tv_sec: %ld", start_.tv_sec);
 
         // Log_info("&&&&& inside createRun cp1");
+        //Log_info("Could be right before ClientWorker::DispatchRequest()");
+        // Log_info("%s: tracepath pid %d", __FUNCTION__, gettid());
 				this->DispatchRequest(coo);         // #con: dispatch a request
         // Log_info("==== returned from call this->DispatchRequest");
         if (config_->client_type_ == Config::Closed) {
           // Log_info("==== checkpoint 000; if (config_->client_type_ == Config::Closed)");
           auto ev = coo->sp_ev_commit_;
           // Log_info("==== checkpoint 010");
-#if 1
+          #if 1
           char txid[20];
           // Log_info("==== checkpoint 011");
           sprintf(txid, "%" PRIx64 "|", coo->ongoing_tx_id_);
           ev->wait_place_ = std::string(txid);
-#endif
+          #endif
 
           // Log_info("==== checkpoint 012");
           Wait_recordplace(ev, Wait(600*1000*1000));
@@ -347,12 +351,13 @@ void ClientWorker::Work() {
           // clock_gettime(CLOCK_MONOTONIC, &end_);
           // Log_info("&&&&& inside createRun cp2");
           verify(coo->coo_id_ > 0);
-//          ev->Wait(400*1000*1000);
+          // ev->Wait(400*1000*1000);
           verify(coo->_inuse_);
           verify(coo->coo_id_ > 0);
           verify(ev->status_ != Event::TIMEOUT);
           if (coo->committed_) {
             success++;
+            Log_info("Tracepath: 4");
           }
           sp_n_tx_done_.Set(sp_n_tx_done_.value_+1);
           num_try.fetch_add(coo->n_retry_);
@@ -600,6 +605,7 @@ void ClientWorker::DispatchRequest(Coordinator* coo) {
 //  FailoverPreprocess(coo);
   const char* f = __FUNCTION__;
   std::function<void()> task = [=]() {
+    
     Log_debug("%s: %d", f, cli_id_);
     // TODO don't use pointer here.
     TxRequest *req = new TxRequest;
@@ -619,6 +625,16 @@ void ClientWorker::DispatchRequest(Coordinator* coo) {
       coo->sp_ev_done_->Set(1);
       delete req;
     };
+        //Log_info("Could be right before CoordinatorClassic::DoTxAsync()");
+    if (!hasPrinted3) {
+      thread_local pid_t t = gettid();
+      // Log_info("From the function, poll thread %d; tid: %d", i, t);
+      thread_local cpu_set_t cs;
+      CPU_ZERO(&cs);
+      CPU_SET(0, &cs);
+      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+      hasPrinted3 = true;
+    }
     coo->DoTxAsync(*req);
   };
   task();

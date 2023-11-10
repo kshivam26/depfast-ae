@@ -279,6 +279,9 @@ void Communicator::BroadcastDispatch(
 	di.str = "dep";
 	di.id = Communicator::global_id++;
   
+  //Log_info("Could be right before ClassicServiceImpl::Dispatch()");
+  // Log_info("%s: tracepath pid %d", __FUNCTION__, gettid());
+  Log_info("Tracepath: 1");
 	auto future = proxy->async_Dispatch(cmd_id, di, md, fuattr);
   Future::safe_release(future);
   if (false) {

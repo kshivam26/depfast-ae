@@ -392,12 +392,12 @@ class PollMgr::PollThread {
     }
     
 		Log_info("starting poll thread");
-    pid_t t = gettid();
-    // Log_info("From the function, poll thread %d; tid: %d", i, t);
-    cpu_set_t cs;
-    CPU_ZERO(&cs);
-    CPU_SET(0, &cs);
-    verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+    // pid_t t = gettid();
+    // // Log_info("From the function, poll thread %d; tid: %d", i, t);
+    // cpu_set_t cs;
+    // CPU_ZERO(&cs);
+    // CPU_SET(0, &cs);
+    // verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
     thiz->poll_loop();
     delete args;
 		delete args2;
@@ -451,6 +451,7 @@ class PollMgr::PollThread {
       auto sp_job = *it;
       if (sp_job->Ready()) {
         //Log_info("Could be right before GotoNextPhase()");
+        // // Log_info("%s: tracepath pid %d", __FUNCTION__, gettid());
         Coroutine::CreateRun([sp_job]() {sp_job->Work();}, __FILE__, __LINE__);
       }
       if (sp_job->Done()) {

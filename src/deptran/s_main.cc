@@ -64,7 +64,7 @@ void client_launch_workers(vector<Config::SiteInfo> &client_sites) {
                                             &(failover_triggers[client_id]),
                                             &failover_server_quit,
                                             &failover_server_idx);
-    workers.push_back(worker);
+    // workers.push_back(worker);
     // Log_info("***current workers size: %d", workers.size());
     client_threads_g.push_back(std::thread(&ClientWorker::Work, worker));
     client_workers_g.push_back(std::unique_ptr<ClientWorker>(worker));
