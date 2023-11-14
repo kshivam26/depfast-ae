@@ -23,7 +23,7 @@ SampleCrpcServiceImpl::SampleCrpcServiceImpl(TxLogServer *sched) : sched_((Sampl
 
 void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& n, const int64_t& value1, const int64_t& value2, const std::vector<uint16_t>& addrChain, const std::vector<ResultAdd>& state, rrr::DeferredReply* defer){
   verify(sched_ != nullptr);
-  Log_info("Tracepath: %d, %d, %d, %ld", gettid(), addrChain.size(), n, id);
+  Log_info("Tracepath: %d, %d, %d", gettid(), addrChain.size(), n);
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
   if (!hasPrinted2) {
     if (addrChain.size() > 1) {
