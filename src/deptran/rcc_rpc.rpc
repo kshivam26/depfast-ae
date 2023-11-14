@@ -146,12 +146,14 @@ abstract service Copilot {
 
 abstract service SampleCrpc {
   defer CrpcAdd(uint64_t id,
+               int64_t n,
                int64_t value1,
                int64_t value2,
                vector<uint16_t> addrChain,
                vector<ResultAdd> state);
 
-  defer BroadcastAdd(int64_t value1,
+  defer BroadcastAdd(int64_t n,
+               int64_t value1,
                int64_t value2 |
                int64_t result);
 }

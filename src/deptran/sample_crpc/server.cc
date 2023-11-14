@@ -43,11 +43,10 @@ namespace janus {
 
         // Log_info("==== inside demoserviceimpl::cRPC; results state is following");
         // auto st = dynamic_pointer_cast<AddCommandState>(state.sp_data_);   // #profile - 0.54%
-        for (size_t i = 0; i < state.size(); ++i)
-        {
+        for (size_t i = 0; i < state.size(); ++i) {
           // Log_info("inside SampleCrpcServer::OnCRPC2; checkpoint 3 @ %d", gettid());
-          bool y = true;
-          ev->FeedResponse(y, i);
+          verify(state[i].result == 3);
+          ev->FeedResponse(true, i);
         }
         // Log_info("inside SampleCrpcServer::OnCRPC2; checkpoint 4 @ %d", gettid());
         // Log_info("==== returning from cRPC");

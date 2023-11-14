@@ -21,8 +21,9 @@ SampleCrpcServiceImpl::SampleCrpcServiceImpl(TxLogServer *sched) : sched_((Sampl
 	srand(curr_time.tv_nsec);
 }
 
-void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& value1, const int64_t& value2, const std::vector<uint16_t>& addrChain, const std::vector<ResultAdd>& state, rrr::DeferredReply* defer){
+void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& n, const int64_t& value1, const int64_t& value2, const std::vector<uint16_t>& addrChain, const std::vector<ResultAdd>& state, rrr::DeferredReply* defer){
   verify(sched_ != nullptr);
+  Log_info("Tracepath: %d, %d, %d, %ld", gettid(), addrChain.size(), n, id);
   //Log_info("*** inside SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
   if (!hasPrinted2) {
     if (addrChain.size() > 1) {
@@ -46,8 +47,8 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& value1, c
   //   auto ev = x->cRPCEvents[id];
   //   x->cRPCEvents.erase(id);
   //   for (size_t i = 0; i < state.size(); ++i) {
-  //     bool y = true;
-  //     ev->FeedResponse(y, i);
+  //     verify(state[i].result == 3);
+  //     ev->FeedResponse(true, i);
   //   }
   //   return;
   // }
@@ -68,8 +69,9 @@ void SampleCrpcServiceImpl::CrpcAdd(const uint64_t& id, const int64_t& value1, c
   // Log_info("*** returning from SampleCrpcServiceImpl::CrpcAdd; tid: %d", gettid());
 }
 
-void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1, const int64_t& value2, int64_t *result, rrr::DeferredReply* defer) {
+void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& n, const int64_t& value1, const int64_t& value2, int64_t *result, rrr::DeferredReply* defer) {
   verify(sched_ != nullptr);
+  Log_info("Tracepath: %d, %d", gettid(), n);
   if (!hasPrinted2) {
       s = Config::GetConfig()->par_clients_.size() + i;
       thread_local pid_t t = gettid();
@@ -85,11 +87,7 @@ void SampleCrpcServiceImpl::BroadcastAdd(const int64_t& value1, const int64_t& v
   }
 
   Coroutine::CreateRun([&] () {
-    sched_->OnAdd(value1,
-                            value2,
-                            result,
-                            std::bind(&rrr::DeferredReply::reply, defer));  // #profile - 3.42%
-
+    sched_->OnAdd(value1, value2, result, std::bind(&rrr::DeferredReply::reply, defer));  // #profile - 3.42%
   });
 
   // Log_info("==== returning from SampleCrpcServiceImpl::Add");

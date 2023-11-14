@@ -357,7 +357,7 @@ void ClientWorker::Work() {
           verify(ev->status_ != Event::TIMEOUT);
           if (coo->committed_) {
             success++;
-            Log_info("Tracepath:  4; client thread id %d", gettid());
+            //Log_info("Tracepath:  4; client thread id %d", gettid());
           }
           sp_n_tx_done_.Set(sp_n_tx_done_.value_+1);
           num_try.fetch_add(coo->n_retry_);

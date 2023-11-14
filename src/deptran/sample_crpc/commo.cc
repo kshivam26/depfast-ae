@@ -10,6 +10,7 @@
 #include <pthread.h>
 
 namespace janus {
+  int pck = 0;
 
 SampleCrpcCommo::SampleCrpcCommo(PollMgr* poll) : Communicator(poll) {
 //  verify(poll != nullptr);
@@ -36,7 +37,7 @@ void SampleCrpcCommo::CrpcAdd3(const uint64_t& id,
   // }
 
   auto proxy = (SampleCrpcProxy *)rpc_proxies_[addrChain[0]];
-  auto f = proxy->async_CrpcAdd(id, value1, value2, addrChain, state);  // #profile(crpc2) - 3.96%%
+  auto f = proxy->async_CrpcAdd(id, pck, value1, value2, addrChain, state);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
 }
 
@@ -100,6 +101,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
 	  if (p.first == leader_site_id) {
         // fix the 1c1s1p bug
         // Log_info("leader_site_id %d", leader_site_id);
+        pck++;
         e->FeedResponse(true, 1, ip);
         continue;
     }
@@ -117,7 +119,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
     
     // this can definitely be pushed into the cRPC function below
     // #profile (crpc2) - 2.05%
-    auto f = proxy->async_CrpcAdd(crpc_id, value1, value2, sitesInfo_, state);
+    auto f = proxy->async_CrpcAdd(crpc_id, pck, value1, value2, sitesInfo_, state);
     Future::safe_release(f);
 
     // this too should be abstracted
@@ -127,7 +129,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::crpc_add(parid_t par_id,
     break;
 
   }
-  verify(!e->IsReady());
+  // verify(!e->IsReady());
   return e;
 }
 
@@ -185,6 +187,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
 	if (p.first == leader_site_id) {
         // fix the 1c1s1p bug
         // Log_info("leader_site_id %d", leader_site_id);
+        pck++;
         e->FeedResponse(true, 1, ip);
         continue;
     }
@@ -214,7 +217,7 @@ shared_ptr<SampleCrpcQuorumEvent> SampleCrpcCommo::broadcast_add(parid_t par_id,
 		outbound++;
     
     // // Log_info("*** inside SampleCrpcCommo::BroadcastAdd; calling proxy->async_Add");
-    auto f = proxy->async_BroadcastAdd(value1, value2, fuattr); // #profile - 1.36%
+    auto f = proxy->async_BroadcastAdd(pck, value1, value2, fuattr); // #profile - 1.36%
     Future::safe_release(f);
   }
   verify(!e->IsReady());
