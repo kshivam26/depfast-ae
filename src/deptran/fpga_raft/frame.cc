@@ -52,7 +52,7 @@ Coordinator *FpgaRaftFrame::CreateCoordinator(cooid_t coo_id,
                                                 ClientControlServiceImpl *ccsi,
                                                 uint32_t id,
                                                 shared_ptr<TxnRegistry> txn_reg) {
-  // Log_info("*** Inside Coordinator *FpgaRaftFrame::CreateCoordinator");
+  // // Log_info("*** Inside Coordinator *FpgaRaftFrame::CreateCoordinator");
   verify(config != nullptr);
   CoordinatorFpgaRaft *coo;
   coo = new CoordinatorFpgaRaft(coo_id,

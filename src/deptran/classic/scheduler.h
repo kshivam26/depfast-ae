@@ -10,6 +10,7 @@ namespace janus {
 class TxData;
 class TpcPrepareCommand;
 class TpcCommitCommand;
+class TpcCommitTestCommand;
 class SimpleCommand;
 class SchedulerClassic: public TxLogServer {
  using TxLogServer::TxLogServer;
@@ -74,6 +75,7 @@ class SchedulerClassic: public TxLogServer {
 
   int PrepareReplicated(TpcPrepareCommand& prepare_cmd);
   int CommitReplicated(TpcCommitCommand& commit_cmd);
+  int CommitTestReplicated(TpcCommitTestCommand& commit_cmd);
 
   bool CheckCommitted(Marshallable& commit_cmd) override;
 

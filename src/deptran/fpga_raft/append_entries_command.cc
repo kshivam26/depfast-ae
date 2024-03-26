@@ -26,7 +26,7 @@ static int volatile x2 =
         m << leaderCommitIndex;
         m << dep_id;
         m << md_cmd; // #profile - 0.66%
-        // Log_info("==== inside AppendEntriesCommand::ToMarshal; checkpoint 3");
+        // // Log_info("==== inside AppendEntriesCommand::ToMarshal; checkpoint 3");
         return m;
     }
 
@@ -39,10 +39,10 @@ static int volatile x2 =
         m >> leaderPrevLogTerm;
         m >> leaderCommitIndex;
         m >> dep_id;
-        // Log_info("==== inside AppendEntriesCommand::FromMarshal; checkpoint 3");
+        // // Log_info("==== inside AppendEntriesCommand::FromMarshal; checkpoint 3");
         m >> md_cmd; // #profile - 2.05%
 
-        // Log_info("==== inside AppendEntriesCommand::FromMarshal; checkpoint 4");
+        // // Log_info("==== inside AppendEntriesCommand::FromMarshal; checkpoint 4");
         return m;
     }
 
@@ -50,14 +50,14 @@ static int volatile x2 =
     Marshal& AppendEntriesCommandState::ToMarshal(Marshal& m) const{
         // Log_debug("==== inside AppendEntriesCommandState::ToMarshal; checkpoint 0 @ %d", gettid());
         m << results;
-        // Log_info("==== inside AppendEntriesCommandState::ToMarshal; checkpoint 3");
+        // // Log_info("==== inside AppendEntriesCommandState::ToMarshal; checkpoint 3");
         return m;
     }
 
     Marshal& AppendEntriesCommandState::FromMarshal(Marshal& m){
         // Log_debug("==== inside AppendEntriesCommandState::FromMarshal; checkpoint 1 @ %d", gettid());
         m >> results;
-        // Log_info("==== inside AppendEntriesCommandState::FromMarshal; checkpoint 2");
+        // // Log_info("==== inside AppendEntriesCommandState::FromMarshal; checkpoint 2");
         return m;
     }
 }

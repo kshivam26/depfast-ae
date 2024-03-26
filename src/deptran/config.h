@@ -251,6 +251,7 @@ class Config {
   bool do_early_return();
   bool do_logging();
   bool IsReplicated();
+  bool IsTest();
   int32_t get_tot_req();
   uint32_t get_cRPC_version();
   bool get_failover() { return failover_; }

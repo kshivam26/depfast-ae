@@ -200,7 +200,7 @@ class FpgaRaftServer : public TxLogServer {
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
       de->Wait();
 			//clock_gettime(CLOCK_MONOTONIC, &end);
-			//Log_info("Time of Write: %d", end.tv_nsec - begin.tv_nsec);
+			//// Log_info("Time of Write: %d", end.tv_nsec - begin.tv_nsec);
     } else {
 			int value = -1;
 			int value_;
@@ -209,7 +209,7 @@ class FpgaRaftServer : public TxLogServer {
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
       de->Wait();
 			//clock_gettime(CLOCK_MONOTONIC, &end);
-			//Log_info("Time of Write: %d", end.tv_nsec - begin.tv_nsec);
+			//// Log_info("Time of Write: %d", end.tv_nsec - begin.tv_nsec);
     }
     *term = currentTerm ;
   }

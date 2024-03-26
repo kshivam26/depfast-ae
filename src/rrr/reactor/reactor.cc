@@ -332,7 +332,7 @@ void Reactor::ContinueCoro(std::shared_ptr<Coroutine> sp_coro) {
 void Reactor::DisplayWaitingEv() {
   char buff[1000];
   int offset = 0;
-  offset += sprintf(buff, "%p waiting events %d:", sp_reactor_th_.get(), waiting_events_.size());
+  offset += sprintf(buff, "%p waiting events %ld:", sp_reactor_th_.get(), waiting_events_.size());
   for (auto& it : waiting_events_) {
     offset += sprintf(buff+offset, "\n%s", it->wait_place_.c_str());
   }
