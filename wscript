@@ -161,7 +161,7 @@ def build(bld):
     bld.objects(source=bld.path.ant_glob("src/deptran/*.cc "
                                        "src/deptran/*/*.cc "
                                        "src/bench/*/*.cc",
-                                       excl=['src/deptran/s_main.cc', 'src/deptran/paxos_main_helper.cc']),
+                                       excl=['src/deptran/s_main.cc', 'src/deptran/paxos_main_helper.cc', 'src/deptran/rpc_benchmark.cc', 'src/deptran/benchmark_service.cc', 'src/deptran/crpc_benchmark.cc', 'src/deptran/crpc_benchmark_individual.cc', 'src/deptran/crpc_service.cc']),
               target="deptran_objects",
               includes="src src/rrr src/deptran ",
               uselib="YAML-CPP BOOST",
@@ -186,6 +186,24 @@ def build(bld):
                 uselib="YAML-CPP BOOST",
                 use="externc rrr memdb deptran_objects PTHREAD PROFILER RT")
 
+    bld.program(source=bld.path.ant_glob("src/deptran/rpc_benchmark.cc src/deptran/benchmark_service.cc"), 
+                target="rpc_benchmark", 
+                includes="src src/rrr src/deptran", 
+                uselib="YAML-CPP BOOST",
+                use="rrr PTHREAD PROFILER RT")
+    
+    bld.program(source=bld.path.ant_glob("src/deptran/crpc_benchmark.cc src/deptran/crpc_service.cc"), 
+                target="crpc_benchmark", 
+                includes="src src/rrr src/deptran", 
+                uselib="YAML-CPP BOOST",
+                use="rrr PTHREAD PROFILER RT")
+    
+    bld.program(source=bld.path.ant_glob("src/deptran/crpc_benchmark_individual.cc src/deptran/crpc_service.cc"), 
+                target="crpc_benchmark_docker", 
+                includes="src src/rrr src/deptran", 
+                uselib="YAML-CPP BOOST",
+                use="rrr PTHREAD PROFILER RT")
+    
     bld.add_post_fun(post)
 
 def post(conf):
@@ -347,4 +365,3 @@ def _depend(target, source, action):
 def _run_cmd(cmd):
     Logs.pprint('PINK', cmd)
     os.system(cmd)
-
