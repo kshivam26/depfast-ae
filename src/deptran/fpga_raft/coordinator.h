@@ -19,6 +19,7 @@ class CoordinatorFpgaRaft : public Coordinator {
   FpgaRaftCommo *commo() {
     // TODO fix this.
     verify(commo_ != nullptr);
+    // Log_info("commo(); called commo()");
     return (FpgaRaftCommo *) commo_;
   }
   bool in_submission_ = false; // debug;

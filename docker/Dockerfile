@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 ENV TZ=Europe/Kiev
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
+# ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 
 RUN echo 'root:root' |chpasswd
@@ -13,6 +13,7 @@ RUN apt-get clean && \
 # install basic libraries
 RUN apt-get update
 RUN apt update
+# RUN apt-get install -y git vim htop sudo make cmake gcc gdb g++ net-tools iperf3 nload iproute2 wget pkg-config cpulimit python3 bwm-ng iperf3 cpulimit
 RUN apt-get install -y \
     git \
     wget \
@@ -29,17 +30,21 @@ RUN apt-get install -y \
     python3-pip \
     python3-wheel \
     python3-setuptools \
-    libgoogle-perftools-dev
+    libgoogle-perftools-dev \
+    bwm-ng \
+    iproute2 \
+    iperf3 \
+    cpulimit
 RUN wget https://github.com/mikefarah/yq/releases/download/v4.24.2/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
 
 # copy .gitconfig (For the permission)
 # COPY gitconfig /root/.gitconfig
 
 WORKDIR "/root"
-RUN git clone --recursive https://github.com/stonysystems/depfast-ae.git depfast
+RUN git clone --branch micro https://github.com/kshivam26/depfast-ae.git depfast
 
 WORKDIR "/root/depfast"
 # install dependencies
-RUN git checkout atc_ae
+# RUN git checkout micro
 RUN pip3 install -r requirements.txt
-RUN python3 waf configure build
+# RUN python3 waf configure -J build

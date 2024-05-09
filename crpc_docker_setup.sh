@@ -39,8 +39,9 @@ cleanup_containers() {
 }
 
 # Stop and remove all existing containers before setting up new ones
-cleanup_containers
+# cleanup_containers
 
+echo "hiiii"
 
 declare -a ips
 
@@ -51,8 +52,10 @@ for (( i=0; i<number_of_nodes; i++ )); do
     # Save IP for use in container command
     ips[i]=$current_ip
 
+    echo "$current_ip"
     # Container name
     container_name="micro_$((i+1))"  # Ensure correct increment
+    build_command="python3 /root/depfast/waf configure -J build"
 
     echo "now running docker run"
     echo "container name $container_name"  # Debugging output
@@ -62,6 +65,15 @@ for (( i=0; i<number_of_nodes; i++ )); do
         --cap-add=NET_ADMIN --cap-add=SYS_ADMIN \
         -v /sys/fs/cgroup:/sys/fs/cgroup \
         -v /home/users/kkumar/micro_benchmark/depfast-ae:/root/depfast $image_name
+
+    # Only run the build command on the first container
+    if [ $i -eq 0 ]; then
+        echo "Running build command on $container_name"
+        sudo docker exec -i "$container_name" $build_command
+    fi
+
+
+    sudo docker exec -i "$container_name" /root/depfast/init_crpc_bw.sh 0 0.25
 done
 
 # # Pass IPs to containers if needed (example command to update configuration inside container)

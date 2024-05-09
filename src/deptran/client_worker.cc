@@ -6,6 +6,7 @@
 #include "workload.h"
 #include "benchmark_control_rpc.h"
 
+
 namespace janus {
 thread_local bool hasPrinted3 = false;
 int clw = 0;
@@ -174,6 +175,7 @@ void ClientWorker::Work() {
   Log_debug("%s: %d", __FUNCTION__, this->cli_id_);
   txn_reg_ = std::make_shared<TxnRegistry>();
   verify(config_ != nullptr);
+  Log_info("^^^^ inside ClientWorker::Work()");
   Workload* workload = Workload::CreateWorkload(config_);
   workload->txn_reg_ = txn_reg_;
   workload->RegisterPrecedures();
@@ -626,15 +628,15 @@ void ClientWorker::DispatchRequest(Coordinator* coo) {
       delete req;
     };
         //Log_info("Could be right before CoordinatorClassic::DoTxAsync()");
-    if (!hasPrinted3) {
-      thread_local pid_t t = gettid();
-      // Log_info("From the function, poll thread %d; tid: %d", i, t);
-      thread_local cpu_set_t cs;
-      CPU_ZERO(&cs);
-      CPU_SET(clw++, &cs);
-      verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
-      hasPrinted3 = true;
-    }
+    // if (!hasPrinted3) {
+    //   thread_local pid_t t = gettid();
+    //   // Log_info("From the function, poll thread %d; tid: %d", i, t);
+    //   thread_local cpu_set_t cs;
+    //   CPU_ZERO(&cs);
+    //   CPU_SET(clw++, &cs);
+    //   verify(sched_setaffinity(t, sizeof(cs), &cs) == 0);
+    //   hasPrinted3 = true;
+    // }
     coo->DoTxAsync(*req);
   };
   task();

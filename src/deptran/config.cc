@@ -69,11 +69,12 @@ int Config::CreateConfig(int argc, char **argv) {
   int32_t tot_req_num           = 10000;
   int16_t n_concurrent          = 1;
   uint32_t cRPC_version = 0;
+  uint32_t currentId = 0;
 
   int c;
   optind = 1;
   string filename;
-  while ((c = getopt(argc, argv, "bc:d:f:h:i:k:p:P:r:s:S:t:H:T:n:v:")) != -1) {
+  while ((c = getopt(argc, argv, "bc:d:f:h:i:k:p:P:r:s:S:t:H:T:n:v:x:")) != -1) { // x stands for current index
     switch (c) {
       case 'b': // heartbeat to controller
         heart_beat = true;
@@ -169,6 +170,12 @@ int Config::CreateConfig(int argc, char **argv) {
       case 'v':  // for crpc version; 0 for no_crpc, 1 for chained rpc
         cRPC_version = strtoul(optarg, &end_ptr, 10);
         Log_info("the cRPC version is: %d", cRPC_version);
+        if ((end_ptr == NULL) || (*end_ptr != '\0'))
+          return -4;
+        break;
+      case 'x':  // for crpc version; 0 for no_crpc, 1 for chained rpc
+        currentId = strtoul(optarg, &end_ptr, 10);
+        Log_info("the currentID is: %d", currentId);
         if ((end_ptr == NULL) || (*end_ptr != '\0'))
           return -4;
         break;
@@ -1054,6 +1061,10 @@ int32_t Config::get_tot_req() {
 
 uint32_t Config::get_cRPC_version() {
   return cRPC_version_;
+}
+
+uint32_t Config::get_currentId() {
+  return currentId_;
 }
 
 }
