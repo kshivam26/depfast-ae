@@ -2,6 +2,7 @@
 #include "../__dep__.h"
 #include "../command.h"
 #include "deptran/procedure.h"
+#include <cstring> // for strlen
 
 namespace janus {
 
@@ -43,14 +44,26 @@ class TpcCommitAddCommand : public Marshallable {
   virtual Marshal& FromMarshal(Marshal&) override;
 };
 
+class TpcRaftSampleCommand : public Marshallable {
+ public:
+  TpcRaftSampleCommand() : Marshallable(MarshallDeputy::CMD_TPC_RAFT_SAMPLE_CMD) {
+  }
+  std::string message_;
+  virtual Marshal& ToMarshal(Marshal&) const override;
+  virtual Marshal& FromMarshal(Marshal&) override;
+};
+
 class TpcEmptyCommand : public Marshallable {
  private:
+  
   shared_ptr<BoxEvent<bool>> event{Reactor::CreateSpEvent<BoxEvent<bool>>()};
 
  public:
+  char* message_ = nullptr;
   TpcEmptyCommand() : Marshallable(MarshallDeputy::CMD_TPC_EMPTY) {}
   Marshal& ToMarshal(Marshal&) const override;
   Marshal& FromMarshal(Marshal&) override;
+  inline size_t Size() const { return strlen(message_); }
   void Wait() { event->Wait(); };
   void Done() { event->Set(1); };
 };
