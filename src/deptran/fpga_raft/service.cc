@@ -1,6 +1,7 @@
 
 #include "service.h"
 #include "server.h"
+// #include "coordinator.h"
 #include <thread>
 # include <gperftools/profiler.h>
 
@@ -9,9 +10,27 @@ thread_local bool hasPrinted = false;
 
 FpgaRaftServiceImpl::FpgaRaftServiceImpl(TxLogServer *sched)
     : sched_((FpgaRaftServer*)sched) {
-	struct timespec curr_time;
-	clock_gettime(CLOCK_MONOTONIC_RAW, &curr_time);
-	srand(curr_time.tv_nsec);
+  // Log_info("@@@@@ launching FpgaRaftServiceImpl; %d", gettid());
+	// struct timespec curr_time;
+	// clock_gettime(CLOCK_MONOTONIC_RAW, &curr_time);
+	// srand(curr_time.tv_nsec);
+
+  // Reactor::CreateSpEvent<NeverEvent>()->Wait(pow(10, 5));
+  
+  
+  // if (sched_->IsLeader()){
+  //   Log_info("******************** I AM LEADER; I will run clients before *********************");
+  //   // Coroutine::CreateRun([&] () { 
+  //   //   Reactor::CreateSpEvent<NeverEvent>()->Wait(pow(10, 3));
+  //   //   auto coo = sched_->CreateRepCoord(0);
+  //   //   Log_info("******************** I AM LEADER; I will run clients after *********************");
+  //   // });
+  //   // sleep(5);
+    
+  //   auto coo = sched_->CreateRepCoord(0);
+  //   Log_info("******************** I AM LEADER; I will run clients after *********************");
+  // }
+  
 }
 
 void FpgaRaftServiceImpl::Heartbeat(const uint64_t& leaderPrevLogIndex,
@@ -149,6 +168,8 @@ void FpgaRaftServiceImpl::Decide(const uint64_t& slot,
   });
 }
 
+
+// ks-RM: called for ring CRPC
 void FpgaRaftServiceImpl::CrpcAppendEntries(const uint64_t& id, 
                         const uint64_t& slot, 
                         const ballot_t& ballot, 
@@ -202,11 +223,54 @@ void FpgaRaftServiceImpl::CrpcAppendEntries(const uint64_t& id,
                     addrChain,
                     state);
       // Log_info("*** inside FpgaRaftServiceImpl::CrpcAppendEntries; cp 3 tid: %d", gettid());
-      defer->reply();
+      // defer->reply();
       // Log_info("*** inside FpgaRaftServiceImpl::CrpcAppendEntries; cp 4 tid: %d", gettid());
   });
 
   // Log_info("*** returning from FpgaRaftServiceImpl::CrpcAppendEntries; tid: %d", gettid());
+}
+
+void FpgaRaftServiceImpl::CrpcDecide(const uint64_t& slot, 
+                                    const ballot_t& ballot, 
+                                    const DepId& dep_id, 
+                                    const MarshallDeputy& cmd, 
+                                    const std::vector<uint16_t>& addrChain, 
+                                    const std::vector<uint16_t>& state, 
+                                    rrr::DeferredReply* defer){
+  // Log_info("inside FpgaRaftServiceImpl; crpcDecide; current size of addrChain: %d", addrChain.size());
+  // int n = Config::GetConfig()->GetPartitionSize(0);
+  // int q = n/2;
+  
+
+    Coroutine::CreateRun([&] () {
+      AppendEntriesResult res;
+      sched_->OnCommit(slot,
+                      ballot,
+                      const_cast<MarshallDeputy&>(cmd).sp_data_); // #profile - 2.88%
+      // std::vector<AppendEntriesResult> st;
+      // st.reserve(state.size()+1);
+      // st.insert(st.end(), state.begin(), state.end());
+      // st.emplace_back(std::move(res));
+      if (addrChain.size() == 1)
+      {
+          return;
+      }
+
+      vector<uint16_t> addrChainCopy;
+      addrChainCopy.reserve(addrChain.size() - 1);  // Reserve space to avoid reallocation
+      std::copy(addrChain.begin() + 1, addrChain.end(), std::back_inserter(addrChainCopy));
+
+      // if (addrChainCopy.size() == 1) { // last node in chain, response must have already been sent to leader
+      //   return;
+      // }
+
+      // Log_info("sending the request to the next node in the chain");
+      // parid_t par_id = this->frame_->site_info_->partition_id_;
+      ((FpgaRaftCommo *)(sched_->commo_))->CrpcDecide2(0,slot, ballot, dep_id, cmd, addrChainCopy, state); // #profile (crpc2) - 4.02%%
+    });
+                                                                                              // Log_info("==== returning from void FpgaRaftServer::OnCRPC");
+    // Log_info("*** inside FpgaRaftServer::OnCRPC; cp 3 tid: %d", gettid());
+
 }
 
 void FpgaRaftServiceImpl::CrpcAppendEntries3(const uint64_t& id, 

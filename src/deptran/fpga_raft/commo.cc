@@ -292,7 +292,7 @@ FpgaRaftCommo::crpc_ring_BroadcastAppendEntries(parid_t par_id,
   unordered_set<std::string> ip_addrs {};
   std::vector<std::shared_ptr<rrr::Client>> clients;
 
-  WAN_WAIT;
+  // WAN_WAIT;
   std::vector<uint16_t> sitesInfo_; // additional; looks like can be computed in cRPC call
   
   for (auto& p : proxies) {
@@ -353,9 +353,9 @@ FpgaRaftCommo::crpc_ring_BroadcastAppendEntries(parid_t par_id,
     // MarshallDeputy ae_md(dynamic_pointer_cast<Marshallable>(ae_cmd));
     
     // crpc_id generation is also not abstracted
-    uint64_t crpc_id = reinterpret_cast<uint64_t>(&e);
+    uint64_t crpc_id = ++crpc_id_counter;
     // // Log_info("*** crpc_id is: %d", crpc_id); // verify it's never the same
-    verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
+    // verify(cRPCEvents.find(crpc_id) == cRPCEvents.end());
 
     std::vector<AppendEntriesResult> state;
 
@@ -534,7 +534,7 @@ FpgaRaftCommo::BroadcastAppendEntries(parid_t par_id,
   std::vector<std::shared_ptr<rrr::Client>> clients;
 
   vector<Future*> fus;
-  WAN_WAIT;
+  // WAN_WAIT;
 
   for (auto& p : proxies) {
     auto id = p.first;
@@ -653,19 +653,77 @@ void FpgaRaftCommo::BroadcastDecide(const parid_t par_id,
 																			const i64 dep_id,
                                       const ballot_t ballot,
                                       const shared_ptr<Marshallable> cmd) {
+  // Log_info("Inside FpgaRaftCommo::BroadcastDecide; cp1");
   auto proxies = rpc_par_proxies_[par_id];
   vector<Future*> fus;
   for (auto& p : proxies) {
     auto proxy = (FpgaRaftProxy*) p.second;
     FutureAttr fuattr;
     fuattr.callback = [](Future* fu) {};
+    // Log_info("Inside FpgaRaftCommo::BroadcastDecide; cp2");
     MarshallDeputy md(cmd);
 		DepId di;
 		di.str = "dep";
 		di.id = dep_id;
     auto f = proxy->async_Decide(slot_id, ballot, di, md, fuattr);
+    // Log_info("Inside FpgaRaftCommo::BroadcastDecide; cp3");
     Future::safe_release(f);
   }
+}
+
+
+void FpgaRaftCommo::CrpcDecide(const parid_t par_id,
+                                      siteid_t leader_site_id,
+                                      const slotid_t slot_id,
+																			const i64 dep_id,
+                                      const ballot_t ballot,
+                                      const shared_ptr<Marshallable> cmd) {
+  // Log_info("Inside FpgaRaftCommo::CrpcDecide; cp1");
+  
+  auto proxies = rpc_par_proxies_[par_id];
+  vector<Future*> fus;
+  std::vector<uint16_t> sitesInfo_;
+  for (auto& p : proxies) {
+    auto id = p.first;
+    // auto proxy = (FpgaRaftProxy*) p.second;
+    // auto cli_it = rpc_clients_.find(id);
+    // std::string ip = "";
+    // if (cli_it != rpc_clients_.end()) {
+    //   ip = cli_it->second->host();
+    // }
+    // ip_addrs.insert(ip);
+    if (id != leader_site_id) { // #cPRC additional
+    sitesInfo_.push_back(id); // #cPRC additional
+    }                           // #cPRC additional
+		//clients.push_back(cli);
+  }
+  // sitesInfo_.push_back(leader_site_id);
+
+  std::vector<uint16_t> state;
+  MarshallDeputy md(cmd);
+  DepId di;
+  di.str = "dep";
+  di.id = dep_id;
+  auto proxy = (FpgaRaftProxy *)rpc_proxies_[sitesInfo_[0]];
+  auto f = proxy->async_CrpcDecide(slot_id, ballot, di, md, sitesInfo_, state);  // #profile(crpc2) - 3.96%%
+  Future::safe_release(f);
+
+  auto proxy2 = (FpgaRaftProxy *)rpc_proxies_[leader_site_id];
+  auto f2 = proxy2->async_Decide(slot_id, ballot, di, md);
+  Future::safe_release(f);
+  // for (auto& p : proxies) {
+  //   auto proxy = (FpgaRaftProxy*) p.second;
+  //   FutureAttr fuattr;
+  //   fuattr.callback = [](Future* fu) {};
+  //   // Log_info("Inside FpgaRaftCommo::BroadcastDecide; cp2");
+  //   MarshallDeputy md(cmd);
+	// 	DepId di;
+	// 	di.str = "dep";
+	// 	di.id = dep_id;
+  //   auto f = proxy->async_Decide(slot_id, ballot, di, md, fuattr);
+  //   // Log_info("Inside FpgaRaftCommo::BroadcastDecide; cp3");
+  //   Future::safe_release(f);
+  // }
 }
 
 void FpgaRaftCommo::BroadcastVote(parid_t par_id,
@@ -825,6 +883,20 @@ void FpgaRaftCommo::CrpcAppendEntries3(const parid_t par_id,
                                           leaderCommitIndex, dep_id, cmd, addrChain, state);  // #profile(crpc2) - 3.96%%
   Future::safe_release(f);
 }
+
+void FpgaRaftCommo::CrpcDecide2(const parid_t par_id,
+                  const uint64_t& slot,
+                  const ballot_t& ballot,
+                  const DepId& dep_id,
+                  const MarshallDeputy& md_cmd, 
+                  const std::vector<uint16_t>& addrChain, 
+                  const std::vector<uint16_t>& state){
+  auto proxy = (FpgaRaftProxy *)rpc_proxies_[addrChain[0]];
+  auto f = proxy->async_CrpcDecide(slot, ballot, dep_id, md_cmd, addrChain, state);  // #profile(crpc2) - 3.96%%
+  Future::safe_release(f);
+}
+
+
 
 void FpgaRaftCommo::CrpcAppendEntries_no_chain(const parid_t par_id,
               const uint64_t& id,

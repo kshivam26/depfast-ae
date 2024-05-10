@@ -138,7 +138,7 @@ friend class FpgaRaftProxy;
 	std::unordered_map<siteid_t, uint64_t> matchedIndex {};
   std::unordered_map<uint64_t, shared_ptr<FpgaRaftAppendQuorumEvent>> cRPCEvents {};
 	int index;
-	
+	uint64_t crpc_id_counter = 0;
   FpgaRaftCommo() = delete;
   FpgaRaftCommo(PollMgr*);
   shared_ptr<FpgaRaftForwardQuorumEvent>
@@ -259,6 +259,13 @@ friend class FpgaRaftProxy;
                        const ballot_t ballot,
                        const shared_ptr<Marshallable> cmd);
 
+  void CrpcDecide(const parid_t par_id,
+                      siteid_t leader_site_id,
+                       const slotid_t slot_id,
+											 const i64 dep_id,
+                       const ballot_t ballot,
+                       const shared_ptr<Marshallable> cmd);
+
   void cRPC(const parid_t par_id,
               const uint64_t& id,
               const MarshallDeputy& cmd, 
@@ -283,6 +290,15 @@ friend class FpgaRaftProxy;
               const MarshallDeputy& cmd, 
               const std::vector<uint16_t>& addrChain, 
               const std::vector<AppendEntriesResult>& state);
+
+
+  void CrpcDecide2(const parid_t par_id,
+                  const uint64_t& slot,
+                  const ballot_t& ballot,
+                  const DepId& dep_id,
+                  const MarshallDeputy& md_cmd, 
+                  const std::vector<uint16_t>& addrChain, 
+                  const std::vector<uint16_t>& state);
 
   void CrpcAppendEntries_no_chain(const parid_t par_id,
               const uint64_t& id,

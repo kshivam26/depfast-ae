@@ -8,12 +8,14 @@
 #include "deptran/procedure.h"
 #include "../command_marshaler.h"
 #include "../rcc_rpc.h"
+#include "commo.h"
 
 class SimpleCommand;
 namespace janus {
 
 class TxLogServer;
 class FpgaRaftServer;
+class FpgaRaftCommo;
 class FpgaRaftServiceImpl : public FpgaRaftService {
  public:
   FpgaRaftServer* sched_;
@@ -99,6 +101,15 @@ class FpgaRaftServiceImpl : public FpgaRaftService {
 							const DepId& dep_id,
               const MarshallDeputy& cmd,
               rrr::DeferredReply* defer) override;
+  void CrpcDecide(const uint64_t& slot, const ballot_t& ballot, const DepId& dep_id, const MarshallDeputy& cmd, const std::vector<uint16_t>& addrChain, const std::vector<uint16_t>& state, rrr::DeferredReply* defer) override;
+
+  // void CrpcDecide(const uint64_t& slot,
+  //             const ballot_t& ballot,
+	// 						const DepId& dep_id,
+  //             const MarshallDeputy& cmd,
+  //             const std::vector<uint16_t>& addrChain, 
+  //             std::vector<uint16_t>* state,
+  //             rrr::DeferredReply* defer) override;
 
   void cRPC(const uint64_t& id,
             const MarshallDeputy& cmd, 
