@@ -161,7 +161,7 @@ def build(bld):
     bld.objects(source=bld.path.ant_glob("src/deptran/*.cc "
                                        "src/deptran/*/*.cc "
                                        "src/bench/*/*.cc",
-                                       excl=['src/deptran/s_main.cc', 'src/deptran/paxos_main_helper.cc', 'src/deptran/rpc_benchmark.cc', 'src/deptran/benchmark_service.cc', 'src/deptran/crpc_benchmark.cc', 'src/deptran/crpc_benchmark_individual.cc', 'src/deptran/crpc_service.cc']),
+                                       excl=['src/deptran/s_main.cc', 'src/deptran/paxos_main_helper.cc', 'src/deptran/rpc_benchmark.cc', 'src/deptran/benchmark_service.cc', 'src/deptran/crpc_benchmark.cc', 'src/deptran/crpc_benchmark_individual.cc', 'src/deptran/crpc_service.cc', 'src/deptran/paxos_crpc_benchmark.cc']),
               target="deptran_objects",
               includes="src src/rrr src/deptran ",
               uselib="YAML-CPP BOOST",
@@ -203,6 +203,12 @@ def build(bld):
                 includes="src src/rrr src/deptran", 
                 uselib="YAML-CPP BOOST",
                 use="rrr PTHREAD PROFILER RT")
+    
+    # bld.program(source=bld.path.ant_glob("src/deptran/paxos_crpc_benchmark.cc"), 
+    #             target="paxos_crpc_benchmark", 
+    #             includes="src src/rrr src/deptran", 
+    #             uselib="YAML-CPP BOOST",
+    #             use="externc rrr memdb PTHREAD PROFILER RT deptran_objects")
     
     bld.add_post_fun(post)
 

@@ -169,6 +169,7 @@ bool SchedulerClassic::OnPrepare(cmdid_t tx_id,
     //Log_info("This is dep_id: %d", dep_id);
     // here, we need to let the paxos coordinator know what request we are working with
     // thsi could be the transaction id or we can add a new id
+    Log_info("^^^^ inside SchedulerClassic::OnPrepare; before createRepCoord");
     auto coo = CreateRepCoord(dep_id.id);
 		
 		/*clock_gettime(CLOCK_MONOTONIC, &end);
@@ -402,7 +403,12 @@ void SchedulerClassic::Next(Marshallable& cmd) {
     auto& c = dynamic_cast<TpcBatchCommand&>(cmd);
     for (auto& cc : c.cmds_)
       CommitReplicated(*cc);
-  } else {
+  } else if (cmd.kind_ == MarshallDeputy::CMD_TPC_RAFT_SAMPLE_CMD) {
+    // do nothing
+    auto& c = dynamic_cast<TpcRaftSampleCommand&>(cmd);
+    // CommitReplicated(c);
+  } 
+  else {
     verify(0);
   }
 }

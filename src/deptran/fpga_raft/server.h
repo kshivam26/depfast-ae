@@ -69,7 +69,7 @@ class FpgaRaftServer : public TxLogServer {
   
 	void setIsLeader(bool isLeader)
   {
-    Log_debug("set loc_id %d is leader %d", loc_id_, isLeader) ;
+    Log_info("@@@@ set loc_id %d is leader %d", loc_id_, isLeader) ;
     is_leader_ = isLeader ;
   }
 
@@ -168,7 +168,9 @@ class FpgaRaftServer : public TxLogServer {
   }
   
   void SetLocalAppend(shared_ptr<Marshallable>& cmd, uint64_t* term, uint64_t* index, slotid_t slot_id = -1, ballot_t ballot = 1 ){
+    // Log_info("inside server setlocalappend; cp1, tid: %d", gettid());
     std::lock_guard<std::recursive_mutex> lock(mtx_);
+    
     *index = lastLogIndex ;
     lastLogIndex += 1;
     auto instance = GetFpgaRaftInstance(lastLogIndex);
@@ -194,20 +196,20 @@ class FpgaRaftServer : public TxLogServer {
 			struct KeyValue key_values[kv_vector.size()];
 			std::copy(kv_vector.begin(), kv_vector.end(), key_values);
 
-			auto de = IO::write(filename, key_values, sizeof(struct KeyValue), kv_vector.size()); // ***uncomment, testing no IO
+			// auto de = IO::write(filename, key_values, sizeof(struct KeyValue), kv_vector.size()); // ***uncomment, testing no IO
 			
 			struct timespec begin, end;
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
-      de->Wait();
+      // de->Wait();
 			//clock_gettime(CLOCK_MONOTONIC, &end);
 			//Log_info("Time of Write: %d", end.tv_nsec - begin.tv_nsec);
     } else {
 			int value = -1;
 			int value_;
-			auto de = IO::write(filename, &value, sizeof(int), 1); // ***uncomment
+			// auto de = IO::write(filename, &value, sizeof(int), 1); // ***uncomment
 			struct timespec begin, end;
 			//clock_gettime(CLOCK_MONOTONIC, &begin);
-      de->Wait();
+      // de->Wait();
 			//clock_gettime(CLOCK_MONOTONIC, &end);
 			//Log_info("Time of Write: %d", end.tv_nsec - begin.tv_nsec);
     }

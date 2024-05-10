@@ -39,6 +39,7 @@ class SampleCrpcServiceImpl: public CrpcBenchmarkService{
     std::vector<uint16_t> sitesInfo_;
     const size_t one_megabyte = 1048576; // Number of bytes in one megabyte
     const size_t ten_kilobyte = 10000; // Number of bytes in ten KB
+    const size_t one_kilobyte = 1000; // Number of bytes in one KB
     char character_to_repeat = 'a'; // Character to fill the string with
     int byte_size = 10;
     char chraacter_to_repeat = 'a'; // Character to fill the string with
@@ -66,7 +67,7 @@ class SampleCrpcServiceImpl: public CrpcBenchmarkService{
                 // for (uint32_t n_tx = 0; n_tx < 10; n_tx++) {
                 prevPoll_->add(dynamic_pointer_cast<Job>(std::make_shared<OneTimeJob>([this, batchSize, max_pending_requests, seconds, payload](){
                     Reactor::CreateSpEvent<NeverEvent>()->Wait(pow(10, 4));
-                    Log_info("in Crpc; tid: %d", gettid());
+                    Log_info("in benchmark; tid: %d", gettid());
                     auto beg_time = Time::now() ;
                     auto end_time = beg_time + seconds * pow(10, 6);
                     struct timespec start_;
@@ -78,7 +79,7 @@ class SampleCrpcServiceImpl: public CrpcBenchmarkService{
                         int cnt = crpc_nop_counter.peek_next();
                         int num_done = crpc_num_done.peek_next();
                         if (cur_time > end_time) {
-                            Log_info("***** ENDING Chaining*****");
+                            Log_info("***** ENDING Benchmark*****");
                             while (cnt !=num_done){
                                 Log_info("#### Waiting for all the responses to return; cnt: %d, num_done: %d", cnt, num_done);
                                 Reactor::CreateSpEvent<NeverEvent>()->Wait(pow(10, 4));
@@ -126,6 +127,7 @@ class SampleCrpcServiceImpl: public CrpcBenchmarkService{
                                 last_sent = 0;
                                 break;
                             }
+                            // Log_info("Going to send chaining request to all servers");
                             cnt = crpc_nop_counter.next();
                             last_sent++;
                             // int q = proxies.size()/2+1;
@@ -140,6 +142,7 @@ class SampleCrpcServiceImpl: public CrpcBenchmarkService{
 
 
                             auto f = proxies[sitesInfo_[0]]->async_CrpcLargePayload(cnt, payload, sitesInfo_, state);
+                            // Log_info("Going to send chaining request to all servers; cp2");
                             Future::safe_release(f);
                         }
 
@@ -345,13 +348,17 @@ class SampleCrpcServiceImpl: public CrpcBenchmarkService{
                 byte_size = ten_kilobyte;
             }
 
+            else if (payloadSize == 4) {
+                byte_size = one_kilobyte;
+            }
+
             // byte_size = isSmall ? 10 : one_megabyte;
 
             // Log_info("byte size is: %d", byte_size);
             
             // int duration = seconds;
             for (auto svr_addr : svr_addrs_) {
-                // Log_info("server %s trying to connect to server:  %s", self_addr_, svr_addr);
+                Log_info("server %s trying to connect to server:  %s", self_addr_, svr_addr);
                 // auto poll = new PollMgr(1);
                 auto rpc_cli = std::make_shared<rrr::Client>(prevPoll_);
                 // Client * cl = new Client();
@@ -360,7 +367,7 @@ class SampleCrpcServiceImpl: public CrpcBenchmarkService{
                     Log_info("server %s failed to connect to server:  %s", self_addr_, svr_addr);
                 }
                 else {
-                    // Log_info("server %s successfully connected to server:  %s", self_addr_, svr_addr);
+                    Log_info("server %s successfully connected to server:  %s", self_addr_, svr_addr);
                 }
                 clients.push_back(rpc_cli);
                 auto proxy = new CrpcBenchmarkProxy(rpc_cli.get());

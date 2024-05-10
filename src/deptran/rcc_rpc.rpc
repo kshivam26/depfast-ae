@@ -1,5 +1,43 @@
 namespace janus;
 
+service Benchmark {
+  defer nop(string st);
+};
+
+
+abstract service CrpcBenchmark {
+
+
+  defer CrpcAdd(uint64_t id,
+               int64_t value1,
+               int64_t value2,
+               vector<uint16_t> addrChain,
+               vector<ResultAdd> state);
+
+  defer BroadcastAdd(int64_t n,
+               int64_t value1,
+               int64_t value2 |
+               int64_t result);
+
+  defer CrpcLargePayload(uint64_t id,
+               string str,
+               vector<uint16_t> addrChain,
+               vector<ResultAdd> state);
+
+  defer BroadcastLargePayload(int64_t n,
+               string str |
+               int64_t result);
+
+  defer nop(string);
+
+  defer crpc_nop(string);
+
+  defer nop_largePayload(string);
+
+  defer crpc_nop_largePayload(string);
+
+}
+
 abstract service MultiPaxos {
 
   defer Forward(MarshallDeputy cmd,
@@ -101,6 +139,14 @@ abstract service FpgaRaft {
                ballot_t ballot,
 							 DepId dep_id,
                MarshallDeputy cmd);
+
+  defer CrpcDecide(uint64_t slot,
+               ballot_t ballot,
+							 DepId dep_id,
+               MarshallDeputy cmd,
+              vector<uint16_t> addrChain,
+              vector<uint16_t> state);
+
 
   defer cRPC(uint64_t id,
             MarshallDeputy cmd, 

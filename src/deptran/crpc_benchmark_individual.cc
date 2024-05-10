@@ -270,7 +270,7 @@ int main(int argc, char **argv) {
     // } else {
     //     Log_info("client will connect to   %s", svr_addr);
     // }
-    Log_info("packet byte size:        %d", batch_size);
+    Log_info("batch size:        %d", batch_size);
     Log_info("epoll instances:         %d", epoll_instances);
     Log_info("fast reqeust:            %s", fast_requests ? "true" : "false");
     Log_info("running seconds:         %d", seconds);
@@ -331,7 +331,8 @@ int main(int argc, char **argv) {
 
         sleep(1);
 
-        BS->start(outgoing_requests, seconds, fast_requests, batch_size);
+        if (current_index == 1)
+            BS->start(outgoing_requests, seconds, fast_requests, batch_size);
 
         Pthread_mutex_init(&g_stop_mutex, nullptr);
         Pthread_cond_init(&g_stop_cond, nullptr);
