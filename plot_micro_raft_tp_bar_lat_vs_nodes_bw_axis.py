@@ -98,8 +98,8 @@ def plot_data(chaining_data, broadcast_data, chaining_errors, broadcast_errors, 
     plt.subplots_adjust(top=0.85, bottom=0.15, left=0.1, right=0.9, hspace=0.2, wspace=0.3)
     
     plt.tight_layout()
-    plt.savefig('micro_tp_lat_large_bar_bw.png')
-    plt.savefig("micro_tp_lat_large_bar_bw.pdf", format='pdf')
+    plt.savefig('micro_raft_tp_lat_large_bar_bw_new.png')
+    plt.savefig("micro_raft_tp_lat_large_bar_bw_new.pdf", format='pdf')
     plt.show()
 
 

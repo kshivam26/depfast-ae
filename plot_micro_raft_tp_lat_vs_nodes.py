@@ -41,9 +41,9 @@ def plot_data(chaining_data, broadcast_data, chaining_errors, broadcast_errors):
 
     # Throughput bar graph
     ax1.bar(index - bar_width/2, chaining_data['throughput'].values, bar_width, label='Chaining', 
-            yerr=chaining_errors[['error_min', 'error_max']].values.T, capsize=5, color='g')
+            yerr=chaining_errors[['error_min', 'error_max']].values.T, capsize=5, color='g',alpha=0.7)
     ax1.bar(index + bar_width/2, broadcast_data['throughput'].values, bar_width, label='Broadcast', 
-            yerr=broadcast_errors[['error_min', 'error_max']].values.T, capsize=5, color='b')
+            yerr=broadcast_errors[['error_min', 'error_max']].values.T, capsize=5, color='b',alpha=0.7)
     ax1.set_xlabel('# Nodes', fontsize='x-large')
     ax1.set_ylabel('Throughput (req/s)', fontsize='x-large')
     ax1.set_xticks(index)
@@ -59,10 +59,10 @@ def plot_data(chaining_data, broadcast_data, chaining_errors, broadcast_errors):
     ax1.yaxis.set_major_locator(ticker.MaxNLocator(5))
 
     # Latency line graph using median run data
-    ax2.plot(index, chaining_data['50%_lat'].values, label='Chaining P50', marker='o', linestyle='--', color='g')
-    ax2.plot(index, chaining_data['90%_lat'].values, label='Chaining P90', marker='o', color='g')
-    ax2.plot(index, broadcast_data['50%_lat'].values, label='Broadcast P50', marker='o', linestyle='--', color='b')
-    ax2.plot(index, broadcast_data['90%_lat'].values, label='Broadcast P90', marker='o', color='b')
+    ax2.plot(index, chaining_data['50%_lat'].values, label='Chaining P50', marker='o', linestyle='--', color='g',alpha=0.7)
+    ax2.plot(index, chaining_data['90%_lat'].values, label='Chaining P90', marker='o', color='g',alpha=0.7)
+    ax2.plot(index, broadcast_data['50%_lat'].values, label='Broadcast P50', marker='o', linestyle='--', color='b',alpha=0.7)
+    ax2.plot(index, broadcast_data['90%_lat'].values, label='Broadcast P90', marker='o', color='b',alpha=0.7)
     ax2.set_xlabel('# Nodes', fontsize='x-large')
     ax2.set_ylabel('Latency (ms)', fontsize='x-large')
     ax2.set_xticks(index)
@@ -73,8 +73,8 @@ def plot_data(chaining_data, broadcast_data, chaining_errors, broadcast_errors):
     ax2.grid(True, axis='y', linestyle='--', alpha=0.7)  # Enable grid
 
     plt.tight_layout()
-    plt.savefig('micro_tp_lat_10B.png')
-    plt.savefig("micro_tp_lat_10B.pdf", format='pdf')
+    plt.savefig('micro_raft_tp_lat_10B.png')
+    plt.savefig("micro_raft_tp_lat_10B.pdf", format='pdf')
     plt.show()
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@
 *.swp
 */log
 */deptran/rcc_service.py
-*/deptran/rcc_rpc.h
+# */deptran/rcc_rpc.h
 */deptran/rcc_rpc.py
 rpc_test/counter.h
 rpc_test/lib
@@ -25,7 +25,7 @@ deptran/mdcc/mdcc_rpc.h
 .python-version
 .ycm_extra_conf.py
 .unittest-gtest/
-*rpc.h
+# *rpc.h
 *.res
 *.prof
 /buck-out/
@@ -49,3 +49,17 @@ profile-results/
 /log
 /archive
 /results
+random_results/*.csv
+nohup.out
+chaining_output*.txt
+micro*.pdf
+micro*.png
+broadcast_*.txt
+benchmark_*.txt
+throughput_*.pdf
+throughput_*.png
+output_first_node.txt
+output_new.txt
+# deptran/s_main*
+# deptran/server_worker*
+config/*.yml
