@@ -1,0 +1,8 @@
+File: logfile_crpc.txt
+Wait - Number of occurrences: 23294
+Wait - Mean: 27422.528075899372
+Wait - Median: 27492.0
+Throughput - Number of occurrences: 30
+Throughput - Mean: 25.881666666666668
+Throughput - Median: 25.85
+Total Throughput: 776.4499999999997

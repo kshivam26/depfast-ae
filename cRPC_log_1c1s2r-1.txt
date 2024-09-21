@@ -1,0 +1,148 @@
+D [../src/deptran/fpga_raft/coordinator.cc:70] 2023-07-10 18:01:44.233 | fpga-raft coordinator broadcasts append entries, par_id_: 0, slot_id: 1, lastLogIndex: 0
+I [../src/deptran/fpga_raft/commo.cc:164] 2023-07-10 18:01:44.234 | tid of leader is 2599774
+D [../src/deptran/fpga_raft/../rcc_rpc.h:882] 2023-07-10 18:01:44.235 | ==== inside proxy async_cRPC; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.235 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.235 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/fpga_raft/append_entries_command.cc:20] 2023-07-10 18:01:44.235 | ==== inside AppendEntriesCommand::ToMarshal; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.235 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.235 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.235 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.235 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.235 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.236 | time of Marshal& operator<<: 521315
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.236 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.236 | time of Marshal& operator<<: 571493
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.236 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.236 | time of Marshal& operator<<: 1117820
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.236 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.236 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/fpga_raft/append_entries_command.cc:51] 2023-07-10 18:01:44.236 | ==== inside AppendEntriesCommandState::ToMarshal; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.236 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.236 | time of Marshal& operator<<: 39922
+D [../src/deptran/fpga_raft/../rcc_rpc.h:683] 2023-07-10 18:01:44.236 | ==== inside __cRPC__wrapper__; checkpoint 0 @ 2599776
+D [../src/deptran/fpga_raft/../rcc_rpc.h:687] 2023-07-10 18:01:44.237 | ==== inside __cRPC__wrapper__; checkpoint 1 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.237 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.237 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599776
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.238 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599776
+D [../src/deptran/fpga_raft/append_entries_command.cc:34] 2023-07-10 18:01:44.238 | ==== inside AppendEntriesCommand::FromMarshal; checkpoint 1 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.239 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.239 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599776
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.240 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.240 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.241 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599776
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.241 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.241 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.241 | time of Marshal& operator>>: 1009430
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.241 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.241 | time of Marshal& operator>>: 2714978
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.241 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.241 | time of Marshal& operator>>: 4361689
+D [../src/deptran/fpga_raft/../rcc_rpc.h:690] 2023-07-10 18:01:44.241 | ==== inside __cRPC__wrapper__; checkpoint 2 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.241 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.241 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599776
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.242 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599776
+D [../src/deptran/fpga_raft/append_entries_command.cc:58] 2023-07-10 18:01:44.243 | ==== inside AppendEntriesCommandState::FromMarshal; checkpoint 1 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.243 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.244 | time of Marshal& operator>>: 2338148
+D [../src/deptran/fpga_raft/server.cc:391] 2023-07-10 18:01:44.244 | fpga-raft scheduler on append entries for slot_id: 1, loc: 1, PrevLogIndex: 0
+D [../src/deptran/fpga_raft/../rcc_rpc.h:882] 2023-07-10 18:01:44.245 | ==== inside proxy async_cRPC; checkpoint 0 @ 2599776
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.245 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599776
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.246 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599776
+D [../src/deptran/fpga_raft/append_entries_command.cc:20] 2023-07-10 18:01:44.247 | ==== inside AppendEntriesCommand::ToMarshal; checkpoint 0 @ 2599776
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.247 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599776
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.247 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599776
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.247 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599776
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.247 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599776
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.248 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599776
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.249 | time of Marshal& operator<<: 1097921
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.249 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599776
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.249 | time of Marshal& operator<<: 1839165
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.249 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599776
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.249 | time of Marshal& operator<<: 3836149
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.249 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599776
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.249 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599776
+D [../src/deptran/fpga_raft/append_entries_command.cc:51] 2023-07-10 18:01:44.250 | ==== inside AppendEntriesCommandState::ToMarshal; checkpoint 0 @ 2599776
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.250 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599776
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.250 | time of Marshal& operator<<: 654555
+D [../src/deptran/fpga_raft/../rcc_rpc.h:683] 2023-07-10 18:01:44.250 | ==== inside __cRPC__wrapper__; checkpoint 0 @ 2599774
+D [../src/deptran/fpga_raft/../rcc_rpc.h:687] 2023-07-10 18:01:44.250 | ==== inside __cRPC__wrapper__; checkpoint 1 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.250 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.250 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.250 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599774
+D [../src/deptran/fpga_raft/append_entries_command.cc:34] 2023-07-10 18:01:44.251 | ==== inside AppendEntriesCommand::FromMarshal; checkpoint 1 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.251 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.251 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.251 | time of Marshal& operator>>: 555691
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.251 | time of Marshal& operator>>: 616771
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.251 | time of Marshal& operator>>: 696399
+D [../src/deptran/fpga_raft/../rcc_rpc.h:690] 2023-07-10 18:01:44.251 | ==== inside __cRPC__wrapper__; checkpoint 2 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.251 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.252 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.252 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599774
+D [../src/deptran/fpga_raft/append_entries_command.cc:58] 2023-07-10 18:01:44.252 | ==== inside AppendEntriesCommandState::FromMarshal; checkpoint 1 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.252 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.252 | time of Marshal& operator>>: 529085
+D [../src/deptran/fpga_raft/coordinator.cc:154] 2023-07-10 18:01:44.252 | fpga-raft append commited loc:0 minindex:1
+D [../src/deptran/fpga_raft/coordinator.cc:187] 2023-07-10 18:01:44.252 | fpga-raft commit for partition: 0, slot 1, commit 1 minIndex 1 in loc:0
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.252 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.252 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.252 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.252 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.252 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.253 | time of Marshal& operator<<: 567745
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.253 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.253 | time of Marshal& operator<<: 613694
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.253 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.253 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.h:88] 2023-07-10 18:01:44.254 | ==== inside Marshal& operator<<; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.h:91] 2023-07-10 18:01:44.254 | ==== inside Marshal& operator<<; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.254 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.254 | time of Marshal& operator<<: 39415
+D [../src/deptran/marshallable.h:93] 2023-07-10 18:01:44.254 | ==== inside Marshal& operator<<; checkpoint 2 @ 2599774
+D [../src/deptran/marshallable.h:95] 2023-07-10 18:01:44.254 | time of Marshal& operator<<: 775016
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.254 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599776
+D [../src/rrr/rpc/client.cpp:60] 2023-07-10 18:01:44.254 | called Future::notify_ready; checkpoint 0 @ 2599774D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.254 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599776
+
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.254 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.255 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.255 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599774D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.255 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599776
+
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.255 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.255 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:74] 2023-07-10 18:01:44.256 | ==== inside Marshal& operator>>; checkpoint 0 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:76] 2023-07-10 18:01:44.256 | ==== inside Marshal& operator>>; checkpoint 1 @ 2599774
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.256 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599774
+D [../src/deptran/marshallable.cc:75] 2023-07-10 18:01:44.256 | ==== inside MarshallDeputy::CreateActualObjectFrom; checkpoint 0 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.256 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599774
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.256 | time of Marshal& operator>>: 550138
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.256 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.256 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599774D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.257 | time of Marshal& operator>>: 1991452
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.257 | time of Marshal& operator>>: 1955117
+
+D [../src/deptran/fpga_raft/server.cc:506] 2023-07-10 18:01:44.257 | fpga-raft par:0 loc:0 executed slot 1 now
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:78] 2023-07-10 18:01:44.257 | ==== inside Marshal& operator>>; checkpoint 2 @ 2599776
+D [../src/deptran/carousel/../occ/../classic/../marshallable.h:80] 2023-07-10 18:01:44.258 | time of Marshal& operator>>: 3646175
+D [../src/rrr/rpc/client.cpp:60] 2023-07-10 18:01:44.258 | called Future::notify_ready; checkpoint 0 @ 2599774
+D [../src/rrr/rpc/client.cpp:60] 2023-07-10 18:01:44.258 | called Future::notify_ready; checkpoint 0 @ 2599778
+D [../src/rrr/rpc/client.cpp:60] 2023-07-10 18:01:44.258 | called Future::notify_ready; checkpoint 0 @ 2599774
+D [../src/rrr/rpc/client.cpp:60] 2023-07-10 18:01:44.258 | called Future::notify_ready; checkpoint 0 @ 2599776
+D [../src/deptran/classic/coordinator.cc:313] 2023-07-10 18:01:44.259 | get start ack 1/1 for cmd_id: 2000000000001, inn_id: 101
+D [../src/deptran/classic/coordinator.cc:323] 2023-07-10 18:01:44.259 | receive all start acks, txn_id: 2000000000001; START PREPARE
+D [../src/deptran/classic/coordinator.cc:604] 2023-07-10 18:01:44.260 | call reply for tx_id: 2000000000001
+I [../src/deptran/client_worker.cc:351] 2023-07-10 18:01:45.112 | wait for all outstanding requests to finish.
+I [../src/deptran/s_main.cc:140] 2023-07-10 18:01:46.201 | wait_for_clients: wait for client threads to exit.
+I [../src/deptran/client_worker.cc:375] 2023-07-10 18:01:49.203 | Finish:
+Total: 1, Commit: 1, Attempts: 0, Running for 2, Throughput: 0.50
+
+I [../src/deptran/s_main.cc:323] 2023-07-10 18:01:49.203 | all clients have shut down.
+D [../src/deptran/server_worker.cc:185] 2023-07-10 18:01:49.203 | WaitForShutdown
+D [../src/deptran/server_worker.cc:208] 2023-07-10 18:01:49.203 | exit WaitForShutdown
+D [../src/deptran/server_worker.cc:185] 2023-07-10 18:01:49.204 | WaitForShutdown
+D [../src/deptran/server_worker.cc:208] 2023-07-10 18:01:49.204 | exit WaitForShutdown

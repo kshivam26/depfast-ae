@@ -25,6 +25,7 @@ static std::vector<std::thread> failover_threads_g = {};
 bool* volatile failover_triggers;
 volatile bool failover_server_quit = false;
 volatile locid_t failover_server_idx;
+ServerWorker* leaderWorker = nullptr;
 
 void client_setup_heartbeat(int num_clients) {
   Log_info("%s", __FUNCTION__);
@@ -56,6 +57,7 @@ void client_launch_workers(vector<Config::SiteInfo> &client_sites) {
 
   failover_triggers = new bool[client_sites.size()]() ;
   for (uint32_t client_id = 0; client_id < client_sites.size(); client_id++) {
+    // Log_info("***inside client_workers spawning; current iteration: %d", client_id);
     ClientWorker* worker = new ClientWorker(client_id,
                                             client_sites[client_id],
                                             Config::GetConfig(),
@@ -63,9 +65,11 @@ void client_launch_workers(vector<Config::SiteInfo> &client_sites) {
                                             &(failover_triggers[client_id]),
                                             &failover_server_quit,
                                             &failover_server_idx);
-    workers.push_back(worker);
+    // workers.push_back(worker);
+    // Log_info("***current workers size: %d", workers.size());
     client_threads_g.push_back(std::thread(&ClientWorker::Work, worker));
     client_workers_g.push_back(std::unique_ptr<ClientWorker>(worker));
+    // Log_info("***current client_workers_g size: %d", client_workers_g.size());
   }
 
 }
@@ -74,17 +78,19 @@ void server_launch_worker(vector<Config::SiteInfo>& server_sites) {
   auto config = Config::GetConfig();
   Log_info("server enabled, number of sites: %d", server_sites.size());
   svr_workers_g.resize(server_sites.size(), ServerWorker());
-  int i=0;
+  std::atomic<int> i{0};
   vector<std::thread> setup_ths;
   for (auto& site_info : server_sites) {
     setup_ths.push_back(std::thread([&site_info, &i, &config] () {
       Log_info("launching site: %x, bind address %s",
                site_info.id,
                site_info.GetBindAddress().c_str());
-      auto& worker = svr_workers_g[i++];
+      int index = i++;
+      auto& worker = svr_workers_g[index];
       worker.site_info_ = const_cast<Config::SiteInfo*>(&config->SiteById(site_info.id));
       worker.SetupBase();
       // register txn piece logic
+      Log_info("^^^^ inside server_launch_worker");
       worker.RegisterWorkload();
       // populate table according to benchmarks
       worker.PopTable();
@@ -92,20 +98,45 @@ void server_launch_worker(vector<Config::SiteInfo>& server_sites) {
 #ifdef DB_CHECKSUM
       worker.DbChecksum();
 #endif
+      // worker.SetupCommo();
       // start server service
       worker.SetupService();
       Log_info("start communication for site %d", (int)worker.site_info_->id);
-      worker.SetupCommo();
+      worker.SetupCommo(); // setup connections among servers
       Log_info("site %d launched!", (int)site_info.id);
+      // if (worker.services_.size() > 1){
+      //   worker.services_[1]
+      // }
+      Log_info("#### The locale_id is: %d", worker.site_info_->locale_id);
+      // if (worker.site_info_->locale_id == 0){
+      //   Log_info("##############This worker maybe is the leader; sleep for 2 sec ##############################");
+      //   // sleep(2);
+      //   Log_info("############## up from sleep, calling start benchmark");
+      //   worker.StartBenchmark();
+      //   Log_info("############## back in worker setup");
+        
+      // }
       worker.launched_ = true;
     }));
   }
 
+  // Log_info("***** server_launch_worker; cp 1");
   for (auto& worker : svr_workers_g) {
     while (!worker.launched_) {
+      // Log_info("***** server_launch_worker; cp 2");
       sleep(1);
     }
+    if (worker.site_info_->locale_id == 0){
+      Log_info("##############This worker maybe is the leader; sleep for 2 sec ##############################");
+      sleep(2);
+      Log_info("############## up from sleep, calling start benchmark");
+      worker.StartBenchmark();
+      Log_info("############## back in worker setup");
+    
+    }
   }
+
+  
 
   Log_info("waiting for server setup threads.");
   for (auto& th: setup_ths) {
@@ -120,6 +151,78 @@ void server_launch_worker(vector<Config::SiteInfo>& server_sites) {
   }
   Log_info("server workers' communicators setup");
 }
+
+
+void server_launch_worker1(vector<Config::SiteInfo>& server_sites) {
+  auto config = Config::GetConfig();
+  Log_info("server enabled, number of sites: %d", server_sites.size());
+  svr_workers_g.resize(0, ServerWorker());
+  // auto worker = ServerWorker();
+  std::atomic<int> i{0};
+  // std::thread setup_th;
+  auto site_info = server_sites[config->currentId_];
+  // for (auto& site_info : server_sites) {
+  // setup_th = std::thread([&site_info, &i, &config] () {
+    Log_info("launching site: %x, bind address %s",
+              site_info.id,
+              site_info.GetBindAddress().c_str());
+    // int index = i++;
+    auto& worker = svr_workers_g[0];
+    worker.site_info_ = const_cast<Config::SiteInfo*>(&config->SiteById(site_info.id));
+    worker.SetupBase();
+    // register txn piece logic
+    Log_info("^^^^ inside server_launch_worker");
+    worker.RegisterWorkload();
+    // populate table according to benchmarks
+    worker.PopTable();
+    Log_info("table popped for site %d", (int)worker.site_info_->id);
+#ifdef DB_CHECKSUM
+    worker.DbChecksum();
+#endif
+    // worker.SetupCommo();
+    // start server service
+    worker.SetupService();
+    Log_info("start communication for site %d", (int)worker.site_info_->id);
+    worker.SetupCommo(); // setup connections among servers
+    Log_info("site %d launched!", (int)site_info.id);
+    // if (worker.services_.size() > 1){
+    //   worker.services_[1]
+    // }
+    Log_info("#### The locale_id is: %d", worker.site_info_->locale_id);
+    if (worker.site_info_->locale_id == 0){
+      Log_info("##############This worker maybe is the leader; sleep for 2 sec ##############################");
+      // sleep(2);
+      Log_info("############## up from sleep, calling start benchmark");
+      worker.StartBenchmark();
+      Log_info("############## back in worker setup");
+      
+    }
+    worker.launched_ = true;
+  // });
+
+  // Log_info("***** server_launch_worker; cp 1");
+  for (auto& worker : svr_workers_g) {
+    while (!worker.launched_) {
+      // Log_info("***** server_launch_worker; cp 2");
+      sleep(1);
+    }
+  }
+
+  Log_info("waiting for server setup threads.");
+  // for (auto& th: setup_ths) {
+  //   th.join();
+  // }
+  Log_info("done waiting for server setup threads.");
+
+  for (ServerWorker& worker : svr_workers_g) {
+    // start communicator after all servers are running
+    // setup communication between controller script
+    worker.SetupHeartbeat();
+  }
+  Log_info("server workers' communicators setup");
+}
+
+
 
 void client_shutdown() {
   client_workers_g.clear();
@@ -293,10 +396,11 @@ int main(int argc, char *argv[]) {
     return ret;
   }
 
-  auto client_infos = Config::GetConfig()->GetMyClients();
-  if (client_infos.size() > 0) {
-    client_setup_heartbeat(client_infos.size());
-  }
+  // ks-RM: remove clients
+  // auto client_infos = Config::GetConfig()->GetMyClients();
+  // if (client_infos.size() > 0) {
+  //   client_setup_heartbeat(client_infos.size());
+  // }
 
 #ifdef CPU_PROFILE
   char prof_file[1024];
@@ -314,26 +418,32 @@ int main(int argc, char *argv[]) {
     Log_info("no servers on this process");
   }
 
-  if (!client_infos.empty()) {
-    //client_setup_heartbeat(client_infos.size());
-    client_launch_workers(client_infos);
-    sleep(Config::GetConfig()->duration_);
-    wait_for_clients();
-    failover_server_quit = true;
-    Log_info("all clients have shut down.");
-  }
+  // ks-RM: remove clients
+  // if (false && !client_infos.empty()) {
+  //   //client_setup_heartbeat(client_infos.size());
+  //   client_launch_workers(client_infos);
+  //   sleep(Config::GetConfig()->duration_);
+  //   // Log_info("***main checkpoint 2");
+  //   wait_for_clients();
+  //   failover_server_quit = true;
+  //   Log_info("all clients have shut down.");
+  // }
 
 #ifdef DB_CHECKSUM
   sleep(90); // hopefully servers can finish hanging RPCs in 90 seconds.
 #endif
 
+
+  sleep(Config::GetConfig()->duration_+11);
   for (auto& worker : svr_workers_g) {
     worker.WaitForShutdown();
   }
 
-  for (auto& ft : failover_threads_g) {
-    ft.join();
-  }
+  Log_info("@@@@ shutting down all servers");
+
+  // for (auto& ft : failover_threads_g) {
+  //   ft.join();
+  // }
 
 #ifdef DB_CHECKSUM
   map<parid_t, vector<int>> checksum_results = {};
@@ -364,6 +474,7 @@ int main(int argc, char *argv[]) {
   exit(0);
   return 0;
   // TODO, FIXME pending_future in rpc cause error.
+  // ks-RM: remove clients shutdown
   client_shutdown();
   server_shutdown();
   Log_info("all server workers have shut down.");

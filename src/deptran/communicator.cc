@@ -15,6 +15,7 @@ namespace janus {
 uint64_t Communicator::global_id = 0;
 
 Communicator::Communicator(PollMgr* poll_mgr) {
+  // Log_info("*** inside Communicator::Communicator; tid: %d", gettid());
   vector<string> addrs;
   if (poll_mgr == nullptr)
     rpc_poll_ = new PollMgr(1);
@@ -25,6 +26,7 @@ Communicator::Communicator(PollMgr* poll_mgr) {
 	Log_info("size of partitions: %d", partitions.size());
   for (auto& par_id : partitions) {
     auto site_infos = config->SitesByPartitionId(par_id);
+    // Log_info("***inside Communicator::Communicator; site_infos size: %d; tid: %d", site_infos.size(), gettid());
     vector<std::pair<siteid_t, ClassicProxy*>> proxies;
     for (auto& si : site_infos) {
       auto result = ConnectToSite(si, std::chrono::milliseconds
@@ -40,6 +42,7 @@ Communicator::Communicator(PollMgr* poll_mgr) {
   } else {
     client_leaders_connected_.store(true);
   }
+  // Log_info("*** returning Communicator::Communicator; tid: %d", gettid());
 }
 
 void Communicator::ConnectClientLeaders() {
@@ -175,7 +178,9 @@ Communicator::ConnectToSite(Config::SiteInfo& site,
   int attempt = 0;
   do {
     Log_debug("connect to site: %s (attempt %d)", addr.c_str(), attempt++);
+    // Log_info("***connect to site: %s (attempt %d) for tid: %d", addr.c_str(), attempt++, gettid());
     auto connect_result = rpc_cli->connect(addr.c_str(), false);
+    // Log_info("***inside Communicator::ConnectToSite; connect_result: %d", connect_result);
     if (connect_result == SUCCESS) {
       ClassicProxy* rpc_proxy = new ClassicProxy(rpc_cli.get());
       rpc_clients_.insert(std::make_pair(site.id, rpc_cli));
@@ -187,8 +192,11 @@ Communicator::ConnectToSite(Config::SiteInfo& site,
 				Reactor::clients_[rpc_cli->host()] = clients;
 			}
 
-			Reactor::clients_[rpc_cli->host()].push_back(rpc_cli);
-      Log_info("connect to site: %s success!", addr.c_str());
+      // Log_info("==== site and addr are: %d -> %s", site.id, addr.c_str());
+      // Log_info("==== rpc_cli->host() is: %s", rpc_cli->host().c_str());
+			Reactor::clients_[rpc_cli->host()].push_back(rpc_cli);  //? every host is localhost, so, unless rpc_cli is same for all, something seems wrong?
+      // Log_info("==== current size of Reactor::clients_[rpc_cli->host()]: %d", Reactor::clients_.size());
+      // Log_info("==== connect to site: %s success!", addr.c_str());
       return std::make_pair(SUCCESS, rpc_proxy);
     } else {
       std::this_thread::sleep_for(std::chrono::milliseconds(CONNECT_SLEEP_MS));
@@ -271,6 +279,9 @@ void Communicator::BroadcastDispatch(
 	di.str = "dep";
 	di.id = Communicator::global_id++;
   
+  //Log_info("Could be right before ClassicServiceImpl::Dispatch()");
+  // Log_info("%s: tracepath pid %d", __FUNCTION__, gettid());
+  //Log_info("Tracepath:  1; client thread id %d", gettid());
 	auto future = proxy->async_Dispatch(cmd_id, di, md, fuattr);
   Future::safe_release(future);
   if (false) {

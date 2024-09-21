@@ -2,6 +2,7 @@
 #include "../__dep__.h"
 #include "../command.h"
 #include "deptran/procedure.h"
+#include <cstring> // for strlen
 
 namespace janus {
 
@@ -30,14 +31,39 @@ class TpcCommitCommand : public Marshallable {
   virtual Marshal& FromMarshal(Marshal&) override;
 };
 
+class TpcCommitAddCommand : public Marshallable {
+ public:
+  TpcCommitAddCommand() : Marshallable(MarshallDeputy::CMD_SAMPLE_CRPC_APPEND_ENTRIES) {
+  }
+  txnid_t tx_id_ = 0;
+  int ret_ = -1;
+  int64_t value_1 = 0;
+  int64_t value_2 = 0;
+  shared_ptr<Marshallable> cmd_{nullptr};
+  virtual Marshal& ToMarshal(Marshal&) const override;
+  virtual Marshal& FromMarshal(Marshal&) override;
+};
+
+class TpcRaftSampleCommand : public Marshallable {
+ public:
+  TpcRaftSampleCommand() : Marshallable(MarshallDeputy::CMD_TPC_RAFT_SAMPLE_CMD) {
+  }
+  std::string message_;
+  virtual Marshal& ToMarshal(Marshal&) const override;
+  virtual Marshal& FromMarshal(Marshal&) override;
+};
+
 class TpcEmptyCommand : public Marshallable {
  private:
+  
   shared_ptr<BoxEvent<bool>> event{Reactor::CreateSpEvent<BoxEvent<bool>>()};
 
  public:
+  char* message_ = nullptr;
   TpcEmptyCommand() : Marshallable(MarshallDeputy::CMD_TPC_EMPTY) {}
   Marshal& ToMarshal(Marshal&) const override;
   Marshal& FromMarshal(Marshal&) override;
+  inline size_t Size() const { return strlen(message_); }
   void Wait() { event->Wait(); };
   void Done() { event->Set(1); };
 };

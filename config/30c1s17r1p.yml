@@ -1,0 +1,66 @@
+
+site:
+  server: # each line is a partition, the first is the master site_name:port
+    - ["s101:9001", "s201:9002", "s301:9003", "s401:9004", "s501:9005", "s601:9006", "s701:9007", "s801:9008", "s901:9009", "s1001:9010", "s1101:9011", "s1201:9012", "s1301:9013", "s1401:9014", "s1501:9015", "s1601:9016", "s1701:9017"]
+  client: # each line is a partition
+    - ["c101", "c201", "c301", "c401", "c501", "c601", "c701", "c801", "c901", "c1001",
+      "c1101", "c1201", "c1301", "c1401", "c1501", "c1601", "c1701", "c1801", "c1901", "c2001",
+      "c2101", "c2201", "c2301", "c2401", "c2501", "c2601", "c2701", "c2801", "c2901", "c3001"]
+
+# site_name - process_name map
+process:
+  s101: localhost
+  s201: localhost
+  s301: localhost
+  s401: localhost
+  s501: localhost
+  s601: localhost
+  s701: localhost
+  s801: localhost
+  s901: localhost
+  s1001: localhost
+  s1101: localhost
+  s1201: localhost
+  s1301: localhost
+  s1401: localhost
+  s1501: localhost
+  s1601: localhost
+  s1701: localhost
+  c101: localhost
+  c201: localhost
+  c301: localhost
+  c401: localhost
+  c501: localhost
+  c601: localhost
+  c701: localhost
+  c801: localhost
+  c901: localhost
+  c1001: localhost
+  c1101: localhost
+  c1201: localhost
+  c1301: localhost
+  c1401: localhost
+  c1501: localhost
+  c1601: localhost
+  c1701: localhost
+  c1801: localhost
+  c1901: localhost
+  c2001: localhost
+  c2101: localhost
+  c2201: localhost
+  c2301: localhost
+  c2401: localhost
+  c2501: localhost
+  c2601: localhost
+  c2701: localhost
+  c2801: localhost
+  c2901: localhost
+  c3001: localhost
+
+# process_name - host_addr map
+host:
+  localhost: 127.0.0.1         
+  # h01: 127.0.0.1
+  # h02: 127.0.0.1
+  # h03: 127.0.0.1
+  # h04: 127.0.0.1

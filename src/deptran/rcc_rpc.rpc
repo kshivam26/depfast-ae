@@ -1,5 +1,43 @@
 namespace janus;
 
+service Benchmark {
+  defer nop(string st);
+};
+
+
+abstract service CrpcBenchmark {
+
+
+  defer CrpcAdd(uint64_t id,
+               int64_t value1,
+               int64_t value2,
+               vector<uint16_t> addrChain,
+               vector<ResultAdd> state);
+
+  defer BroadcastAdd(int64_t n,
+               int64_t value1,
+               int64_t value2 |
+               int64_t result);
+
+  defer CrpcLargePayload(uint64_t id,
+               string str,
+               vector<uint16_t> addrChain,
+               vector<ResultAdd> state);
+
+  defer BroadcastLargePayload(int64_t n,
+               string str |
+               int64_t result);
+
+  defer nop(string);
+
+  defer crpc_nop(string);
+
+  defer nop_largePayload(string);
+
+  defer crpc_nop_largePayload(string);
+
+}
+
 abstract service MultiPaxos {
 
   defer Forward(MarshallDeputy cmd,
@@ -57,6 +95,33 @@ abstract service FpgaRaft {
                       uint64_t followerAppendOK,
                       uint64_t followerCurrentTerm,
                       uint64_t followerLastLogIndex);
+
+  // maybe replace state vector later by a state map
+  defer CrpcAppendEntries(uint64_t id,
+                      uint64_t slot,
+                      ballot_t ballot,
+                      uint64_t leaderCurrentTerm,
+                      uint64_t leaderPrevLogIndex,
+                      uint64_t leaderPrevLogTerm,
+                      uint64_t leaderCommitIndex,
+											DepId dep_id,
+                      MarshallDeputy cmd,
+                      vector<uint16_t> addrChain,
+                      vector<AppendEntriesResult> state
+                      );
+
+  defer CrpcAppendEntries3(uint64_t id,
+                      uint64_t slot,
+                      ballot_t ballot,
+                      uint64_t leaderCurrentTerm,
+                      uint64_t leaderPrevLogIndex,
+                      uint64_t leaderPrevLogTerm,
+                      uint64_t leaderCommitIndex,
+											DepId dep_id,
+                      MarshallDeputy cmd,
+                      vector<uint16_t> addrChain |
+                      vector<AppendEntriesResult> state
+                      );
  
 	defer AppendEntries2(uint64_t slot,
                       ballot_t ballot,
@@ -74,6 +139,19 @@ abstract service FpgaRaft {
                ballot_t ballot,
 							 DepId dep_id,
                MarshallDeputy cmd);
+
+  defer CrpcDecide(uint64_t slot,
+               ballot_t ballot,
+							 DepId dep_id,
+               MarshallDeputy cmd,
+              vector<uint16_t> addrChain,
+              vector<uint16_t> state);
+
+
+  defer cRPC(uint64_t id,
+            MarshallDeputy cmd, 
+            vector<uint16_t> addrChain, 
+            MarshallDeputy state);
 }
 
 
@@ -110,6 +188,20 @@ abstract service Copilot {
                uint64_t slot,
                uint64_t dep,
                MarshallDeputy cmd);
+}
+
+abstract service SampleCrpc {
+  defer CrpcAdd(uint64_t id,
+               int64_t n,
+               int64_t value1,
+               int64_t value2,
+               vector<uint16_t> addrChain,
+               vector<ResultAdd> state);
+
+  defer BroadcastAdd(int64_t n,
+               int64_t value1,
+               int64_t value2 |
+               int64_t result);
 }
 
 // below is for 2PL and OCC
@@ -342,6 +434,16 @@ struct TxDispatchRequest {
 }
 
 struct TxnDispatchResponse {
+}
+
+struct AppendEntriesResult {
+	uint64_t followerAppendOK;
+  uint64_t followerCurrentTerm;
+  uint64_t followerLastLogIndex;
+}
+
+struct ResultAdd {
+	int64_t result;
 }
 
 abstract service ClientControl {

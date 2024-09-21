@@ -556,8 +556,10 @@ inline rrr::Marshal &operator>>(rrr::Marshal &m, std::pair<T1, T2> &v) {
 
 template<class T>
 inline rrr::Marshal &operator>>(rrr::Marshal &m, std::vector<T> &v) {
+  // Log_info("inside rrr::Marshal &operator>>");
   v64 v_len;
   m >> v_len;
+  // uncomment for correct results
   v.clear();
   v.reserve(v_len.get());
   for (int i = 0; i < v_len.get(); i++) {

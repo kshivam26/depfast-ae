@@ -1159,6 +1159,7 @@ int RccServer::OnCommit(const txnid_t cmd_id,
                         const bool need_validation,
                         const parent_set_t& parents,
                         TxnOutput *output) {
+  // Log_info("***** RccServer::OnCommit; tid: %d", gettid());
   if ((rank == RANK_I && SKIP_I) || (rank == RANK_D && SKIP_D)) {
     return SUCCESS;
   }

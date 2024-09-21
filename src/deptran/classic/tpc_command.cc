@@ -34,6 +34,12 @@ static int volatile x5 =
                                        return new TpcBatchCommand;
                                      });
 
+static int volatile x6 =
+    MarshallDeputy::RegInitializer(MarshallDeputy::CMD_TPC_RAFT_SAMPLE_CMD,
+                                      [] () -> Marshallable* {
+                                       return new TpcRaftSampleCommand;
+                                     });
+
 
 Marshal& TpcPrepareCommand::ToMarshal(Marshal& m) const {
   m << tx_id_;
@@ -85,6 +91,40 @@ Marshal& TpcCommitCommand::FromMarshal(Marshal& m) {
     cmd_ = md.sp_data_;
   else
     verify(0);
+  return m;
+}
+
+Marshal& TpcCommitAddCommand::ToMarshal(Marshal& m) const {
+  m << tx_id_;
+  m << ret_;
+  MarshallDeputy md(cmd_);
+  m << md;
+  m << value_1;
+  m << value_2;
+  return m;
+}
+
+Marshal& TpcCommitAddCommand::FromMarshal(Marshal& m) {
+  m >> tx_id_;
+  m >> ret_;
+  MarshallDeputy md;
+  m >> md;
+  m >> value_1;
+  m >> value_2;
+  if (!cmd_)
+    cmd_ = md.sp_data_;
+  else
+    verify(0);
+  return m;
+}
+
+Marshal& TpcRaftSampleCommand::ToMarshal(Marshal& m) const {
+  m << message_;
+  return m;
+}
+
+Marshal& TpcRaftSampleCommand::FromMarshal(Marshal& m) {
+  m >> message_;
   return m;
 }
 

@@ -140,6 +140,7 @@ void ServerConnection::end_reply() {
 //compute the latency of every rpc to each connection and send it to the application
 //application can then compare the rpc with expected latency
 bool ServerConnection::handle_read() {
+    // Log_info("*** inside ServerConnection::handle_read(); tid: %d", gettid());
 		//Log_info("Server's addr is: %s", server_->addr_.c_str());
     if (status_ == CLOSED) {
         return false;
@@ -203,7 +204,12 @@ bool ServerConnection::handle_read() {
 #endif // RPC_STATISTICS
 
         auto it = server_->handlers_.find(rpc_id);
-	//Log_info("RPC ID is: %d", rpc_id);
+        // static int64_t count = 0;
+        // if (rpc_id == 0x1a89b555){
+        //   count++;
+        //   // Log_info("*** count of dispatch is: %ld", count);   // todo: uncomment/comment this
+        // }
+	
         if (it != server_->handlers_.end()) {
             // the handler should delete req, and release server_connection refcopy.
             auto x = dynamic_pointer_cast<ServerConnection>(shared_from_this());
@@ -628,6 +634,7 @@ int Server::start(const char* bind_addr) {
         verify(setsockopt(server_sock_, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes)) == 0);
 
         if (::bind(server_sock_, rp->ai_addr, rp->ai_addrlen) == 0) {
+            // close(server_sock_);
             break;
         } else {
           verify(0);

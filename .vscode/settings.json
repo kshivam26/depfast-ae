@@ -1,6 +1,7 @@
 {
   "python.pythonPath": "/usr/bin/python",
   "files.associations": {
+    "*.da": "python",
     "cctype": "cpp",
     "clocale": "cpp",
     "cmath": "cpp",
@@ -61,6 +62,24 @@
     "memory_resource": "cpp",
     "random": "cpp",
     "set": "cpp",
-    "string": "cpp"
-  }
+    "string": "cpp",
+    "any": "cpp",
+    "strstream": "cpp",
+    "bit": "cpp",
+    "codecvt": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "future": "cpp",
+    "ranges": "cpp",
+    "stop_token": "cpp",
+    "cfenv": "cpp",
+    "valarray": "cpp",
+    "variant": "cpp",
+    "*.ipp": "cpp"
+  },
+  "cmake.configureOnOpen": false,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "python.formatting.provider": "none"
 }

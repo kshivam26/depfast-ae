@@ -19,6 +19,7 @@ class CoordinatorFpgaRaft : public Coordinator {
   FpgaRaftCommo *commo() {
     // TODO fix this.
     verify(commo_ != nullptr);
+    // Log_info("commo(); called commo()");
     return (FpgaRaftCommo *) commo_;
   }
   bool in_submission_ = false; // debug;
@@ -57,7 +58,7 @@ class CoordinatorFpgaRaft : public Coordinator {
     return n_replica() / 2 + 1;
   }
 
-  void DoTxAsync(TxRequest &req) override {}
+  void DoTxAsync(TxRequest &req) override {Log_info("inside CoordinatorFpgaRaft::DoTxAsync in header file");}
   void Forward(shared_ptr<Marshallable> &cmd,
               const std::function<void()> &func = []() {},
               const std::function<void()> &exe_callback = []() {}) ;

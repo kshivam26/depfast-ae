@@ -77,6 +77,7 @@ void RccCoord::DispatchAck(phase_t phase,
   std::lock_guard<std::recursive_mutex> lock(this->mtx_);
   verify(phase == phase_); // cannot proceed without all acks.
   verify(tx_data().root_id_ == tx_data().id_);
+  // Log_info("***** inside RccCoord::DispatchAck");
 //  verify(graph.vertex_index().size() > 0);
 //  RccTx& info = *(graph.vertex_index().at(tx_data().root_id_));
 //  verify(cmd[0].root_id_ == info.id());

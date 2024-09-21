@@ -14,7 +14,7 @@ class Marshallable {
 //      verify(0);
 //    }
 //    __debug_ = 30;
-//    Log_debug("destruct marshallable.");
+//    // Log_debug("destruct marshallable.");
   };
   virtual Marshal& ToMarshal(Marshal& m) const;
   virtual Marshal& FromMarshal(Marshal& m);
@@ -42,7 +42,12 @@ class MarshallDeputy {
     CMD_TPC_PREPARE_CAROUSEL = 8,
 		CMD_BLK_PXS = 9,
     CMD_NOOP = 10,
-    CMD_TPC_BATCH = 11
+    CMD_TPC_BATCH = 11,
+    CMD_RAFT_APPEND_ENTRIES = 12, // cRPC appendEntries
+    CMD_RAFT_APPEND_ENTRIES_STATE = 13, // cRPC appendEntries
+    CMD_SAMPLE_CRPC_APPEND_ENTRIES = 14, // sample cRPC appendEntries
+    CMD_SAMPLE_CRPC_APPEND_ENTRIES_STATE = 15, // sample cRPC appendEntries
+    CMD_TPC_RAFT_SAMPLE_CMD = 16
   };
   /**
    * This should be called by the rpc layer.
@@ -67,16 +72,28 @@ class MarshallDeputy {
 };
 
 inline Marshal& operator>>(Marshal& m, MarshallDeputy& rhs) {
+  struct timespec begin, end;
+  clock_gettime(CLOCK_MONOTONIC, &begin);
+  // Log_debug("==== inside Marshal& operator>>; checkpoint 0 @ %d", gettid());
   m >> rhs.kind_;
+  // Log_debug("==== inside Marshal& operator>>; checkpoint 1 @ %d", gettid());
   rhs.CreateActualObjectFrom(m);
+  // Log_debug("==== inside Marshal& operator>>; checkpoint 2 @ %d", gettid());
+  clock_gettime(CLOCK_MONOTONIC, &end);
+	// Log_debug("time of Marshal& operator>>: %d", end.tv_nsec-begin.tv_nsec);
   return m;
 }
 
 inline Marshal& operator<<(Marshal& m, const MarshallDeputy& rhs) {
   verify(rhs.kind_ != MarshallDeputy::UNKNOWN);
+  // Log_debug("==== inside Marshal& operator<<; checkpoint 0 @ %d", gettid());
   m << rhs.kind_;
   verify(rhs.sp_data_); // must be non-empty
-  rhs.sp_data_->ToMarshal(m);
+  // Log_debug("==== inside Marshal& operator<<; checkpoint 1 @ %d", gettid());
+  rhs.sp_data_->ToMarshal(m); // #profile (crpc2) - 5.31%
+  // Log_debug("==== inside Marshal& operator<<; checkpoint 2 @ %d", gettid());
+  // clock_gettime(CLOCK_MONOTONIC, &end);
+	// // Log_debug("time of Marshal& operator<<: %d", end.tv_nsec-begin.tv_nsec);
   return m;
 }
 

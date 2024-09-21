@@ -61,7 +61,7 @@ class Epoll {
 #ifdef USE_KQUEUE
     poll_fd_ = kqueue();
 #else
-    poll_fd_ = epoll_create(10);    // arg ignored, any value > 0 will do
+    poll_fd_ = epoll_create(10);    // arg ignored, any value > 0 will do // ***uncomment/change value to 10
 #endif
     verify(poll_fd_ != -1);
   }

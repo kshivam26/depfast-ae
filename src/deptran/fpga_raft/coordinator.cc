@@ -3,7 +3,7 @@
 #include "../constants.h"
 #include "coordinator.h"
 #include "commo.h"
-
+// #include <chrono>
 #include "server.h"
 
 namespace janus {
@@ -41,6 +41,7 @@ void CoordinatorFpgaRaft::Forward(shared_ptr<Marshallable>& cmd,
 void CoordinatorFpgaRaft::Submit(shared_ptr<Marshallable>& cmd,
                                    const function<void()>& func,
                                    const function<void()>& exe_callback) {
+  // Log_info("*** inside void CoordinatorFpgaRaft::Submit; tid: %d", gettid());
   if (!IsLeader()) {
     //Log_fatal("i am not the leader; site %d; locale %d",
     //          frame_->site_info_->id, loc_id_);
@@ -57,10 +58,12 @@ void CoordinatorFpgaRaft::Submit(shared_ptr<Marshallable>& cmd,
   verify(cmd_->kind_ != MarshallDeputy::UNKNOWN);
   commit_callback_ = func;
   GotoNextPhase();
+  // Log_info("*** returning from void CoordinatorFpgaRaft::Submit");
 }
 
 void CoordinatorFpgaRaft::AppendEntries() {
-    std::lock_guard<std::recursive_mutex> lock(mtx_);
+    // Log_info("inside coordinator appendEntries; tid: %d", gettid());
+    // std::lock_guard<std::recursive_mutex> lock(mtx_);
     verify(!in_append_entries);
     // verify(this->sch_->IsLeader()); TODO del it yidawu
     in_append_entries = true;
@@ -80,8 +83,15 @@ void CoordinatorFpgaRaft::AppendEntries() {
     uint64_t prevLogTerm = this->sch_->currentTerm;
 		this->sch_->SetLocalAppend(cmd_, &prevLogTerm, &prevLogIndex, slot_id_, curr_ballot_) ;
 		
+    shared_ptr<FpgaRaftAppendQuorumEvent> sp_quorum = nullptr;
+    static uint64_t count = 0;
+    count++;
 
-    auto sp_quorum = commo()->BroadcastAppendEntries(par_id_,
+    
+    // Log_info("*** inside void CoordinatorFpgaRaft::AppendEntries; count: %ld; tid is: %d", count, gettid());
+    // if(Config::GetConfig()->get_cRPC_version() == 0 && true){
+    if (Config::GetConfig()->get_cRPC_version() == 0){
+      sp_quorum = commo()->BroadcastAppendEntries(par_id_,
                                                      this->sch_->site_id_,
                                                      slot_id_,
                                                      dep_id_,
@@ -93,16 +103,48 @@ void CoordinatorFpgaRaft::AppendEntries() {
                                                      /* ents, */
                                                      this->sch_->commitIndex,
                                                      cmd_);
+    }
+    else if (Config::GetConfig()->get_cRPC_version() == 2) {
+      sp_quorum = commo()->crpc_ring_BroadcastAppendEntries(par_id_,
+                                                     this->sch_->site_id_,
+                                                     slot_id_,
+                                                     dep_id_,
+                                                     curr_ballot_,
+                                                     this->sch_->IsLeader(),
+                                                     this->sch_->currentTerm,
+                                                     prevLogIndex,
+                                                     prevLogTerm,
+                                                     /* ents, */
+                                                     this->sch_->commitIndex,
+                                                     cmd_);
+    }
+    else{
+      sp_quorum = commo()->crpc_BroadcastAppendEntries(par_id_,
+                                                     this->sch_->site_id_,
+                                                     slot_id_,
+                                                     dep_id_,
+                                                     curr_ballot_,
+                                                     this->sch_->IsLeader(),
+                                                     this->sch_->currentTerm,
+                                                     prevLogIndex,
+                                                     prevLogTerm,
+                                                     /* ents, */
+                                                     this->sch_->commitIndex,
+                                                     cmd_);
+    }
+    
 
-		struct timespec start_;
-		clock_gettime(CLOCK_MONOTONIC, &start_);
+		// struct timespec start_, end_;
+		// clock_gettime(CLOCK_MONOTONIC, &start_);
+    // Log_info("=== waiting for quorum");
     sp_quorum->Wait();
-		struct timespec end_;
-		clock_gettime(CLOCK_MONOTONIC, &end_);
+    // Log_info("*** quorum reached");
+		// struct timespec end_;
+		// clock_gettime(CLOCK_MONOTONIC, &end_);
 
 		// quorum_events_.push_back(sp_quorum);
-		// Log_info("time of Wait(): %d", (end_.tv_sec-start_.tv_sec)*1000000000 + end_.tv_nsec-start_.tv_nsec);
-		slow_ = sp_quorum->IsSlow();
+		// Log_info("*** time of sp_quorum->Wait(): %ld", (end_.tv_sec-start_.tv_sec)* 1000000L + (end_.tv_nsec-start_.tv_nsec)/1000L);
+		slow_ = sp_quorum->IsSlow();  // #profile - 2.13%
 		
 		long leader_time;
 		std::vector<long> follower_times {};
@@ -110,6 +152,7 @@ void CoordinatorFpgaRaft::AppendEntries() {
 		int total_ob = 0;
 		int avg_ob = 0;
 		//Log_info("begin_index: %d", commo()->begin_index);
+    // Log_info("going to call commo()");
 		if (commo()->begin_index >= 1000) {
 			if (commo()->ob_index < 100) {
 				commo()->outbounds[commo()->ob_index] = commo()->outbound;
@@ -126,6 +169,7 @@ void CoordinatorFpgaRaft::AppendEntries() {
 		} else {
 			commo()->begin_index++;
 		}
+    // Log_info("after call commo()");
 		avg_ob = total_ob/100;
 
 		for (auto it = commo()->rpc_clients_.begin(); it != commo()->rpc_clients_.end(); it++) {
@@ -140,11 +184,11 @@ void CoordinatorFpgaRaft::AppendEntries() {
 			slow_ = follower_times[0]/avg_ob > 80000 && follower_times[1]/avg_ob > 80000;
 		}
 
-		//Log_info("slow?: %d", slow_);
+		// Log_info("slow?: %d", slow_);
     if (sp_quorum->Yes()) {
         minIndex = sp_quorum->minIndex;
 				//Log_info("%d vs %d", minIndex, this->sch_->commitIndex);
-        verify(minIndex >= this->sch_->commitIndex) ;
+        // verify(minIndex >= this->sch_->commitIndex) ; // TODO: ks-RM: uncomment and check
         committed_ = true;
         Log_debug("fpga-raft append commited loc:%d minindex:%d", loc_id_, minIndex ) ;
     }
@@ -160,6 +204,7 @@ void CoordinatorFpgaRaft::AppendEntries() {
     else {
         verify(0);
     }
+    // Log_info("*** returning from void CoordinatorFpgaRaft::AppendEntries");
 }
 
 void CoordinatorFpgaRaft::Commit() {
@@ -173,10 +218,11 @@ void CoordinatorFpgaRaft::Commit() {
 }
 
 void CoordinatorFpgaRaft::LeaderLearn() {
+    // Log_info("inside CoordinatorFpgaRaft::LeaderLearn(); cp1");
     std::lock_guard<std::recursive_mutex> lock(mtx_);
-    commit_callback_();
+    // commit_callback_();
     uint64_t prevCommitIndex = this->sch_->commitIndex;
-    verify(minIndex >= prevCommitIndex);
+    // verify(minIndex >= prevCommitIndex);  // TODO: ks-RM: uncomment and check
     this->sch_->commitIndex = std::max(this->sch_->commitIndex, minIndex);
     Log_debug("fpga-raft commit for partition: %d, slot %d, commit %d minIndex %d in loc:%d", 
       (int) par_id_, (int) slot_id_, sch_->commitIndex, minIndex, loc_id_);
@@ -185,19 +231,28 @@ void CoordinatorFpgaRaft::LeaderLearn() {
     /*     auto instance = this->sch_->GetFpgaRaftInstance(this->sch_->commitIndex); */
     /*     this->sch_->app_next_(*instance->log_); */
     /* } */
-
-    commo()->BroadcastDecide(par_id_, slot_id_, dep_id_, curr_ballot_, cmd_);
+    auto empty_cmd = std::make_shared<TpcEmptyCommand>();
+    auto sp_m = dynamic_pointer_cast<Marshallable>(empty_cmd);
+    // Log_info("Inside leader learn");
+    if (Config::GetConfig()->get_cRPC_version() == 0){
+      commo()->BroadcastDecide(par_id_, slot_id_, dep_id_, curr_ballot_, sp_m);
+    }
+    else {
+      commo()->CrpcDecide(par_id_, this->sch_->site_id_, slot_id_, dep_id_, curr_ballot_, sp_m);
+    }
     verify(phase_ == Phase::COMMIT);
     GotoNextPhase();
 }
 
 void CoordinatorFpgaRaft::GotoNextPhase() {
+  // Log_info("*** inside CoordinatorFpgaRaft::GotoNextPhase");
   int n_phase = 4;
   int current_phase = phase_ % n_phase;
   phase_++;
   switch (current_phase) {
     case Phase::INIT_END:
       if (IsLeader()) {
+        // Log_info("*** inside GotoNextPhase->INIT_END->IsLeader()");
         phase_++; // skip prepare phase for "leader"
         verify(phase_ % n_phase == Phase::ACCEPT);
         AppendEntries();
@@ -205,11 +260,13 @@ void CoordinatorFpgaRaft::GotoNextPhase() {
         verify(phase_ % n_phase == Phase::COMMIT);
       } else {
         // TODO
+        // // Log_info("*** inside GotoNextPhase->INIT_END->not IsLeader()");
         verify(0);
         Forward(cmd_,commit_callback_) ;
         phase_ = Phase::COMMIT;
       }
     case Phase::ACCEPT:
+      // // Log_info("*** inside GotoNextPhase->ACCEPT");
       verify(phase_ % n_phase == Phase::COMMIT);
       if (committed_) {
         LeaderLearn();
@@ -220,10 +277,12 @@ void CoordinatorFpgaRaft::GotoNextPhase() {
       }
       break;
     case Phase::PREPARE:
+      // Log_info("*** inside GotoNextPhase->PREPARE");
       verify(phase_ % n_phase == Phase::ACCEPT);
       AppendEntries();
       break;
     case Phase::COMMIT:
+      // Log_info("*** inside GotoNextPhase->COMMIT");
       // do nothing.
       break;
     default:

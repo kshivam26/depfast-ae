@@ -33,6 +33,11 @@ class Config {
   std::string site2host_name(std::string &addr);
 
   bool heart_beat_;
+
+
+  // configuration for trial controller.
+  uint32_t cRPC_version_ = 0; // 0 for no_crpc, 1 for chained rpc
+
   // configuration for trial controller.
   char *ctrl_hostname_;
   uint32_t ctrl_port_;
@@ -44,7 +49,9 @@ class Config {
   vector<string> config_paths_;
 
   // common configuration
+  // uncomment; commenting to test open loop clients
   ClientType client_type_ = Closed;
+  // ClientType client_type_ = Open;
   int client_rate_ = -1;
   int32_t client_max_undone_ = -1;
   int32_t tx_proto_ = 0; // transaction protocol
@@ -244,7 +251,9 @@ class Config {
   bool do_early_return();
   bool do_logging();
   bool IsReplicated();
+  bool IsSampleCrpc();
   int32_t get_tot_req();
+  uint32_t get_cRPC_version();
   bool get_failover() { return failover_; }
   int32_t get_failover_stop_interval() { return failover_stop_int_; }
   int32_t get_failover_run_interval() { return failover_run_int_; }

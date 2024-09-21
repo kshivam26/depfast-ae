@@ -1,0 +1,42 @@
+site:
+  server: # each line is a partition, the first is the master site_name:port
+    - ["s101:11001", "s201:11002", "s301:11003"]
+  client: # each line is a partition
+    - ["c101", "c201", "c301", "c401", "c501", "c601", "c701", "c801", "c901", "c1001",
+    "c1101", "c1201", "c1301", "c1401", "c1501", "c1601", "c1701", "c1801", "c1901", "c2001",
+    "c2101", "c2201", "c2301", "c2401", "c2501"]
+
+# process_name - host_addr map
+process:
+  s101: localhost
+  s201: localhost
+  s301: localhost
+  c101: localhost
+  c201: localhost
+  c301: localhost
+  c401: localhost
+  c501: localhost
+  c601: localhost
+  c701: localhost
+  c801: localhost
+  c901: localhost
+  c1001: localhost
+  c1101: localhost
+  c1201: localhost
+  c1301: localhost
+  c1401: localhost
+  c1501: localhost
+  c1601: localhost
+  c1701: localhost
+  c1801: localhost
+  c1901: localhost
+  c2001: localhost
+  c2101: localhost
+  c2201: localhost
+  c2301: localhost
+  c2401: localhost
+  c2501: localhost
+    
+host:
+  localhost: 127.0.0.1
+

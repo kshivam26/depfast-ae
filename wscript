@@ -161,7 +161,7 @@ def build(bld):
     bld.objects(source=bld.path.ant_glob("src/deptran/*.cc "
                                        "src/deptran/*/*.cc "
                                        "src/bench/*/*.cc",
-                                       excl=['src/deptran/s_main.cc', 'src/deptran/paxos_main_helper.cc']),
+                                       excl=['src/deptran/s_main.cc', 'src/deptran/paxos_main_helper.cc', 'src/deptran/rpc_benchmark.cc', 'src/deptran/benchmark_service.cc', 'src/deptran/crpc_benchmark.cc', 'src/deptran/crpc_benchmark_individual.cc', 'src/deptran/crpc_service.cc', 'src/deptran/paxos_crpc_benchmark.cc']),
               target="deptran_objects",
               includes="src src/rrr src/deptran ",
               uselib="YAML-CPP BOOST",
@@ -186,6 +186,30 @@ def build(bld):
                 uselib="YAML-CPP BOOST",
                 use="externc rrr memdb deptran_objects PTHREAD PROFILER RT")
 
+    bld.program(source=bld.path.ant_glob("src/deptran/rpc_benchmark.cc src/deptran/benchmark_service.cc"), 
+                target="rpc_benchmark", 
+                includes="src src/rrr src/deptran", 
+                uselib="YAML-CPP BOOST",
+                use="rrr PTHREAD PROFILER RT")
+    
+    bld.program(source=bld.path.ant_glob("src/deptran/crpc_benchmark.cc src/deptran/crpc_service.cc"), 
+                target="crpc_benchmark", 
+                includes="src src/rrr src/deptran", 
+                uselib="YAML-CPP BOOST",
+                use="rrr PTHREAD PROFILER RT")
+    
+    bld.program(source=bld.path.ant_glob("src/deptran/crpc_benchmark_individual.cc src/deptran/crpc_service.cc"), 
+                target="crpc_benchmark_docker", 
+                includes="src src/rrr src/deptran", 
+                uselib="YAML-CPP BOOST",
+                use="rrr PTHREAD PROFILER RT")
+    
+    # bld.program(source=bld.path.ant_glob("src/deptran/paxos_crpc_benchmark.cc"), 
+    #             target="paxos_crpc_benchmark", 
+    #             includes="src src/rrr src/deptran", 
+    #             uselib="YAML-CPP BOOST",
+    #             use="externc rrr memdb PTHREAD PROFILER RT deptran_objects")
+    
     bld.add_post_fun(post)
 
 def post(conf):
@@ -309,10 +333,12 @@ def _enable_debug(conf):
                 "-ggdb -DLOG_LEVEL_AS_DEBUG -DLOG_DEBUG -rdynamic -fno-omit-frame-pointer".split())
     else:
         if Options.options.mutrace:
+            print("if clause")
             Logs.pprint("PINK", "mutrace debugging enabled")
             conf.env.append_value("CXXFLAGS", "-Wall -pthread -O0 -DNDEBUG -g "
                 "-ggdb -DLOG_INFO -rdynamic -fno-omit-frame-pointer".split())
         else:
+            print("else clause")
             conf.env.append_value("CXXFLAGS", "-g -pthread -O2 -DNDEBUG -DLOG_INFO".split())
 
 def _properly_split(args):
@@ -345,4 +371,3 @@ def _depend(target, source, action):
 def _run_cmd(cmd):
     Logs.pprint('PINK', cmd)
     os.system(cmd)
-

@@ -120,7 +120,7 @@ bool Event::Test() {
       Reactor::GetReactor()->ready_events_.push_back(shared_from_this());
     } else if (status_ == READY) {
       // This could happen for a quorum event.
-      Log_info("event status ready, triggered?");
+      // Log_info("==== event status ready, triggered?");
     } else if (status_ == DONE) {
       // do nothing
     } else {
@@ -186,8 +186,8 @@ int DiskEvent::Write_Spec() {
 			written = fwrite(buffer, size_, count_, f);
 			fclose(f);
 		} else {
-			Log_info("file: %s", file.c_str());
-			Log_info("error is: %s", strerror(errno)); 
+			// Log_info("file: %s", file.c_str());
+			// Log_info("error is: %s", strerror(errno)); 
 		}
 		return written;
 	}

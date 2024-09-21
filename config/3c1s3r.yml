@@ -4,3 +4,19 @@ site:
     - ["s101:8000", "s201:8001", "s301:8002"]
   client: # each line is a partition
     - ["c101", "c201", "c301"]
+
+# site_name - process_name map
+process:
+  s101: h01
+#  s102: localhost
+#  s103: localhost
+  c101: h02
+  c102: h03
+  c103: h04
+
+# process_name - host_addr map
+host:
+  h01: 127.0.0.1
+  h02: 127.0.0.1
+  h03: 127.0.0.1
+  h04: 127.0.0.1

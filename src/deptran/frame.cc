@@ -291,18 +291,24 @@ TxData* Frame::CreateTxnCommand(TxRequest& req, shared_ptr<TxnRegistry> reg) {
 //}
 
 Communicator* Frame::CreateCommo(PollMgr* pollmgr) {
+  // Log_info("***inside Frame::CreateCommo; checkpoint 1");
   switch (mode_) {
     case MODE_NONE_COPILOT:
       commo_ = new CommunicatorNoneCopilot(pollmgr);
       break;
     default:
+      // Log_info("***inside Frame::CreateCommo; checkpoint 1.2");
+      // Log_info("*** inside Communicator* Frame::CreateCommo cp 1; tid: %d", gettid());
       commo_ = new Communicator(pollmgr);
+      // Log_info("*** inside Communicator* Frame::CreateCommo cp 2; tid: %d", gettid());
       break;
   }
+  // Log_info("***inside Frame::CreateCommo; checkpoint 2");
   
   if (mode_ == MODE_NONE || mode_ == MODE_NONE_COPILOT) {
     commo_->broadcasting_to_leaders_only_ = false;
   }
+  // Log_info("***inside Frame::CreateCommo; checkpoint 3");
   return commo_;
 }
 
@@ -459,7 +465,8 @@ map<string, int> &Frame::FrameNameToMode() {
       {"multi_paxos",   MODE_MULTI_PAXOS},
       {"fpga_raft",     MODE_FPGA_RAFT},
       {"epaxos",        MODE_NOT_READY},
-      {"rep_commit",    MODE_NOT_READY}
+      {"rep_commit",    MODE_NOT_READY},
+      {"sample_crpc",   MODE_SAMPLE_CRPC}
   };
   return frame_name_mode_s;
 }
